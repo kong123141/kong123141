@@ -1,0 +1,27 @@
+﻿auto w
+dragon/baron stuck w
+auto buy scrying orb
+auto use scrying orb when enemy walks in bush
+auto use pink ward on rengar
+jungle steal (check iKalista if only on key press)
+jungle clear : focus max hp mobs
+combo: auto minions when faster than walking + enemies out of range + use e to kill the minion and slow the enemy
+balista 
+ks
+more e <> vs more kite
+
+
+    +Custom target selection based on the spears stuck in the enemy
+    #If no enemy is in range, kite by attacking minions if that's faster than walking
+    +    If the enemy has a spear, try attacking minions that are killable with 1 auto + e, so you can slow the enemy and get the reset
+    +More e usage: Use e in a teamfight if you can get the reset (because hurricane attacked a minion + it's killable ...), but only if it will do more DPS than a autoattack and the e stack it applies
+    +Prefer target with W passive (also adds to custom target selection ...)
+    #Display AA count until killable (or %)
+    Smart e when about to die AND enemy is not killable until death for sure
+    Smart auto w
+    #Check flying AA's and pre-rend
+    Q jungle mobs/minions with many stacks into an enemy (hotkey ?)
+    Draw e damage on jungle mob health bar (only big mobs ?)
+    Better Q prediction
+    Custom farm hotkey that stacks on multiple minions and kills them with e later
+	tahm kench balista

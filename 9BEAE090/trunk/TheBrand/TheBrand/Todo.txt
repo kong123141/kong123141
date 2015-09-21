@@ -1,0 +1,41 @@
+﻿Check W - Q combo: q cast before w applies
+Check Ignite
+Check Bridge
+Check Q casting 0.1 sec before passive gone
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## old
+
+r logic: random rng ult before death if maximum hits could kill
+harass toggleable  -- dunno dont like it
+optimal range/target for each skill, should it even switch targets? -- seems okay now, could still do better tho
+fix damage indicator -- done, could use more logic at ult (two object bounce -> more dmg) but that would be perf intense and pretty unnesecary
+fix skills sometimes not casting (after cc?)  -- couldnt fully reconstruct ## its always in a situation where W is down and QE up, dunno
+Un-target passive dead ppl
+Ignite heal ppl (low health adc?)
+
+Movement predicition in R logic, so the bounces work better
+
+#######################################
+
+before going live:
+customizeable target selection range
+
+w prediction off
+r bounce check ults near minions (kinda max range) (maybe add virtual range on ult bounce)
+e sometimes not casting!?!??!
+
+
+http://share.gifyoutube.com/yX8bY7.gif

@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{902E1E9F-C15B-4B1A-800D-51CE2886DDE9}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TacticalRetreat</RootNamespace>
+    <AssemblyName>TacticalRetreat</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PreBuildEvent />
+    <PostBuildEvent />
+    <OutputPath>bin\Release</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LeagueSharp">
+      <HintPath>C:\Users\Matt\Downloads\Game Folders\LeagueSharp\System\LeagueSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp.Common">
+      <HintPath>C:\Users\Matt\Downloads\Game Folders\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Users\Matt\Downloads\Game Folders\LeagueSharp\System\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Plugins\Nautilus.cs" />
+    <Compile Include="Plugins\Aatrox.cs" />
+    <Compile Include="Plugins\Ahri.cs" />
+    <Compile Include="Plugins\Akali.cs" />
+    <Compile Include="Plugins\Alistar.cs" />
+    <Compile Include="Plugins\Amumu.cs" />
+    <Compile Include="Plugins\Anivia.cs" />
+    <Compile Include="Plugins\Annie.cs" />
+    <Compile Include="Plugins\Ashe.cs" />
+    <Compile Include="Plugins\Azir.cs" />
+    <Compile Include="Plugins\Bard.cs" />
+    <Compile Include="Plugins\Blitzcrank.cs" />
+    <Compile Include="Plugins\Brand.cs" />
+    <Compile Include="Plugins\Braum.cs" />
+    <Compile Include="Plugins\Caitlyn.cs" />
+    <Compile Include="Plugins\Cassiopeia.cs" />
+    <Compile Include="Plugins\ChoGath.cs" />
+    <Compile Include="Plugins\Corki.cs" />
+    <Compile Include="Plugins\Darius.cs" />
+    <Compile Include="Plugins\Diana.cs" />
+    <Compile Include="Plugins\Draven.cs" />
+    <Compile Include="Plugins\Ekko.cs" />
+    <Compile Include="Plugins\Elise.cs" />
+    <Compile Include="Plugins\Evelynn.cs" />
+    <Compile Include="Plugins\Ezreal.cs" />
+    <Compile Include="Plugins\Fiddlesticks.cs" />
+    <Compile Include="Plugins\Fiora.cs" />
+    <Compile Include="Plugins\Fizz.cs" />
+    <Compile Include="Plugins\Galio.cs" />
+    <Compile Include="Plugins\Gangplank.cs" />
+    <Compile Include="Plugins\Garen.cs" />
+    <Compile Include="Plugins\Gnar.cs" />
+    <Compile Include="Plugins\Gragas.cs" />
+    <Compile Include="Plugins\Graves.cs" />
+    <Compile Include="Plugins\Hecarim.cs" />
+    <Compile Include="Plugins\Heimerdinger.cs" />
+    <Compile Include="Plugins\Irelia.cs" />
+    <Compile Include="Plugins\Janna.cs" />
+    <Compile Include="Plugins\JarvanIV.cs" />
+    <Compile Include="Plugins\Jax.cs" />
+    <Compile Include="Plugins\Jayce.cs" />
+    <Compile Include="Plugins\Jinx.cs" />
+    <Compile Include="Plugins\Kalista.cs" />
+    <Compile Include="Plugins\Karma.cs" />
+    <Compile Include="Plugins\Karthus.cs" />
+    <Compile Include="Plugins\Kassadin.cs" />
+    <Compile Include="Plugins\Katarina.cs" />
+    <Compile Include="Plugins\Kayle.cs" />
+    <Compile Include="Plugins\Kennen.cs" />
+    <Compile Include="Plugins\KhaZix.cs" />
+    <Compile Include="Plugins\KogMaw.cs" />
+    <Compile Include="Plugins\LeBlanc.cs" />
+    <Compile Include="Plugins\LeeSin.cs" />
+    <Compile Include="Plugins\Leona.cs" />
+    <Compile Include="Plugins\Lissandra.cs" />
+    <Compile Include="Plugins\Lucian.cs" />
+    <Compile Include="Plugins\Lulu.cs" />
+    <Compile Include="Plugins\Lux.cs" />
+    <Compile Include="Plugins\Malphite.cs" />
+    <Compile Include="Plugins\Malzahar.cs" />
+    <Compile Include="Plugins\Maokai.cs" />
+    <Compile Include="Plugins\MasterYi.cs" />
+    <Compile Include="Plugins\MissFortune.cs" />
+    <Compile Include="Plugins\Mordekaiser.cs" />
+    <Compile Include="Plugins\Morgana.cs" />
+    <Compile Include="Plugins\Mundo.cs" />
+    <Compile Include="Plugins\Nami.cs" />
+    <Compile Include="Plugins\Nasus.cs" />
+    <Compile Include="Plugins\Nidalee.cs" />
+    <Compile Include="Plugins\Nocturne.cs" />
+    <Compile Include="Plugins\Nunu.cs" />
+    <Compile Include="Plugins\Olaf.cs" />
+    <Compile Include="Plugins\Orianna.cs" />
+    <Compile Include="Plugins\Pantheon.cs" />
+    <Compile Include="Plugins\Poppy.cs" />
+    <Compile Include="Plugins\Quinn.cs" />
+    <Compile Include="Plugins\Rammus.cs" />
+    <Compile Include="Plugins\RekSai.cs" />
+    <Compile Include="Plugins\Renekton.cs" />
+    <Compile Include="Plugins\Rengar.cs" />
+    <Compile Include="Plugins\Riven.cs" />
+    <Compile Include="Plugins\Rumble.cs" />
+    <Compile Include="Plugins\Ryze.cs" />
+    <Compile Include="Plugins\Sejuani.cs" />
+    <Compile Include="Plugins\Shaco.cs" />
+    <Compile Include="Plugins\Shen.cs" />
+    <Compile Include="Plugins\Shyvana.cs" />
+    <Compile Include="Plugins\Singed.cs" />
+    <Compile Include="Plugins\Sion.cs" />
+    <Compile Include="Plugins\Sivir.cs" />
+    <Compile Include="Plugins\Skarner.cs" />
+    <Compile Include="Plugins\Sona.cs" />
+    <Compile Include="Plugins\Soraka.cs" />
+    <Compile Include="Plugins\Swain.cs" />
+    <Compile Include="Plugins\Syndra.cs" />
+    <Compile Include="Plugins\Talon.cs" />
+    <Compile Include="Plugins\Taric.cs" />
+    <Compile Include="Plugins\Teemo.cs" />
+    <Compile Include="Plugins\Thresh.cs" />
+    <Compile Include="Plugins\Tristana.cs" />
+    <Compile Include="Plugins\Trundle.cs" />
+    <Compile Include="Plugins\Tryndamere.cs" />
+    <Compile Include="Plugins\TwistedFate.cs" />
+    <Compile Include="Plugins\Twitch.cs" />
+    <Compile Include="Plugins\Udyr.cs" />
+    <Compile Include="Plugins\Urgot.cs" />
+    <Compile Include="Plugins\Varus.cs" />
+    <Compile Include="Plugins\Vayne.cs" />
+    <Compile Include="Plugins\Veigar.cs" />
+    <Compile Include="Plugins\VelKoz.cs" />
+    <Compile Include="Plugins\Vi.cs" />
+    <Compile Include="Plugins\Viktor.cs" />
+    <Compile Include="Plugins\Vladimir.cs" />
+    <Compile Include="Plugins\Volibear.cs" />
+    <Compile Include="Plugins\Warwick.cs" />
+    <Compile Include="Plugins\Wukong.cs" />
+    <Compile Include="Plugins\Xerath.cs" />
+    <Compile Include="Plugins\XinZhao.cs" />
+    <Compile Include="Plugins\Yasuo.cs" />
+    <Compile Include="Plugins\Yorick.cs" />
+    <Compile Include="Plugins\Zac.cs" />
+    <Compile Include="Plugins\Zed.cs" />
+    <Compile Include="Plugins\Ziggs.cs" />
+    <Compile Include="Plugins\Zilean.cs" />
+    <Compile Include="Plugins\Zyra.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,12 @@
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\TheInfo.exe.config
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\TheInfo.exe
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\TheInfo.pdb
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\LeagueSharp.Common.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\LeagueSharp.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\SharpDX.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\SharpDX.Direct3D9.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\clipper_library.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\LeagueSharp.Sandbox.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\x86\Debug\LeagueSharp.xml
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\obj\x86\Debug\TheInfo.exe
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\obj\x86\Debug\TheInfo.pdb

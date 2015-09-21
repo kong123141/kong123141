@@ -1,0 +1,13 @@
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\obj\Debug\TheInfo.csprojResolveAssemblyReference.cache
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\TheInfo.exe.config
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\TheInfo.exe
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\TheInfo.pdb
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\LeagueSharp.Common.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\LeagueSharp.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\SharpDX.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\SharpDX.Direct3D9.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\clipper_library.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\LeagueSharp.Sandbox.dll
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\bin\Debug\LeagueSharp.xml
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\obj\Debug\TheInfo.exe
+c:\users\nino\documents\visual studio 2012\Projects\TheInfo\TheInfo\obj\Debug\TheInfo.pdb
