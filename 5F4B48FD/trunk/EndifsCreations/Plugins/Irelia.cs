@@ -40,14 +40,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Irelia.Combo.R", "Use R").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Irelia.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Irelia.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {               
                 harassmenu.AddItem(new MenuItem("EC.Irelia.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Irelia.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Irelia.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -55,27 +55,27 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Irelia.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Irelia.QFarmDelay", "Q Delay").SetValue(new Slider(500, 0, 1000)));
                 laneclearmenu.AddItem(new MenuItem("EC.Irelia.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Irelia.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Irelia.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Irelia.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }  
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Irelia.Misc.E", "E Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Irelia.Misc.E2", "E Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Irelia.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Irelia.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Irelia.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -83,10 +83,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-            var UseQ = config.Item("EC.Irelia.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Irelia.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Irelia.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Irelia.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Irelia.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Irelia.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Irelia.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Irelia.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -96,7 +96,7 @@ namespace EndifsCreations.Plugins
                 {                    
                     if (UseQ && Q.IsReady() && Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= Q.Range)
                     {
-                        if (Target.UnderTurret(true) && !config.Item("EC.Irelia.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.UnderTurret(true) && !Root.Item("EC.Irelia.Combo.Dive").GetValue<bool>()) return;
                         if (myUtility.ImmuneToMagic(Target)) return;
                         if (Q.IsKillable(Target)) Q.Cast(Target);
                         else if (!Orbwalking.InAutoAttackRange(Target) && myUtility.TickCount - LastQ > 2000)
@@ -148,9 +148,9 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Irelia.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Irelia.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Irelia.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Irelia.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Irelia.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Irelia.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (target.IsValidTarget())
             {
@@ -172,8 +172,8 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Irelia.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Irelia.Farm.Q").GetValue<bool>() && Q.IsReady() && myUtility.TickCount - LastQ > config.Item("EC.Irelia.QFarmDelay").GetValue<Slider>().Value && !Player.IsWindingUp)
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Irelia.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Irelia.Farm.Q").GetValue<bool>() && Q.IsReady() && myUtility.TickCount - LastQ > Root.Item("EC.Irelia.QFarmDelay").GetValue<Slider>().Value && !Player.IsWindingUp)
             {
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 if (minionQ == null) return;
@@ -191,7 +191,7 @@ namespace EndifsCreations.Plugins
                     }
                 }                
             }
-            if (config.Item("EC.Irelia.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Irelia.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
             {                
                 var minionE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 if (minionE == null) return;
@@ -218,7 +218,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Irelia.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob))
+                if (Root.Item("EC.Irelia.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob))
                 {
                     if (largemobs != null)
                     {
@@ -229,7 +229,7 @@ namespace EndifsCreations.Plugins
                         Q.Cast(mob);
                     }
                 }
-                if (config.Item("EC.Irelia.Jungle.E").GetValue<bool>() && E.IsReady() && E.IsInRange(mob))
+                if (Root.Item("EC.Irelia.Jungle.E").GetValue<bool>() && E.IsReady() && E.IsInRange(mob))
                 {
                     if (largemobs != null)
                     {
@@ -279,7 +279,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Irelia.Combo.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.Irelia.Combo.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }
@@ -324,7 +324,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Irelia.Misc.E").GetValue<bool>() && E.IsReady() && args.DangerLevel == Interrupter2.DangerLevel.High)
+            if (Root.Item("EC.Irelia.Misc.E").GetValue<bool>() && E.IsReady() && args.DangerLevel == Interrupter2.DangerLevel.High)
             {
                 if (Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range && myUtility.PlayerHealthPercentage < (sender.Health * 100 / sender.MaxHealth))
                 {
@@ -334,7 +334,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Irelia.Misc.E2").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Irelia.Misc.E2").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -346,15 +346,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Irelia.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Irelia.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Irelia.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Irelia.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Irelia.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Irelia.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

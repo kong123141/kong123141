@@ -46,14 +46,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Sejuani.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Sejuani.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Sejuani.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Sejuani.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Sejuani.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Sejuani.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -64,21 +64,21 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Sejuani.Farm.Q.Value", "Q More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Sejuani.EFarmType", "E").SetValue(new StringList(new[] { "Any", "Most", "Only Siege" })));
                 laneclearmenu.AddItem(new MenuItem("EC.Sejuani.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Sejuani.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Sejuani.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Sejuani.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Sejuani.QRPredHitchance", "Q/R Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
                 miscmenu.AddItem(new MenuItem("EC.Sejuani.Misc.Q", "Q Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Sejuani.Misc.W", "W Turrets").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -86,7 +86,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Sejuani.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Sejuani.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Sejuani.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -94,16 +94,13 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Sejuani.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Sejuani.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Sejuani.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Sejuani.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Sejuani.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Sejuani.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Sejuani.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Sejuani.Combo.Items").GetValue<bool>();
             if (UseW && W.IsReady())
-            {
-                if (Player.CountEnemiesInRange(350) > 0)
-                {
-                    W.Cast();
-                }
+            {                
+                mySpellcast.PointBlank(null, W, 350);
             }
             if (UseE && E.IsReady() && !Player.IsDashing() && Player.CountEnemiesInRange(E.Range) > 0)
             {
@@ -123,7 +120,7 @@ namespace EndifsCreations.Plugins
                 {
                     if (UseQ && Q.IsReady() && !Player.IsWindingUp && Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= Q.Range)
                     {
-                        if (Target.ServerPosition.UnderTurret(true) && !config.Item("EC.Sejuani.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.ServerPosition.UnderTurret(true) && !Root.Item("EC.Sejuani.Combo.Dive").GetValue<bool>()) return;
                         QPredict(Target);
                     }                                      
                     if (CastItems)
@@ -145,8 +142,8 @@ namespace EndifsCreations.Plugins
         private void Harass()
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, false);
-            var UseQ = config.Item("EC.Sejuani.Harass.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Sejuani.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Sejuani.Harass.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Sejuani.Harass.E").GetValue<bool>();
             if (target.IsValidTarget())
             {
                 if (UseQ && Q.IsReady() && !Player.IsWindingUp && !target.UnderTurret(true) && Vector3.Distance(Player.ServerPosition, target.ServerPosition) < Q.Range)
@@ -161,17 +158,17 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Sejuani.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Sejuani.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing())
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Sejuani.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Sejuani.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing())
             {
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range).ToList();
-                switch (config.Item("EC.Sejuani.QFarmType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Sejuani.QFarmType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:                       
                         var QLine = Q2.GetLineFarmLocation(minionQ, Q.Width);
                         if (QLine.Position.IsValid() && !QLine.Position.To3D().UnderTurret(true))
                         {
-                            if (QLine.MinionsHit > config.Item("EC.Sejuani.Farm.Q.Value").GetValue<Slider>().Value) Q2.Cast(QLine.Position);
+                            if (QLine.MinionsHit > Root.Item("EC.Sejuani.Farm.Q.Value").GetValue<Slider>().Value) Q2.Cast(QLine.Position);
                         }
                         break;
                     case 1:
@@ -183,14 +180,14 @@ namespace EndifsCreations.Plugins
                         break;
                 }
             }
-            if (config.Item("EC.Sejuani.Farm.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Sejuani.Farm.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
             {
                 W.Cast();
             }
-            if (config.Item("EC.Sejuani.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && !Player.UnderTurret(true))
+            if (Root.Item("EC.Sejuani.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && !Player.UnderTurret(true))
             {
                 var minionE = MinionManager.GetMinions(Player.ServerPosition, E.Range).ToList();
-                switch (config.Item("EC.Sejuani.EFarmType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Sejuani.EFarmType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         //Any
@@ -227,7 +224,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Sejuani.Jungle.Q").GetValue<bool>() && Q2.IsReady() && Q2.IsInRange(mob))
+                if (Root.Item("EC.Sejuani.Jungle.Q").GetValue<bool>() && Q2.IsReady() && Q2.IsInRange(mob))
                 {
                     if (largemobs != null)
                     {
@@ -238,7 +235,7 @@ namespace EndifsCreations.Plugins
                         Q2.Cast(Player.ServerPosition.Extend(mob.ServerPosition, Q2.Range));
                     }
                 }
-                if (config.Item("EC.Sejuani.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsDashing())
+                if (Root.Item("EC.Sejuani.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsDashing())
                 {
                     var mobsE = mobs.Count(x => x.HasBuff("sejuanifrost") && E.IsInRange(x));
                     if (largemobs != null && largemobs.HasBuff("sejuanifrost") && E.IsKillable(largemobs))
@@ -262,7 +259,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQRHitChance()
         {
-            switch (config.Item("EC.Sejuani.QRPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Sejuani.QRPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -319,7 +316,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Sejuani.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Sejuani.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -335,7 +332,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass)
                 {
-                    if (config.Item("EC.Sejuani.Harass.W").GetValue<bool>() &&
+                    if (Root.Item("EC.Sejuani.Harass.W").GetValue<bool>() &&
                         !Player.IsWindingUp &&
                         W.IsReady() &&
                         target.IsValidTarget()) W.Cast();
@@ -343,7 +340,7 @@ namespace EndifsCreations.Plugins
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear)
                 {
                     if (target is Obj_AI_Turret && target.Team != Player.Team &&
-                        config.Item("EC.Sejuani.Misc.W").GetValue<bool>() &&
+                        Root.Item("EC.Sejuani.Misc.W").GetValue<bool>() &&
                         !Player.IsWindingUp && Orbwalking.InAutoAttackRange(target))
                     {
                         W.Cast();
@@ -354,19 +351,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Sejuani.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Sejuani.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Sejuani.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Sejuani.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Sejuani.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Sejuani.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Sejuani.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Sejuani.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
                 var tomouse = Player.ServerPosition.Extend(Game.CursorPos, Vector3.Distance(Player.ServerPosition, Game.CursorPos));

@@ -1,21 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LeagueSharp;
-using LeagueSharp.Common;
-using System.Drawing;
-
-
-namespace ElCorki
+﻿namespace ElCorki
 {
+    using System;
+
+    using LeagueSharp.Common;
 
     public class ElCorkiMenu
     {
-        public static String ScriptVersion { get { return typeof(Corki).Assembly.GetName().Version.ToString(); } }
+        #region Static Fields
 
         public static Menu _menu;
+
+        #endregion
+
+        #region Public Properties
+
+        public static string ScriptVersion
+        {
+            get
+            {
+                return typeof(Corki).Assembly.GetName().Version.ToString();
+            }
+        }
+
+        #endregion
+
+        #region Public Methods and Operators
 
         public static void Initialize()
         {
@@ -40,7 +49,9 @@ namespace ElCorki
             cMenu.AddItem(new MenuItem("ElCorki.Combo.Ignite", "Use Ignite").SetValue(true));
             cMenu.AddItem(new MenuItem("ElCorki.ssssssssssss", ""));
             cMenu.AddItem(new MenuItem("ElCorki.Combo.RStacks", "Keep R Stacks").SetValue(new Slider(0, 0, 7)));
-            cMenu.AddItem(new MenuItem("ElCorki.hitChance", "Hitchance Q").SetValue(new StringList(new[] { "Low", "Medium", "High", "Very High" }, 3)));
+            cMenu.AddItem(
+                new MenuItem("ElCorki.hitChance", "Hitchance Q").SetValue(
+                    new StringList(new[] { "Low", "Medium", "High", "Very High" }, 3)));
             cMenu.AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             _menu.AddSubMenu(cMenu);
@@ -50,22 +61,30 @@ namespace ElCorki
             hMenu.AddItem(new MenuItem("ElCorki.Harass.E", "Use E").SetValue(false));
             hMenu.AddItem(new MenuItem("ElCorki.Harass.R", "Use R").SetValue(true));
             hMenu.AddItem(new MenuItem("ElCorki.Harass.RStacks", "Keep R Stacks").SetValue(new Slider(0, 0, 7)));
+            hMenu.AddItem(new MenuItem("ElCorki.harass.mana2", "Harass mana").SetValue(new Slider(55)));
 
-
-            hMenu.SubMenu("AutoHarass").AddItem(new MenuItem("ElCorki.AutoHarass", "[Toggle] Auto harass", false).SetValue(new KeyBind("U".ToCharArray()[0], KeyBindType.Toggle)));
+            hMenu.SubMenu("AutoHarass")
+                .AddItem(
+                    new MenuItem("ElCorki.AutoHarass", "[Toggle] Auto harass", false).SetValue(
+                        new KeyBind("U".ToCharArray()[0], KeyBindType.Toggle)));
             hMenu.SubMenu("AutoHarass").AddItem(new MenuItem("ElCorki.UseQAutoHarass", "Use Q").SetValue(true));
             hMenu.SubMenu("AutoHarass").AddItem(new MenuItem("ElCorki.UseRAutoHarass", "Use R").SetValue(true));
-            hMenu.SubMenu("AutoHarass").AddItem(new MenuItem("ElCorki.harass.mana", "Auto harass mana")).SetValue(new Slider(55));
+            hMenu.SubMenu("AutoHarass")
+                .AddItem(new MenuItem("ElCorki.harass.mana", "Auto harass mana"))
+                .SetValue(new Slider(55));
 
             _menu.AddSubMenu(hMenu);
 
             var lMenu = new Menu("Clear", "Clear");
             lMenu.AddItem(new MenuItem("useQFarm", "Use Q").SetValue(true));
-            lMenu.AddItem(new MenuItem("ElCorki.Count.Minions", "Killable minions with Q >=").SetValue(new Slider(2, 1, 5)));
+            lMenu.AddItem(
+                new MenuItem("ElCorki.Count.Minions", "Killable minions with Q >=").SetValue(new Slider(2, 1, 5)));
             lMenu.AddItem(new MenuItem("useEFarm", "Use E").SetValue(true));
-            lMenu.AddItem(new MenuItem("ElCorki.Count.Minions.E", "Killable minions with E >=").SetValue(new Slider(2, 1, 5)));
+            lMenu.AddItem(
+                new MenuItem("ElCorki.Count.Minions.E", "Killable minions with E >=").SetValue(new Slider(2, 1, 5)));
             lMenu.AddItem(new MenuItem("useRFarm", "Use R").SetValue(true));
-            lMenu.AddItem(new MenuItem("ElCorki.Count.Minions.R", "Killable minions with R >=").SetValue(new Slider(2, 1, 5)));
+            lMenu.AddItem(
+                new MenuItem("ElCorki.Count.Minions.R", "Killable minions with R >=").SetValue(new Slider(2, 1, 5)));
             lMenu.AddItem(new MenuItem("useEFarmddsdsaasaafsdaadsd", ""));
             lMenu.AddItem(new MenuItem("useQFarmJungle", "Use Q in jungle").SetValue(true));
             lMenu.AddItem(new MenuItem("useEFarmJungle", "Use E in jungle").SetValue(true));
@@ -80,8 +99,10 @@ namespace ElCorki
             itemMenu.AddItem(new MenuItem("ElCorki.Items.Cutlass", "Use Cutlass").SetValue(true));
             itemMenu.AddItem(new MenuItem("ElCorki.Items.Blade", "Use Blade of the Ruined King").SetValue(true));
             itemMenu.AddItem(new MenuItem("ElCorki.Harasssfsddass.E", ""));
-            itemMenu.AddItem(new MenuItem("ElCorki.Items.Blade.EnemyEHP", "Enemy HP Percentage").SetValue(new Slider(80, 100, 0)));
-            itemMenu.AddItem(new MenuItem("ElCorki.Items.Blade.EnemyMHP", "My HP Percentage").SetValue(new Slider(80, 100, 0)));
+            itemMenu.AddItem(
+                new MenuItem("ElCorki.Items.Blade.EnemyEHP", "Enemy HP Percentage").SetValue(new Slider(80, 100, 0)));
+            itemMenu.AddItem(
+                new MenuItem("ElCorki.Items.Blade.EnemyMHP", "My HP Percentage").SetValue(new Slider(80, 100, 0)));
 
             _menu.AddSubMenu(itemMenu);
 
@@ -115,5 +136,7 @@ namespace ElCorki
 
             Console.WriteLine("Menu Loaded");
         }
+
+        #endregion
     }
 }

@@ -24,7 +24,7 @@ namespace DetuksSharp
         private static readonly string[] AttackResets =
         {
             "dariusnoxiantacticsonh", "fioraflurry", "garenq",
-            "hecarimrapidslash", "jaxempowertwo", "jaycehypercharge", "leonashieldofdaybreak", "luciane", "lucianw",
+            "hecarimrapidslash", "jaxempowertwo", "jaycehypercharge", "leonashieldofdaybreak", "luciane", "lucianw", "lucianq",
             "monkeykingdoubleattack", "mordekaisermaceofspades", "nasusq", "nautiluspiercinggaze", "netherblade",
             "parley", "poppydevastatingblow", "powerfist", "renektonpreexecute", "rengarq", "shyvanadoubleattack",
             "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble", "vie", "volibearq",
@@ -99,6 +99,9 @@ namespace DetuksSharp
 
         public static int lastDmg = HealthDeath.now;
 
+        private static int previousAttack = 0;
+
+        private static bool isTryingToAttack = false;
         private static int lastAutoAttack = 0;
         private static int lastAutoAttackMove = 0;
         private static int lastmove = 0;
@@ -173,7 +176,7 @@ namespace DetuksSharp
         {
             //Console.WriteLine("sender: "+sender.Name+" type: "+sender.Type);
 
-            if (sender is MissileClient)
+            /*if (sender is MissileClient)
             {
                 var mis = (MissileClient) sender;
 
@@ -181,7 +184,7 @@ namespace DetuksSharp
                 {
                     FireAfterAttack(player,(AttackableUnit) mis.Target);
                 }
-            }
+            }*/
             if(!azir) return;
             if (sender.Name == "AzirSoldier" && sender.IsAlly)
             {
@@ -192,12 +195,46 @@ namespace DetuksSharp
 
         }
 
+        private static void afterAttack(Obj_AI_Base sender, AttackableUnit target)
+        {
+            isTryingToAttack = false;
+            Console.WriteLine("Hit is rdy " + player.AttackDelay * 1000);
+            lastAutoAttackMove = 0;
+            FireAfterAttack(sender, target);
+        }
+
+        private static void onDoCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe)
+            {
+                if (isAutoAttackReset(args.SData.Name))
+                {
+                    if(player.ChampionName == "Lucian")
+                        Utility.DelayAction.Add((int)350, resetAutoAttackTimer);
+                    else
+                        resetAutoAttackTimer();
+                    //
+                }
+                var spell = player.Spellbook.GetSpell(args.Slot);
+                if (spell.IsAutoAttack() || args.SData.IsAutoAttack())
+                {
+                    /*if(player.IsMelee)
+                        Utility.DelayAction.Add((int)(player.AttackDelay * 1000), delegate { afterAttack(sender, (AttackableUnit)args.Target); });
+                    else*/
+                        afterAttack(sender, (AttackableUnit)args.Target);
+                }
+
+            }
+        }
+
         private static void onStopAutoAttack(Spellbook sender, SpellbookStopCastEventArgs args)
         {
             if (sender.Owner.IsMe && args.DestroyMissile)
             {
-                lastAutoAttack = 0;
-                lastAutoAttackMove = 0;
+                Console.WriteLine("Cancel auto");
+                var resetTo = (menu.Item("betaStut").GetValue<bool>()) ? previousAttack : 0;
+                lastAutoAttack = resetTo;
+                lastAutoAttackMove = resetTo;
             }
         }
 
@@ -211,13 +248,11 @@ namespace DetuksSharp
                 object value = descriptor.GetValue(args.SData);
                 Console.WriteLine("{0}={1}", name, value);
             }*/
-            if (isAutoAttackReset(args.SData.Name))
-            {
-                Utility.DelayAction.Add((int)250, resetAutoAttackTimer);
-            }
+            
 
             if (IsAutoAttack(args.SData.Name))
             {
+                previousAttack = lastAutoAttack;
                 lastAutoAttack = now;
                 lastAutoAttackMove = now;
             }
@@ -225,10 +260,10 @@ namespace DetuksSharp
             {
                 lastAutoAttackMove-=100;
             }
-            //Fire after attack!
-            if (sender.IsMelee)
+            //Fire after attack!a
+            /*if (sender.IsMelee)
                 Utility.DelayAction.Add(
-                    (int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(sender, (AttackableUnit)args.Target));
+                    (int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(sender, (AttackableUnit)args.Target));*/
 
             
         }
@@ -299,6 +334,7 @@ namespace DetuksSharp
             {
                 FireBeforeAttack(target);
                 playerStoped = false;
+                previousAttack = lastAutoAttack;
                 lastAutoAttack = now;
                 lastAutoAttackMove = now;
                 lastAutoAttackUnit = target;
@@ -386,9 +422,9 @@ namespace DetuksSharp
             if (CurrentMode == Mode.Harass || CurrentMode == Mode.Lasthit || CurrentMode == Mode.LaneClear)
             {
                 //Last hit
-                foreach (var targ in enemiesAround.OrderByDescending(min => HealthDeath.getLastHitPred(min, timeTillDamageOn(min))))
+                foreach (var targ in enemiesAround.OrderByDescending(min => HealthDeath.getLastHitPredPeriodic(min, timeTillDamageOn(min))))
                 {
-                    var hpOnDmgPred = HealthDeath.getLastHitPredPeriodic(targ, timeTillDamageOn(targ));
+                    var hpOnDmgPred = HealthDeath.getLastHitPred(targ, timeTillDamageOn(targ));
                     if (hpOnDmgPred <= 0 && (lastAutoAttackUnit == null || lastAutoAttackUnit.NetworkId != targ.NetworkId))
                         FireOnUnkillable(player, targ, HealthDeath.getTimeTillDeath(targ));
                     if (hpOnDmgPred <= 0 || hpOnDmgPred > (int)getRealAADmg(targ))
@@ -705,13 +741,14 @@ namespace DetuksSharp
 
         public static bool canMove()
         {
-            return canMoveAfter() == 0;
+            return canMoveAfter() == 0 /*&& !player.IsAttackingPlayer*/;
         }
 
         public static int canMoveAfter()
         {
-            var after = lastAutoAttack + player.AttackCastDelay * 1000 - now + menu.Item("MovDelay").GetValue<Slider>().Value + ((hyperCharged()) ? 150 : 0);
-            return (int)(after > 0 ? after : 0);
+            var after = lastAutoAttackMove + player.AttackCastDelay * 1000 - now + menu.Item("MovDelay").GetValue<Slider>().Value + ((hyperCharged()) ? 150 : 0);
+            var aaBefore = (isTryingToAttack)? (lastAutoAttack + 350) - now:0;
+            return (int)(after > 0 ? after : (aaBefore>0)?aaBefore:0);
         }
 
         private static bool hyperCharged()
@@ -721,8 +758,9 @@ namespace DetuksSharp
 
         public static void resetAutoAttackTimer()
         {
+            //Console.WriteLine("Reseet");
             lastAutoAttack = 0;
-            lastAutoAttackMove = 0;
+            //lastAutoAttackMove = 0;
         }
 
         public static float realDistanceTill(AttackableUnit unit)
@@ -766,6 +804,7 @@ namespace DetuksSharp
 
         private static void FireBeforeAttack(AttackableUnit target)
         {
+            isTryingToAttack = true;
             if (BeforeAttack != null)
             {
                 BeforeAttack(new BeforeAttackEventArgs
@@ -808,6 +847,7 @@ namespace DetuksSharp
             menuIn.AddItem(new MenuItem("MovDelay", "Move delay").SetValue(new Slider(0, -100, 250)));
             menuIn.AddItem(new MenuItem("farmDelay", "Farm delay").SetValue(new Slider(100, -100, 250)));
             menuIn.AddItem(new MenuItem("runCS", "Run CS distance").SetValue(new Slider(25, 0, 500)));
+            menuIn.AddItem(new MenuItem("betaStut", "Beta anti stut").SetValue(true));
 
             menu = menuIn;
 
@@ -820,15 +860,15 @@ namespace DetuksSharp
             Obj_AI_Base.OnProcessSpellCast += onStartAutoAttack;
             Spellbook.OnStopCast += onStopAutoAttack;
 
-            //Obj_AI_Base.OnDamage += onDamage;
+            Obj_AI_Base.OnDoCast += onDoCast;
 
             GameObject.OnCreate += onCreate;
             GameObject.OnDelete += onDelete;
-
             Obj_AI_Minion.OnPlayAnimation += Obj_AI_Minion_OnPlayAnimation;
 
             Game.OnUpdate += OnUpdate;
         }
+
 
         public static float getRealAADmg(Obj_AI_Base targ)
         {
@@ -855,12 +895,12 @@ namespace DetuksSharp
 
         public static List<Obj_AI_Minion> getUsableSoliders()
         {
-            return azirSoldiers.Where(sol => !sol.IsDead && sol != null).ToList();
+            return azirSoldiers.Where(sol => !sol.IsDead && sol != null ).ToList();
         }
 
         public static List<Obj_AI_Minion> getActiveSoliders()
         {
-            return azirSoldiers.Where(s => s.IsValid && !s.IsDead && !s.IsMoving && s.ServerPosition.Distance(player.Position,true)<=900*900 /*(!Animations.ContainsKey(s.NetworkId) || Animations[s.NetworkId] != "Inactive")*/).ToList();
+            return azirSoldiers.Where(s => s.IsValid && !s.IsMoving && !s.IsDead && !s.IsMoving && s.ServerPosition.Distance(player.Position, true) <= 850 * 850 /*(!Animations.ContainsKey(s.NetworkId) || Animations[s.NetworkId] != "Inactive")*/).ToList();
         }
 
         public static bool solisAreStill()
@@ -894,7 +934,7 @@ namespace DetuksSharp
         {
             var solis = getActiveSoliders();
 
-            return !ene.IsDead && solis.Count != 0 && solis.Where(sol => !sol.IsMoving).Any(sol => ene.Distance(sol) < 325);
+            return !ene.IsDead && solis.Count != 0 && solis.Where(sol => !sol.IsMoving && !sol.IsDashing()).Any(sol => ene.Distance(sol) < 305);
         }
 
         public static int solidersAroundEnemy(Obj_AI_Base ene)

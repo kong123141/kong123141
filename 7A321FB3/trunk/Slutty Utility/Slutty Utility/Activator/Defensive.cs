@@ -2,12 +2,24 @@
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using ItemData = LeagueSharp.Common.Data.ItemData;
 
 namespace Slutty_Utility.Activator
 {
      class Defensive : Helper
     {
-        public static int ZhonyaId, Omen, Seraphs, QSS, Mikaels, Locket, Mountain;
+        public static int ZhonyaId, Omen, Seraphs, QSS, Mikaels, Locket, Mountain, Merc;
+        public static readonly BuffType[] Bufftype =
+        {
+            BuffType.Snare, 
+            BuffType.Blind, 
+            BuffType.Charm, 
+            BuffType.Stun,
+            BuffType.Fear, 
+            BuffType.Slow,
+            BuffType.Taunt, 
+            BuffType.Suppression
+        };
 
         static Defensive()
         {
@@ -15,11 +27,12 @@ namespace Slutty_Utility.Activator
             Omen = 3143;
             Seraphs = 3040;
             QSS = 3140;
+            Merc = 3139;
             Mikaels = 3222;
             Locket = 3190;
             Mountain = 3401;
         }
-
+         
 
          public static void OnLoad()
          {
@@ -29,6 +42,8 @@ namespace Slutty_Utility.Activator
 
          private static void OnUpdate(EventArgs args)
          {
+            // Console.WriteLine(ItemData.Total_Biscuit_of_Rejuvenation2.Id);
+            // Console.WriteLine("seraphs" + ItemData.Seraphs_Embrace.Id + " " + "QSS" + ItemData.Quicksilver_Sash.Id + ItemData.Mercurial_Scimitar.Id);
              #region Omen
 
              if (ItemReady(Omen) && HasItem(Omen))
@@ -38,6 +53,7 @@ namespace Slutty_Utility.Activator
                      SelfCast(Omen);
                  }
              }
+
              #endregion
 
              #region Locket
@@ -50,7 +66,7 @@ namespace Slutty_Utility.Activator
                      if (GetStringValue("locketop" + hero.ChampionName) == 0
                          && hero.Distance(Player) <= 1000
                          && hero.HealthPercent <= Config.Item("lockethp" + hero.ChampionName).GetValue<Slider>().Value
-                         && Player.CountEnemiesInRange(1500) >= 2)
+                         && Player.CountEnemiesInRange(1500) >= 1)
                          SelfCast(Locket);
                  }
              }
@@ -72,23 +88,27 @@ namespace Slutty_Utility.Activator
 
              if (ItemReady(Mikaels) && HasItem(Mikaels))
              {
-                 foreach (var hero in HeroManager.Allies.Where(x =>x.Distance(Player) <= 800))
+                 foreach (
+                     var hero in HeroManager.Allies)
                  {
-                     if (Config.Item("mikaels" + hero.ChampionName).GetValue<StringList>().SelectedIndex == 0)
+                     foreach (var buff in Bufftype)
                      {
-                         if (hero.HasBuffOfType(BuffType.Charm) ||
-                             hero.HasBuffOfType(BuffType.Silence) ||
-                             hero.HasBuffOfType(BuffType.Stun) ||
-                             hero.HasBuffOfType(BuffType.Taunt) ||
-                             hero.HasBuffOfType(BuffType.Suppression))
+                         if (!GetBool("defensive.mikaels", typeof(bool)) ||
+                             !GetBool("usemikaels" + hero.ChampionName, typeof(bool)))
+                             return;
+                         if (hero.HasBuffOfType(buff))
                          {
-                             UseUnitItem(Mikaels, hero);
+                             if (GetBool("mikalesuse" + buff, typeof (bool)))
+                             {
+                                 UseUnitItem(Mikaels, hero);
+                             }
                          }
                      }
                  }
              }
+         
 
-             #endregion
+         #endregion
 
              #region Mountain
 
@@ -96,7 +116,7 @@ namespace Slutty_Utility.Activator
              {
                  foreach (var hero in HeroManager.Allies.Where(x => x.Distance(Player) <= 700))
                  {
-                     if (GetStringValue("Mountain") == 0
+                     if (GetStringValue("Mountain" + hero.ChampionName) == 0
                          && hero.HealthPercent <= Config.Item("facehp" + hero.ChampionName).GetValue<Slider>().Value
                          && Player.CountEnemiesInRange(1500) >= 2)
                      {
@@ -109,17 +129,20 @@ namespace Slutty_Utility.Activator
 
              #region QSS
 
-             if (ItemReady(QSS) && HasItem(QSS))
+             if ((ItemReady(Merc) && HasItem(Merc))|| (ItemReady(QSS) && HasItem(QSS)))
              {
-                 if (GetBool("defensive.qss", typeof(bool)))
+                 foreach (var buff in Bufftype)
                  {
-                     if (Player.HasBuffOfType(BuffType.Charm) ||
-                         Player.HasBuffOfType(BuffType.Silence) ||
-                         Player.HasBuffOfType(BuffType.Stun) ||
-                         Player.HasBuffOfType(BuffType.Taunt) ||
-                         Player.HasBuffOfType(BuffType.Suppression))
+                     if (GetBool("defensive.qss" + buff, typeof(bool)))
                      {
-                         SelfCast(QSS);
+                         if (Player.HasBuffOfType(buff) && HasItem(QSS))
+                         {
+                             Utility.DelayAction.Add(GetValue("qssdelay"), () =>  SelfCast(QSS));
+                         }
+                         else if (Player.HasBuffOfType(buff))
+                         {
+                             Utility.DelayAction.Add(GetValue("qssdelay"), () => SelfCast(Merc));
+                         }
                      }
                  }
              }

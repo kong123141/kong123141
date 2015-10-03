@@ -56,12 +56,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Gnar.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Gnar.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Gnar.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Gnar.Misc.W", "W Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -69,7 +69,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Gnar.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Gnar.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Gnar.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -79,12 +79,12 @@ namespace EndifsCreations.Plugins
                 TargetSelector.GetSelectedTarget() != null && TargetSelector.GetSelectedTarget().IsValidTarget() ? TargetSelector.GetSelectedTarget() :
                 Mini ? TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical) : TargetSelector.GetTarget(W2.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Gnar.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Gnar.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Gnar.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Gnar.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Gnar.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Gnar.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Gnar.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Gnar.Combo.R").GetValue<bool>();
 
-            var CastItems = config.Item("EC.Gnar.Combo.Items").GetValue<bool>();
+            var CastItems = Root.Item("EC.Gnar.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;                
@@ -219,7 +219,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Gnar.Misc.W").GetValue<bool>() && W2.IsReady())
+            if (Root.Item("EC.Gnar.Misc.W").GetValue<bool>() && W2.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -236,30 +236,30 @@ namespace EndifsCreations.Plugins
             if (Player.IsDead) return;
             if (Mini)
             {
-                if (config.Item("EC.Gnar.Draw.Q").GetValue<bool>() && Q.Level > 0)
+                if (Root.Item("EC.Gnar.Draw.Q").GetValue<bool>() && Q.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
                 }
-                if (config.Item("EC.Gnar.Draw.E").GetValue<bool>() && E.Level > 0)
+                if (Root.Item("EC.Gnar.Draw.E").GetValue<bool>() && E.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
                 }
             }
             if (Mega)
             {
-                if (config.Item("EC.Gnar.Draw.Q").GetValue<bool>() && Q2.Level > 0)
+                if (Root.Item("EC.Gnar.Draw.Q").GetValue<bool>() && Q2.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, Q2.Range, Color.White);
                 }
-                if (config.Item("EC.Gnar.Draw.W").GetValue<bool>() && W2.Level > 0)
+                if (Root.Item("EC.Gnar.Draw.W").GetValue<bool>() && W2.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, W2.Range, Color.White);
                 }
-                if (config.Item("EC.Gnar.Draw.E").GetValue<bool>() && E2.Level > 0)
+                if (Root.Item("EC.Gnar.Draw.E").GetValue<bool>() && E2.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, E2.Range, Color.White);
                 }
-                if (config.Item("EC.Gnar.Draw.R").GetValue<bool>() && R.Level > 0)
+                if (Root.Item("EC.Gnar.Draw.R").GetValue<bool>() && R.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
                 }

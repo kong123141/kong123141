@@ -44,14 +44,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Kassadin.Combo.RType", "R").SetValue(new StringList(new[] { "Always", "E check" })));
                 combomenu.AddItem(new MenuItem("EC.Kassadin.NoRValue", "Don't R if > enemy").SetValue(new Slider(1, 1, 5)));
                 combomenu.AddItem(new MenuItem("EC.Kassadin.Combo.Dive", "Turret Dive").SetValue(false));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {               
                 harassmenu.AddItem(new MenuItem("EC.Kassadin.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Kassadin.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Kassadin.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -61,20 +61,20 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Kassadin.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Kassadin.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Kassadin.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Kassadin.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Kassadin.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Kassadin.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }  
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Kassadin.Misc.Q", "Q Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Kassadin.Misc.E", "E Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -82,7 +82,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Kassadin.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Kassadin.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Kassadin.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -90,9 +90,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Kassadin.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Kassadin.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Kassadin.Combo.R").GetValue<bool>();           
+            var UseQ = Root.Item("EC.Kassadin.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Kassadin.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Kassadin.Combo.R").GetValue<bool>();           
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -101,28 +101,28 @@ namespace EndifsCreations.Plugins
                 {
                     if (UseR && R.IsReady())
                     {
-                        if (Target.UnderTurret(true) && !config.Item("EC.Kassadin.Combo.Dive").GetValue<bool>()) return;
-                        if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= R.Range && (Target.ServerPosition.CountEnemiesInRange(R.Range) - 1) < config.Item("EC.Kassadin.NoRValue").GetValue<Slider>().Value)
+                        if (Target.UnderTurret(true) && !Root.Item("EC.Kassadin.Combo.Dive").GetValue<bool>()) return;
+                        if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= R.Range && (Target.ServerPosition.CountEnemiesInRange(R.Range) - 1) < Root.Item("EC.Kassadin.NoRValue").GetValue<Slider>().Value)
                         {
                             Vector3 pos = Player.ServerPosition.Extend(Target.ServerPosition, Vector3.Distance(Player.ServerPosition, Target.ServerPosition));
                             if (R.Instance.ManaCost < 300f)
                             {                                
-                                switch (config.Item("EC.Kassadin.Combo.RType").GetValue<StringList>().SelectedIndex)
+                                switch (Root.Item("EC.Kassadin.Combo.RType").GetValue<StringList>().SelectedIndex)
                                 {
                                     case 0:
-                                        mySpellcast.LinearVector(pos, R, Target.BoundingRadius);
+                                        mySpellcast.PointVector(pos, R, Target.BoundingRadius);
                                         break;
                                     case 1:
                                         if ((ECanCast || EBuffCount >= 3))
                                         {
-                                            mySpellcast.LinearVector(pos, R, Target.BoundingRadius);
+                                            mySpellcast.PointVector(pos, R, Target.BoundingRadius);
                                         }
                                         break;
                                 }
                             }
                             if (R.Instance.ManaCost > 300f && R.IsKillable(Target) && Player.Mana > R.Instance.ManaCost)
                             {
-                                mySpellcast.LinearVector(pos, R, Target.BoundingRadius);
+                                mySpellcast.PointVector(pos, R, Target.BoundingRadius);
                             }
                         }
                     }
@@ -141,8 +141,8 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Kassadin.Harass.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Kassadin.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Kassadin.Harass.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Kassadin.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -161,8 +161,8 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Kassadin.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Kassadin.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Kassadin.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Kassadin.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 if (minionQ == null) return;
@@ -180,7 +180,7 @@ namespace EndifsCreations.Plugins
                     }
                 }                
             }
-            if (config.Item("EC.Kassadin.Farm.E").GetValue<bool>() && E.IsReady() && ECanCast)
+            if (Root.Item("EC.Kassadin.Farm.E").GetValue<bool>() && E.IsReady() && ECanCast)
             {
                 if (Player.UnderTurret(true)) return;
                 var minionE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
@@ -194,7 +194,7 @@ namespace EndifsCreations.Plugins
                 {
                     foreach (var x in minionE)
                     {
-                        if (MinionManager.GetMinions(x.ServerPosition, 275).Count() > config.Item("EC.Kassadin.Farm.E.Value").GetValue<Slider>().Value)
+                        if (MinionManager.GetMinions(x.ServerPosition, 275).Count() > Root.Item("EC.Kassadin.Farm.E.Value").GetValue<Slider>().Value)
                         {
                             if (x.IsValidTarget() && x.ServerPosition.IsValid()) E.Cast(x.ServerPosition);
                         }
@@ -218,7 +218,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Kassadin.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob))
+                if (Root.Item("EC.Kassadin.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob))
                 {
                     if (largemobs != null)
                     {
@@ -229,7 +229,7 @@ namespace EndifsCreations.Plugins
                         Q.CastOnUnit(mob);
                     }
                 }
-                if (config.Item("EC.Kassadin.Jungle.E").GetValue<bool>() && E.IsReady() && ECanCast)
+                if (Root.Item("EC.Kassadin.Jungle.E").GetValue<bool>() && E.IsReady() && ECanCast)
                 {
                     if (largemobs != null)
                     {
@@ -244,7 +244,7 @@ namespace EndifsCreations.Plugins
         }
         private void LastHit()
         {
-            if (myOrbwalker.IsWaiting() && !Player.IsWindingUp && config.Item("EC.Kassadin.UseWLastHit").GetValue<bool>() && W.IsReady())
+            if (myOrbwalker.Waiting && !Player.IsWindingUp && Root.Item("EC.Kassadin.UseWLastHit").GetValue<bool>() && W.IsReady())
             {
                 W.Cast();
             }
@@ -301,7 +301,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (sender.IsEnemy && config.Item("EC.Kassadin.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (sender.IsEnemy && Root.Item("EC.Kassadin.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (myUtility.ImmuneToMagic(sender)) return;
                 Utility.DelayAction.Add(myHumazier.ReactionDelay, () => mySpellcast.Unit(sender, Q));
@@ -320,7 +320,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Kassadin.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Kassadin.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -331,7 +331,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Kassadin.Farm.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Kassadin.Farm.W").GetValue<bool>() && W.IsReady())
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null && 
@@ -347,8 +347,8 @@ namespace EndifsCreations.Plugins
         {
             if (args.Target is Obj_AI_Hero && args.Target.IsValidTarget() && args.Target.IsEnemy)
             {                
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Kassadin.Combo.W").GetValue<bool>() ||
-                    myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && config.Item("EC.Kassadin.Harass.W").GetValue<bool>()) &&                   
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Kassadin.Combo.W").GetValue<bool>() ||
+                    myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && Root.Item("EC.Kassadin.Harass.W").GetValue<bool>()) &&                   
                     W.IsReady())
                 {
                     W.Cast();
@@ -357,7 +357,7 @@ namespace EndifsCreations.Plugins
             if (args.Target is Obj_AI_Minion)
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear &&                    
-                    config.Item("EC.Kassadin.Farm.W").GetValue<bool>() &&
+                    Root.Item("EC.Kassadin.Farm.W").GetValue<bool>() &&
                     !Player.IsWindingUp &&
                     W.IsReady())
                 {
@@ -367,7 +367,7 @@ namespace EndifsCreations.Plugins
             if (args.Target is Obj_AI_Minion && args.Target.Team == GameObjectTeam.Neutral)
             {
                 if (!args.Target.Name.Contains("Mini") &&
-                    config.Item("EC.Kassadin.Jungle.W").GetValue<bool>() &&
+                    Root.Item("EC.Kassadin.Jungle.W").GetValue<bool>() &&
                     !Player.IsWindingUp &&
                     W.IsReady())
                 {
@@ -382,7 +382,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)                 
                 {
-                    if (config.Item("EC.Kassadin.Combo.W").GetValue<bool>() &&
+                    if (Root.Item("EC.Kassadin.Combo.W").GetValue<bool>() &&
                         !Player.IsWindingUp &&
                         W.IsReady() && 
                         target.IsValidTarget()) W.Cast();
@@ -392,19 +392,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Kassadin.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Kassadin.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Kassadin.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Kassadin.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Kassadin.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Kassadin.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Kassadin.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Kassadin.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

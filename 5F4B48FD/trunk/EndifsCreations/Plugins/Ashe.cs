@@ -37,13 +37,13 @@ namespace EndifsCreations.Plugins
             {
                 combomenu.AddItem(new MenuItem("EC.Ashe.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Ashe.Combo.W", "Use W").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {                
                 drawmenu.AddItem(new MenuItem("EC.Ashe.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Ashe.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -51,7 +51,7 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             
-            var UseW = config.Item("EC.Ashe.Combo.W").GetValue<bool>();            
+            var UseW = Root.Item("EC.Ashe.Combo.W").GetValue<bool>();            
             if (Target.IsValidTarget())
             {
                 try
@@ -88,7 +88,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Ashe.Combo.Q").GetValue<bool>() && Q.IsReady() && (Player.GetBuffCount("AsheQ") >= 5 || Player.HasBuff("asheqcastready")))
+                    if (Root.Item("EC.Ashe.Combo.Q").GetValue<bool>() && Q.IsReady() && (Player.GetBuffCount("AsheQ") >= 5 || Player.HasBuff("asheqcastready")))
                     {
                         Q.Cast();
                     }
@@ -108,11 +108,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Ashe.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Ashe.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Ashe.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Ashe.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Game.CursorPos, R.Range), R.Width);
                 var insidebox = HeroManager.Enemies.Where(x => box.IsInside(x) && x.IsValidTarget()).ToList();

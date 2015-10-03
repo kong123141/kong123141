@@ -220,6 +220,7 @@ namespace VayneHunter_Reborn
             ItemManager.OnLoad(Menu);
             ProfileSelector.ProfileSelector.OnLoad(Menu);
             Game.OnUpdate += Game_OnGameUpdate;
+            //Obj_AI_Base.OnDoCast += Obj_AI_Base_OnDoCast;
             Orbwalking.AfterAttack += OrbwalkingAfterAttack;
             AntiGP.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
@@ -237,6 +238,15 @@ namespace VayneHunter_Reborn
             }
             //ProfileSelector.ProfileSelector.OnLoad(Menu);
         }
+
+        static void Obj_AI_Base_OnDoCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && Orbwalking.IsAutoAttack(args.SData.Name))
+            {
+                ExecuteAfterAA(sender, args.Target as AttackableUnit);
+            }
+        }
+
 
         #endregion
 
@@ -459,12 +469,19 @@ namespace VayneHunter_Reborn
             OnUpdateFunctions();
         }
 
+        #region
+
         /// <summary>
         /// Called when an unit finishes the attack.
         /// </summary>
         /// <param name="unit">The Unit</param>
         /// <param name="target">The target of the attack</param>
         private static void OrbwalkingAfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            ExecuteAfterAA(unit, target);
+        }
+
+        private static void ExecuteAfterAA(AttackableUnit unit, AttackableUnit target)
         {
             if (!(target is Obj_AI_Base) || !unit.IsMe)
             {
@@ -503,6 +520,7 @@ namespace VayneHunter_Reborn
                 Menu.Item("dz191.vhr.misc.condemn.enextauto").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle));
             }
         }
+        #endregion
 
         /// <summary>
         /// Delegate used for drawings.

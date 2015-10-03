@@ -58,7 +58,7 @@ namespace KurisuMorgana
             var ccmenu = new Menu(":: Combo Settings", "ccmenu");
 
             var menuQ = new Menu("Dark Binding (Q)", "qmenu");
-            menuQ.AddItem(new MenuItem("hitchanceq", "Binding hitchance ")).SetValue(new Slider(4, 1, 4));
+            menuQ.AddItem(new MenuItem("hitchanceq", "Binding hitchance ")).SetValue(new Slider(3, 1, 4));
             menuQ.AddItem(new MenuItem("useqcombo", "Use in combo")).SetValue(true);
             menuQ.AddItem(new MenuItem("useharassq", "Use in harass")).SetValue(true);
             menuQ.AddItem(new MenuItem("useqanti", "Use on gapcloser")).SetValue(true);
@@ -293,10 +293,7 @@ namespace KurisuMorgana
             if (_w.IsReady() && soil)
             {
                 foreach (var itarget in HeroManager.Enemies.Where(h => h.IsValidTarget(_w.Range)))
-                {
-                    if (Immobile(itarget))
-                        _w.Cast(itarget.ServerPosition);
-                }
+                    _w.SPredictionCast(itarget, HitChance.Immobile);
             }
 
             if (_r.IsReady())
@@ -316,7 +313,7 @@ namespace KurisuMorgana
             if (gapcloser.Sender.IsValidTarget(250f))
             {
                 if (_menu.Item("useqanti").GetValue<bool>())
-                    _q.SPredictionCast(gapcloser.Sender, HitChance.Low);
+                    _q.SPredictionCast(gapcloser.Sender, HitChance.Medium);
             }
         }
 
@@ -360,7 +357,7 @@ namespace KurisuMorgana
                 foreach (var lib in KurisuLib.CCList.Where(x => x.HeroName == attacker.ChampionName && x.Slot == attacker.GetSpellSlot(args.SData.Name)))
                     if (_menu.Item(lib.SDataName + "on").GetValue<bool>() && _menu.Item("useon" + ally.ChampionName).GetValue<bool>())
                     {
-                        Utility.DelayAction.Add(100, () => _e.CastOnUnit(ally));
+                        LeagueSharp.Common.Utility.DelayAction.Add(100, () => _e.CastOnUnit(ally));
                     }}
         }
     }

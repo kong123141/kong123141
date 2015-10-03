@@ -39,17 +39,17 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Blitzcrank.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Blitzcrank.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Blitzcrank.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }            
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Blitzcrank.Muramana", "Muramana").SetValue(new Slider(50)));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Blitzcrank.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -57,14 +57,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Blitzcrank.Combo.Q").GetValue<bool>();
-            var UseR = config.Item("EC.Blitzcrank.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Blitzcrank.Combo.Q").GetValue<bool>();
+            var UseR = Root.Item("EC.Blitzcrank.Combo.R").GetValue<bool>();
             if (UseR && R.IsReady())
             {
-                if (Player.CountEnemiesInRange(R.Range) >= 4)
-                {
-                    R.Cast();
-                }
+                mySpellcast.PointBlank(null, R, R.Range, 2);
             }
             if (Target.IsValidTarget())
             {
@@ -101,7 +98,7 @@ namespace EndifsCreations.Plugins
                     myUtility.Reset();
                     if (Player.HasBuff("Muramana"))
                     {
-                        if (myUtility.PlayerManaPercentage < config.Item("EC.Blitzcrank.Muramana").GetValue<Slider>().Value)
+                        if (myUtility.PlayerManaPercentage < Root.Item("EC.Blitzcrank.Muramana").GetValue<Slider>().Value)
                         {
                             if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                         }
@@ -118,7 +115,7 @@ namespace EndifsCreations.Plugins
             {
                 if (spell.SData.Name.ToLower() == "rocketgrab" && 
                     myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && 
-                    config.Item("EC.Blitzcrank.Combo.E").GetValue<bool>() && E.IsReady())
+                    Root.Item("EC.Blitzcrank.Combo.E").GetValue<bool>() && E.IsReady())
                 {
                    
                         if ((Obj_AI_Hero)spell.Target != null && spell.Target.IsEnemy)
@@ -139,7 +136,7 @@ namespace EndifsCreations.Plugins
             {
                 if (args.Slot == SpellSlot.E)
                 {
-                    if (ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > config.Item("EC.Blitzcrank.Muramana").GetValue<Slider>().Value)
+                    if (ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > Root.Item("EC.Blitzcrank.Muramana").GetValue<Slider>().Value)
                     {
                         if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                     }
@@ -152,11 +149,11 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Blitzcrank.Combo.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.Blitzcrank.Combo.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }
-                    if (config.Item("EC.Blitzcrank.Combo.E").GetValue<bool>() && E.IsReady())
+                    if (Root.Item("EC.Blitzcrank.Combo.E").GetValue<bool>() && E.IsReady())
                     {
                         E.Cast();
                     }
@@ -166,7 +163,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Blitzcrank.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Blitzcrank.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);                
                 Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
@@ -180,7 +177,7 @@ namespace EndifsCreations.Plugins
                         {
                             box.Draw(Color.Blue);
                         }
-                        else if (box.IsInside(pred.CastPosition) && Vector2.Distance(Target.ServerPosition.To2D(), myUtility.PredictMovement(Target, Q.Delay, Q.Speed)) <= Q.Width + Target.BoundingRadius)
+                        else if (box.IsInside(pred.CastPosition) && Vector2.Distance(Target.ServerPosition.To2D(), myUtility.PredictMovement(Target, Q.Delay, Q.Speed).To2D()) <= Q.Width + Target.BoundingRadius)
                         {
                             box.Draw(Color.Red);
                         }

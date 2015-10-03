@@ -248,10 +248,10 @@ namespace EndifsCreations
                     break;
                 case "rengar":
                     new Rengar();
-                    break;/*
+                    break;
                  case "riven":
                     new Riven();
-                    break;
+                    break;/*
                  case "rumble":
                     new Rumble();
                     break;

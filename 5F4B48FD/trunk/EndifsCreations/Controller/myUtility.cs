@@ -128,16 +128,16 @@ namespace EndifsCreations.Controller
             return source.Direction.To2D().Perpendicular().AngleBetween((direction - source.Position).To2D()) <= angle;
         }
 
-        public static int RandomDelay(int x, int y)
+        public static int RandomDelay(int low, int high)
         {
             var random = new Random();
-            return random.Next(x + Game.Ping, y + Game.Ping);
+            return random.Next(low + Game.Ping, high + Game.Ping);
         }
 
-        public static int RandomRange(int x, int y)
+        public static float RandomRange(float x, float y)
         {
-            var random = new Random();
-            return random.Next(x, y);
+            var random = new Random(DateTime.Now.Millisecond);
+            return random.NextFloat(x, y);
         }
 
         public static Vector3 RandomPos(int x, int y, int range, Vector3 pos)
@@ -183,16 +183,14 @@ namespace EndifsCreations.Controller
             return NavMesh.GetCollisionFlags(vec).HasFlag(CollisionFlags.Wall) || NavMesh.GetCollisionFlags(vec).HasFlag(CollisionFlags.Building);
         }
 
-        public static Vector2 PredictMovement(Obj_AI_Hero target, float time, float speed = float.MaxValue)
+        public static Vector3 PredictMovement(Obj_AI_Hero target, float time, float speed = float.MaxValue)
         {
             var movement = time * speed;
             var path = target.GetWaypoints();
-
             for (var i = 0; i < path.Count - 1; i++)
             {
                 var to = path[i + 1];
                 var from = path[i];
-
                 var dist = Vector2.Distance(from,to);
 
                 if (dist < movement)
@@ -201,16 +199,17 @@ namespace EndifsCreations.Controller
                 }
                 else
                 {
-                    return from + movement * (to - from).Normalized();
+                    return (from + movement * (to - from).Normalized()).To3D();
                 }
             }
-            return path[path.Count - 1];
+            return path[path.Count - 1].To3D();
         }
 
         public static bool MovingAway(Obj_AI_Hero target)
         {                      
             return !IsFacing(target, Player.ServerPosition) && target.IsMoving && !MovementDisabled(target);
         }
+
         public static bool IsInvulnerable(Obj_AI_Hero target)
         {
             return target.IsInvulnerable || target.HasBuff("JudicatorIntervention") || target.HasBuff("Undying Rage") || target.HasBuff("Chrono Shift");

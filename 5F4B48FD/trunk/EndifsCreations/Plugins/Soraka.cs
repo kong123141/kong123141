@@ -24,7 +24,7 @@ namespace EndifsCreations.Plugins
             E = new Spell(SpellSlot.E, 925);
             R = new Spell(SpellSlot.R);
 
-            Q.SetSkillshot(0.283f, 210, 1100, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.5f, 210, 1100, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.5f, 70f, 1750, false, SkillshotType.SkillshotCircle);   
             
             SpellList.Add(Q);
@@ -39,29 +39,29 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Soraka.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Soraka.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Soraka.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Soraka.Misc.E", "E Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Soraka.Misc.E2", "E Interrupts").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Soraka.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Soraka.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
         private void Combo()
         {
-            Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            Target = myUtility.GetTarget(Q.Range + 200, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Soraka.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Soraka.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Soraka.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Soraka.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Soraka.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Soraka.Combo.E").GetValue<bool>();
             if (UseW && W.IsReady())
             {
                 var Allies = HeroManager.Allies.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= W.Range).OrderBy(i => i.Health);
@@ -72,16 +72,15 @@ namespace EndifsCreations.Plugins
             }
             if (Target.IsValidTarget())
             {
-                if (Target.InFountain()) return;
                 try
                 {
                     if (UseQ && Q.IsReady() && myUtility.TickCount - LastE > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, Q, HitChance.High);                   
+                        mySpellcast.CircularAoe(Target, Q, HitChance.High, Q.Range, 210);                   
                     }
                     if (UseE && E.IsReady() && myUtility.TickCount - LastQ > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, E, HitChance.High);
+                        mySpellcast.CircularAoe(Target, E, HitChance.High, E.Range, 70);
                     }
                 }
                 catch { }
@@ -107,7 +106,13 @@ namespace EndifsCreations.Plugins
                     Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                     if (Target.IsValidTarget() && Q.IsReady())
                     {
-                        mySpellcast.CircularAoe(Target, Q, HitChance.High);
+                        mySpellcast.CircularAoe(Target, Q, HitChance.High, Q.Range, 210);
+                    }
+                    break;
+                case myOrbwalker.OrbwalkingMode.LaneClear:
+                    if (myUtility.EnoughMana(33))
+                    {
+                        myFarmManager.LaneCircular(Q, Q.Range, 210);
                     }
                     break;
             }
@@ -128,7 +133,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Soraka.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Soraka.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range + (E.Width/2))
                 {
@@ -140,7 +145,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Soraka.Misc.E2").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Soraka.Misc.E2").GetValue<bool>() && E.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range)
                 {
@@ -160,11 +165,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Soraka.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Soraka.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Soraka.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Soraka.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

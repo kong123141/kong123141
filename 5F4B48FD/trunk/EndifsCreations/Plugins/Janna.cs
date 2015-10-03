@@ -38,27 +38,27 @@ namespace EndifsCreations.Plugins
                 //combomenu.AddItem(new MenuItem("EC.Janna.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Janna.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Janna.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }            
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Janna.Misc.W", "W Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Janna.Misc.E", "E Shields").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Janna.UseESupport", "E Supports").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Janna.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Janna.Draw.W", "W").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
         private void Combo()
         {
             Target = myUtility.GetTarget(W.Range, TargetSelector.DamageType.Magical);
-            var UseW = config.Item("EC.Janna.Combo.W").GetValue<bool>();
+            var UseW = Root.Item("EC.Janna.Combo.W").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 try
@@ -104,7 +104,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsAlly && !unit.IsMe)
             {
-                if (config.Item("EC.Janna.UseESupport").GetValue<bool>())
+                if (Root.Item("EC.Janna.UseESupport").GetValue<bool>())
                 {                    
                     if (spell.Target is Obj_AI_Hero && spell.SData.IsAutoAttack() && spell.Target.IsEnemy)
                     {
@@ -114,7 +114,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if (config.Item("EC.Janna.Misc.E").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Janna.Combo.E").GetValue<bool>()) && E.IsReady())
+                if (Root.Item("EC.Janna.Misc.E").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Janna.Combo.E").GetValue<bool>()) && E.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -157,7 +157,7 @@ namespace EndifsCreations.Plugins
             {
                 return;
             }
-            if (config.Item("EC.Janna.UseESupport").GetValue<bool>())
+            if (Root.Item("EC.Janna.UseESupport").GetValue<bool>())
             {
                 var missile = (MissileClient)sender;
                 if (!missile.SpellCaster.IsValid<Obj_AI_Hero>() || !missile.SpellCaster.IsAlly || missile.SpellCaster.IsMe ||
@@ -178,7 +178,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Janna.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Janna.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= W.Range)
                 {
@@ -190,11 +190,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Janna.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Janna.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Janna.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Janna.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }

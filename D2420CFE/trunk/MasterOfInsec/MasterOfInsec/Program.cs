@@ -18,8 +18,9 @@ namespace MasterOfInsec
     internal static class Program
     {
         // Master Of Insec LEE
-
-
+        public static bool checkpred;
+        public static int QTotal;
+        public static int GoodQ;
         private static Obj_AI_Hero allytarget;
         public static Obj_AI_Hero Player;
         public static Menu menu;
@@ -33,7 +34,7 @@ namespace MasterOfInsec
         private static string step = "WOne";
         private static bool hit = false;
         public static Orbwalking.Orbwalker Orbwalker { get; internal set; }
-
+        public static MenuItem dmgAfterComboItem;
         public static Orbwalking.OrbwalkingMode OrbwalkerMode
         {
             get { return Orbwalker.ActiveMode; }
@@ -46,11 +47,7 @@ namespace MasterOfInsec
 
         public static bool Passive()
         {
-            if (Player.HasBuff("blindmonkpassive_cosmetic"))
-            {
-                return true;
-            }
-            return false;
+            return Player.HasBuff("blindmonkpassive_cosmetic");
         }
 
         private static void Menu()
@@ -59,19 +56,43 @@ namespace MasterOfInsec
             var orbWalkerMenu = new Menu("Orbwalker", "Orbwalker");
             orb = new Orbwalking.Orbwalker(orbWalkerMenu);
             var TargetSelectorMenu = new Menu("TargetSelector", "TargetSelector");
+            var KillstealMenu = new Menu("KillSteal", "KillSteal");
+                                    {
+                                        KillstealMenu.AddItem(new MenuItem("comboR", "Use R to finish the enemy").SetValue(true));
+                                        KillstealMenu.AddItem(new MenuItem("IgniteR", "Use R+Ignite for kill").SetValue(true));
+                                        KillstealMenu.AddItem(new MenuItem("Ignite", "Use ignite for kill").SetValue(true));
+                                    }
+            var QMenu = new Menu("Q","Q conf");
+            {
+                   QMenu.AddItem(  new MenuItem("Prediction mode", "Prediction Mode").SetValue(new StringList(new[] { "Awesome prediction", "Common pred"}, 1)));
+               QMenu .AddItem(new MenuItem("seth", "Q Hitchance")).SetValue(new Slider(3, 1, 4));
+                QMenu .AddItem(new MenuItem("comboQ", "Use Q in combo").SetValue(true));
+                QMenu .AddItem(new MenuItem("comboQ2", "Use Q2 in combo").SetValue(true));
+        //        comboMenu.AddItem(new MenuItem("smiteq", "Smite q").SetValue(true));
+            }
+                    var WMenu = new Menu("W","W conf");
+            {
+                WMenu.AddItem(new MenuItem("comboW", "Use W in combo").SetValue(false));
+                WMenu.AddItem(new MenuItem("comboWLH", "Use W if low hp").SetValue(false));
+                WMenu.AddItem(new MenuItem("Set W life %", "Set % W").SetValue(new Slider(100, 0, 100)));
+            }
+                           var EMenu = new Menu("E","E conf");
+            {
+             EMenu.AddItem(new MenuItem("comboE", "Use E in combo").SetValue(true));
+            }
+                               var RMenu = new Menu("R","R conf");
+            {
+                RMenu.AddItem(new MenuItem("comboRQ", "Use R+Q for max damage").SetValue(false));
+            }
             var comboMenu = new Menu("Combo", "Combo");
             {
                 comboMenu.AddItem(new MenuItem("cpassive", "Use Passive").SetValue(true));
-                comboMenu.AddItem(new MenuItem("smiteq", "Smite q").SetValue(true));
-                comboMenu.AddItem(new MenuItem("seth", "Q Hitchance")).SetValue(new Slider(3, 1, 4));
-                comboMenu.AddItem(new MenuItem("comboQ", "Use Q in combo").SetValue(true));
-                comboMenu.AddItem(new MenuItem("comboW", "Use W in combo").SetValue(false));
-                comboMenu.AddItem(new MenuItem("comboWLH", "Use W if low hp").SetValue(false));
-                comboMenu.AddItem(new MenuItem("Set W life %", "Set % W").SetValue(new Slider(100, 0, 100)));
-                comboMenu.AddItem(new MenuItem("comboE", "Use E in combo").SetValue(true));
-                comboMenu.AddItem(new MenuItem("comboR", "Use R to finish the enemy").SetValue(true));
-                comboMenu.AddItem(new MenuItem("IgniteR", "Use R+Ignite for kill").SetValue(true));
-                comboMenu.AddItem(new MenuItem("Ignite", "Use ignite for kill").SetValue(true));
+
+                comboMenu.AddSubMenu(KillstealMenu);
+                comboMenu.AddSubMenu(QMenu);
+                comboMenu.AddSubMenu(WMenu);
+                comboMenu.AddSubMenu(EMenu);
+                comboMenu.AddSubMenu(RMenu);
                 comboMenu.AddItem(new MenuItem("combokey", "Combo key").SetValue(new KeyBind(32, KeyBindType.Press)));
             }
 
@@ -153,12 +174,14 @@ namespace MasterOfInsec
             var DrawSettingsMenu = new Menu("Draw Settings", "Draw Settings");
             {
                 DrawSettingsMenu.AddItem(new MenuItem("DrawInsec", "Draw Insec Line").SetValue(true));
-                DrawSettingsMenu.AddItem(new MenuItem("DrawKilleableText", "Draw Killeable Text").SetValue(true));
+                DrawSettingsMenu.AddItem(new MenuItem("Draw Q%hit", "Draw Q %hit").SetValue(true));
                 DrawSettingsMenu.AddItem(new MenuItem("Draw Q Range", "Draw Q Range").SetValue(true));
                 DrawSettingsMenu.AddItem(new MenuItem("Draw W Range", "Draw W Range").SetValue(true));
                 DrawSettingsMenu.AddItem(new MenuItem("Draw E Range", "Draw E Range").SetValue(true));
                 DrawSettingsMenu.AddItem(new MenuItem("Draw R Range", "Draw R Range").SetValue(true));
             }
+         dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
+            DrawSettingsMenu.AddItem(dmgAfterComboItem);
             var WardJumpMenu = new Menu("WardJump", "WardJump");
             {
                 WardJumpMenu.AddItem(
@@ -215,13 +238,35 @@ namespace MasterOfInsec
                 true, SkillshotType.SkillshotLine);
             RInsec.SetTargetted(R.Instance.SData.CastFrame/30, R.Instance.SData.MissileSpeed);
             Menu();
+            AwesomePrediction.main.Initialize();
             Game.PrintChat("[LeeSin]Master Of Insec load good luck ;) ver 0.9.9.7");
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnWndProc += GameOnOnWndProc;
             Game.OnUpdate += Game_OnGameUpdate;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            Obj_AI_Base.OnBuffAdd += OnBuffAd;
             Spellbook.OnCastSpell += OnCast;
         }
 
+        private static void OnBuffAd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
+        {
+            if (args.Buff.Name == "BlindMonkQOne")
+            {
+                GoodQ++;
+            }
+        }
+
+        private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
+        {
+            var s = args.SData.Name;
+
+            if (unit.IsMe&&args.SData.Name == "BlindMonkQOne")
+            {
+                //if(args.)
+                QTotal++;
+            }
+
+        }
         private static void OnCast(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
             passive = false;
@@ -257,7 +302,6 @@ namespace MasterOfInsec
         {
             Q.MinHitChance = Combo.HitchanceCheck(menu.Item("seth").GetValue<Slider>().Value);
             if (Player.IsDead) return;
-            //   KsIgnite();
             if(menu.Item("fleekey").GetValue<KeyBind>().Active)
             {
                 Flee.Do();
@@ -269,6 +313,10 @@ namespace MasterOfInsec
             if (menu.Item("wardjump").GetValue<KeyBind>().Active)
             {
                 WardJump.Newjump();
+            }
+            else
+            {
+                WardJump.jumped = false;
             }
             if (menu.Item("jungleclearkey").GetValue<KeyBind>().Active)
             {
@@ -303,8 +351,17 @@ namespace MasterOfInsec
             {
                 NormalInsec.ResetInsecStats();
             }
+            checkBuffs();
         }
 
+        public static void checkBuffs()
+        {
+            if (checkpred == true)
+            {
+
+                checkpred = false;
+            }
+        }
         public static Obj_AI_Hero GetWInsecTarget()
         {
             return ObjectManager.Get<Obj_AI_Hero>()
@@ -340,8 +397,10 @@ namespace MasterOfInsec
             var damage = Player.GetAutoAttackDamage(target);
 
             if (Q.IsReady())
-                damage += Player.GetSpellDamage(target, SpellSlot.Q)*2;
-            damage += Player.GetAutoAttackDamage(target)*4;
+            {
+                damage += Player.GetSpellDamage(target, SpellSlot.Q);
+                damage += Player.GetSpellDamage(target, SpellSlot.Q) + (target.MaxHealth - target.Health) * 8 / 100;
+            }
             if (E.IsReady())
                 damage += Player.GetSpellDamage(target, SpellSlot.E);
             if (R.IsReady())
@@ -366,6 +425,13 @@ namespace MasterOfInsec
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
+            if (menu.Item("Draw Q%hit").GetValue<bool>())
+            {
+              Drawing.DrawText(10, 150, System.Drawing.Color.Yellow, "Total Q : " +QTotal );
+              Drawing.DrawText(10, 175, System.Drawing.Color.Yellow, "Total Good Q : " + GoodQ);
+              var percent = ((float)GoodQ / (float)QTotal) * 100f;
+            Drawing.DrawText(10, 200, System.Drawing.Color.Yellow,  "Q successful % : " + percent + "%");
+            }
             if (menu.Item("Draw Q Range").GetValue<bool>())
             {
                 Drawing.DrawCircle(Player.Position, Q.Range, Color.Green);
@@ -383,30 +449,13 @@ namespace MasterOfInsec
                 Drawing.DrawCircle(Player.Position, 375f, Color.Green);
             }
             //draw % de vida
-            if (menu.Item("DrawKilleableText").GetValue<bool>())
+            foreach (Obj_AI_Hero hero in HeroManager.Enemies)
             {
-                foreach (
-                    var target in
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(x => x.IsEnemy)
-                            .Where(x => !x.IsDead)
-                            .Where(x => x.IsVisible)
-                            .ToList())
-                {
-                    if (target.Health <= GetComboDamage(Player))
-                    {
-                        if (target.Health <= GetComboDamage(Player) - 300)
-                        {
-                            var wts = Drawing.WorldToScreen(target.Position);
-                            Drawing.DrawText(wts[0] - 35, wts[1] + 10, Color.Yellow, "Finish Him");
-                        }
-                        else
-                        {
-                            var wts = Drawing.WorldToScreen(target.Position);
-                            Drawing.DrawText(wts[0] - 35, wts[1] + 10, Color.Yellow, "Killeable");
-                        }
-                    }
-                }
+              
+                Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+                Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+                dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+                    { Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>(); };
             }
             if (menu.Item("InstaFlashRkey").GetValue<KeyBind>().Active && menu.Item("DrawInsec").GetValue<bool>())
             {
@@ -461,9 +510,22 @@ namespace MasterOfInsec
             }
             var wtsxx = Drawing.WorldToScreen(Player.Position);
             //      Drawing.DrawText(wtsxx[0] - 35, wtsxx[1] + 10, System.Drawing.Color.Yellow, "mode :" +);  
-            //      Drawing.DrawText(wtsxx[0] - 35, wtsxx[1] + 10, System.Drawing.Color.Yellow, "step : " +NormalInsec.Steps);
+             //     Drawing.DrawText(wtsxx[0] - 35, wtsxx[1] + 10, System.Drawing.Color.Yellow, "step : " +NormalInsec.Steps);
         }
 
+        public static void cast(Obj_AI_Hero target,Spell spell)
+        {
+            if (Program.menu.Item("Prediction mode").GetValue<StringList>().SelectedIndex == 1)
+            {
+                spell.CastIfHitchanceEquals(
+                    target,
+                    Combos.Combo.HitchanceCheck(Program.menu.Item("seth").GetValue<Slider>().Value));
+            }
+            else
+            {
+                AwesomePrediction.Awesome.SpellPrediction(spell, target,true);
+            }
+        }
         public static T GetValue<T>(string name)
         {
             return menu.Item(name).GetValue<T>();

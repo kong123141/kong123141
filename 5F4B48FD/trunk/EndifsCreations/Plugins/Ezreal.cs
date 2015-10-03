@@ -40,7 +40,7 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Ezreal.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Ezreal.Combo.E", "Use E").SetValue(true));
                 //combomenu.AddItem(new MenuItem("EC.Ezreal.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }            
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -48,7 +48,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Ezreal.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Ezreal.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Ezreal.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -56,10 +56,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(W.Range, TargetSelector.DamageType.Magical, true);
 
-            var UseQ = config.Item("EC.Ezreal.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Ezreal.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Ezreal.Combo.E").GetValue<bool>();
-            //var UseR = config.Item("EC.Ezreal.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Ezreal.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Ezreal.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Ezreal.Combo.E").GetValue<bool>();
+            //var UseR = Root.Item("EC.Ezreal.Combo.R").GetValue<bool>();
 
             if (Target.IsValidTarget())
             {
@@ -126,7 +126,7 @@ namespace EndifsCreations.Plugins
                         }
                         else if (W.IsReady() && W.IsInRange(Target))
                         {
-                            mySpellcast.LinearVector(Target.Position, W, Target.BoundingRadius);
+                            mySpellcast.PointVector(Target.Position, W, Target.BoundingRadius);
                         }
                     }
                     break;
@@ -145,19 +145,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Ezreal.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Ezreal.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Ezreal.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Ezreal.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Ezreal.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Ezreal.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Ezreal.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Ezreal.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var wtc = Drawing.WorldToScreen(Game.CursorPos);
                 var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Game.CursorPos, R.Range), R.Width);

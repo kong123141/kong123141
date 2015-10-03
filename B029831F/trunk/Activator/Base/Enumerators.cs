@@ -3,15 +3,15 @@
 // any form or by any means, mechanical, electronical or otherwise, is prohibited
 // without the prior written consent of the copyright owner.
 // 
-// Document:	activator/enumerators.cs
-// Date:		01/07/2015
+// Document:	Base/Enumerators.cs
+// Date:		22/09/2015
 // Author:		Robin Kurisu
 #endregion
 
-using System.Collections.Generic;
 using Activator.Items;
 using Activator.Spells;
 using Activator.Summoners;
+using System.Collections.Generic;
 
 namespace Activator.Base
 {

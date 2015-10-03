@@ -80,6 +80,10 @@
                     return new Spell(SpellSlot.E, 400);
                 case "Urgot":
                     return new Spell(SpellSlot.R, 700);
+                case "VelKoz":
+                    return new Spell(SpellSlot.E, 800);
+                case "Morgana":
+                    return new Spell(SpellSlot.Q, 1175);
             }
 
             return null;
@@ -87,20 +91,51 @@
 
         private static void OnCreateObject(GameObject sender, EventArgs args)
         {
+            if (sender.Name == "Rengar_Base_R_Alert" || sender.Name == "Rengar_LeapSound.troy" && sender.IsEnemy)
+            {
+                var oracleLens = ItemData.Oracles_Lens_Trinket.GetItem();
+                var pinkTrinket = ItemData.Greater_Vision_Totem_Trinket.GetItem();
+                var pinkWard = ItemData.Vision_Ward.GetItem();
+
+                foreach (var enemy in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(hero => hero.IsValidTarget(1500) && hero.ChampionName == "Rengar" && hero.IsEnemy))
+                {
+                    if (oracleLens.IsOwned(Entry.Player) && oracleLens.IsReady()
+                        && InitializeMenu.Menu.Item("Protect.Rengar.Lens").GetValue<bool>())
+                    {
+                        oracleLens.Cast(Entry.Player);
+                        return;
+                    }
+
+                    if (pinkWard.IsOwned(Entry.Player) && pinkWard.IsReady()
+                        && InitializeMenu.Menu.Item("Protect.Rengar.Pinkward").GetValue<bool>())
+                    {
+                        pinkWard.Cast(enemy.ServerPosition);
+                        return;
+                    }
+
+                    if (pinkTrinket.IsOwned(Entry.Player) && pinkTrinket.IsReady()
+                        && InitializeMenu.Menu.Item("Protect.Rengar.PinkwardTrinket").GetValue<bool>())
+                    {
+                        pinkTrinket.Cast(enemy.ServerPosition);
+                        return;
+                    }
+                }
+            }
+
             if (sender.Name == "Rengar_LeapSound.troy" && sender.IsEnemy)
             {
                 foreach (var enemy in
                     ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(
-                            hero =>
-                            hero.IsValidTarget(1500) && hero.ChampionName == "Rengar" && !hero.IsVisible && !hero.IsDead)
-                    )
+                        .Where(hero => hero.IsValidTarget(1500) && hero.ChampionName == "Rengar" && !hero.IsDead))
                 {
                     rengarObj = enemy;
                 }
             }
+
             if (rengarObj != null && Entry.Player.Distance(rengarObj, true) < 1000 * 1000
-                && InitializeMenu.Menu.Item("Protect.Rengar").GetValue<bool>())
+                && InitializeMenu.Menu.Item("Protect.Rengar2").GetValue<bool>())
             {
                 AntiRengar();
             }
@@ -176,21 +211,6 @@
 
             try
             {
-                var oracleLens = ItemData.Oracles_Lens_Trinket.GetItem();
-
-                foreach (var enemy in
-                    ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(hero => hero.IsValidTarget(1500) && hero.ChampionName == "Rengar"))
-                {
-                    if (enemy.HasBuff("rengarralertsound") || enemy.HasBuff("RengarRBuff"))
-                    {
-                        if (oracleLens.IsOwned(Entry.Player) && oracleLens.IsReady()
-                            && InitializeMenu.Menu.Item("Protect.Rengar.Lens").GetValue<bool>())
-                        {
-                            oracleLens.Cast(enemy.ServerPosition);
-                        }
-                    }
-                }
             }
             catch (Exception e)
             {
@@ -204,7 +224,8 @@
                    || Entry.Player.ChampionName == "Draven" || Entry.Player.ChampionName == "Ashe"
                    || Entry.Player.ChampionName == "Leesin" || Entry.Player.ChampionName == "Janna"
                    || Entry.Player.ChampionName == "Fiddlesticks" || Entry.Player.ChampionName == "Braum"
-                   || Entry.Player.ChampionName == "Thresh" || Entry.Player.ChampionName == "Urgot";
+                   || Entry.Player.ChampionName == "Thresh" || Entry.Player.ChampionName == "Urgot"
+                   || Entry.Player.ChampionName == "VelKoz" || Entry.Player.ChampionName == "Morgana";
         }
 
         #endregion

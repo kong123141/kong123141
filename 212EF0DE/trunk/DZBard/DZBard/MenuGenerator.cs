@@ -37,9 +37,10 @@ namespace DZBard
                                 hero.ChampionName).SetValue(true));
                         
                     }
-                    harassMenu.AddSubMenu(QMenu);
                 }
+
                 harassMenu.AddItem(new MenuItem("dz191.bard.mixed.useq", "Use Q").SetValue(true));
+                harassMenu.AddSubMenu(QMenu);
                 rootMenu.AddSubMenu(harassMenu);
             }
 

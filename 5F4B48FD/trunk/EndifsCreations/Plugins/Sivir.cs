@@ -37,14 +37,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Sivir.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Sivir.Combo.R", "Use R").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Sivir.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Sivir.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Sivir.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Sivir.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -53,24 +53,24 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Sivir.Farm.Q.Value", "Q More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Sivir.Farm.W.Value", "W More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Sivir.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Sivir.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Sivir.Jungle.W", "Use W").SetValue(true)); 
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Sivir.QPredHitchance", "Q Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
                 miscmenu.AddItem(new MenuItem("EC.Sivir.Misc.E", "E Spellblock").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Sivir.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -78,9 +78,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Sivir.Combo.Q").GetValue<bool>();            
-            var UseR = config.Item("EC.Sivir.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Sivir.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Sivir.Combo.Q").GetValue<bool>();            
+            var UseR = Root.Item("EC.Sivir.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Sivir.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -125,7 +125,7 @@ namespace EndifsCreations.Plugins
         private void Harass()
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            var UseQ = config.Item("EC.Sivir.Harass.Q").GetValue<bool>();            
+            var UseQ = Root.Item("EC.Sivir.Harass.Q").GetValue<bool>();            
             if (target.IsValidTarget() && !Player.IsWindingUp)
             {
                 if (Player.UnderTurret(true) && target.UnderTurret(true)) return;
@@ -137,22 +137,22 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Sivir.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Sivir.Farm.ManaPercent").GetValue<Slider>().Value) return;
             if (Player.UnderTurret(true)) return;
-            if (config.Item("EC.Sivir.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Sivir.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var MinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 var QLine = Q.GetLineFarmLocation(MinionsQ);
-                if (QLine.Position.IsValid() && QLine.MinionsHit > config.Item("EC.Sivir.Farm.Q.Value").GetValue<Slider>().Value)
+                if (QLine.Position.IsValid() && QLine.MinionsHit > Root.Item("EC.Sivir.Farm.Q.Value").GetValue<Slider>().Value)
                 {
                     if (myUtility.IsFacing(Player, QLine.Position.To3D())) Q.Cast(QLine.Position);
                 }
             }
-            if (config.Item("EC.Sivir.Farm.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Sivir.Farm.W").GetValue<bool>() && W.IsReady())
             {
                 var MinionsW = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 if (MinionsW == null) return;
-                if (MinionsW.Count > config.Item("EC.Sivir.Farm.W.Value").GetValue<Slider>().Value)
+                if (MinionsW.Count > Root.Item("EC.Sivir.Farm.W.Value").GetValue<Slider>().Value)
                 {                   
                     W.Cast();
                 }
@@ -165,7 +165,7 @@ namespace EndifsCreations.Plugins
             if (mobs.Count <= 0) return;
             var mob = mobs[0];
             if (mob == null) return;
-            if (config.Item("EC.Sivir.Jungle.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Sivir.Jungle.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (largemobs != null)
                 {
@@ -188,7 +188,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQHitChance()
         {
-            switch (config.Item("EC.Sivir.QPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Sivir.QPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -235,9 +235,9 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && E.IsReady())
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Sivir.Combo.E").GetValue<bool>()) ||
-                    (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && config.Item("EC.Sivir.Harass.E").GetValue<bool>()) ||
-                    (config.Item("EC.Sivir.Misc.E").GetValue<bool>())
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Sivir.Combo.E").GetValue<bool>()) ||
+                    (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && Root.Item("EC.Sivir.Harass.E").GetValue<bool>()) ||
+                    (Root.Item("EC.Sivir.Misc.E").GetValue<bool>())
                     )
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
@@ -265,7 +265,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Sivir.Combo.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.Sivir.Combo.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }
@@ -275,7 +275,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Sivir.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Sivir.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }

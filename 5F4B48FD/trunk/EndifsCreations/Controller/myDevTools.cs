@@ -20,6 +20,9 @@ namespace EndifsCreations.Controller
             Obj_AI_Base.OnBuffAdd += OnBuffAdd;
             Obj_AI_Base.OnBuffRemove += OnBuffRemove;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
+            AttackableUnit.OnDamage += OnDamage;
+            Obj_AI_Hero.OnPlayAnimation += OnPlayAnimation;
+            Obj_AI_Base.OnDoCast += OnDoCast;
         } 
 
         private static Menu Menu;
@@ -47,24 +50,30 @@ namespace EndifsCreations.Controller
                     foreach (var enemy in HeroManager.Enemies)
                     {
                         Blacklist.SubMenu("Enemy").AddItem(new MenuItem("EC.DevTools.Ignore." + enemy.NetworkId, enemy.CharData.BaseSkinName).SetValue(false));
-                    }                    
+                    }
                 }
                 subs.AddSubMenu(Blacklist);
 
                 var mouseover = new Menu("Mouse Over", "MouseOver");
                 {
                     mouseover.AddItem(new MenuItem("EC.DevTools.ObjectCheck", "Object Check").SetValue(false));
-                    mouseover.AddItem(new MenuItem("EC.DevTools.BuffCheck", "Buff Check").SetValue(false));
                     mouseover.AddItem(new MenuItem("EC.DevTools.SpellsCheck", "Spells Check").SetValue(false));
+                    mouseover.AddItem(new MenuItem("EC.DevTools.BuffCheck", "Buff Check").SetValue(false));
+                    
                 }
                 subs.AddSubMenu(mouseover);
                 var capture = new Menu("Capture to Console", "Capture");
                 {
                     capture.AddItem(new MenuItem("EC.DevTools.DebugMode", "Debug Mode").SetValue(false));
-                    capture.AddItem(new MenuItem("EC.DevTools.SpellsProcessCheck", "Spells Process (Self)").SetValue(false));
+                    capture.AddItem(new MenuItem("EC.DevTools.OnDamage", "On Damage").SetValue(false));
+                    capture.AddItem(new MenuItem("dividerasdz", "----------"));                    
+                    capture.AddItem(new MenuItem("EC.DevTools.SpellsProcessCheck", "Spells Process").SetValue(false));
+                    capture.AddItem(new MenuItem("EC.DevTools.SelfBuffAddBuffRemove", "Buff Add/Remove").SetValue(false));
+                    capture.AddItem(new MenuItem("EC.DevTools.OnPlayAnimation", "On Play Animation").SetValue(false));                    
+                    capture.AddItem(new MenuItem("dividerzzxca", "----------"));
                     capture.AddItem(new MenuItem("EC.DevTools.OthersSpellsProcessCheck", "Spells Process (Others)").SetValue(false));
-                    capture.AddItem(new MenuItem("EC.DevTools.SelfBuffAddBuffRemove", "Buff Add/Remove (Self)").SetValue(false));
                     capture.AddItem(new MenuItem("EC.DevTools.OthersBuffAddBuffRemove", "Buff Add/Remove (Others)").SetValue(false));
+                    
                 }
                 subs.AddSubMenu(capture);
             }
@@ -104,12 +113,13 @@ namespace EndifsCreations.Controller
             Once = true;
         }
 
-        private static void SpellsCheck()
+        private static void SpellsCheck(Obj_AI_Hero target)
         {
             if (Once) return;
-            foreach (var x in ObjectManager.Player.Spellbook.Spells)
+            foreach (var x in target.Spellbook.Spells)
             {
                 var s = x.SData;
+                Console.WriteLine("SpellName:" + x.Name);
                 Console.WriteLine("SpellSlot: " + x.Slot + " || TargettingType: " + s.TargettingType);
                 Console.WriteLine("Range: " + s.CastRange + " || Width: " + s.LineWidth + " || Radius: " + s.CastRadius);
                 Console.WriteLine("CastTime: " + s.SpellCastTime + " || Delay: " + s.DelayCastOffsetPercent + " || Missile Speed: " + s.MissileSpeed);
@@ -131,7 +141,13 @@ namespace EndifsCreations.Controller
             }
             if (Menu.Item("EC.DevTools.SpellsCheck").GetValue<bool>())
             {
-                SpellsCheck();
+                if (myUtility.TickCount - LastOrder > 1000)
+                {
+                    ChampionsList = ObjectManager.Get<Obj_AI_Hero>().ToList();
+                    var test = ChampionsList.FirstOrDefault(x => x.Position.Distance(Game.CursorPos) < 150);
+                    SpellsCheck(test);
+                    LastOrder = myUtility.TickCount;
+                }
             }
             else if (!Menu.Item("EC.DevTools.SpellsCheck").GetValue<bool>() && Once)
             {
@@ -198,7 +214,7 @@ namespace EndifsCreations.Controller
             {
                 if (unit.IsMe && !spell.SData.IsAutoAttack())
                 {
-                    Console.WriteLine("------------------------------");
+                    Console.WriteLine("----Spells Process Check----Self----");
                     Console.WriteLine("TargettingType: " + spell.SData.TargettingType.ToString());
                     Console.WriteLine("SData.Name: " + spell.SData.Name);
                     Console.WriteLine("SData.CastRange: " + spell.SData.CastRange);
@@ -218,8 +234,8 @@ namespace EndifsCreations.Controller
             if (Menu.Item("EC.DevTools.OthersSpellsProcessCheck").GetValue<bool>())
             {
                 if (unit is Obj_AI_Hero && !unit.IsMe && !spell.SData.IsAutoAttack() && !Menu.Item("EC.DevTools.Ignore." + unit.NetworkId).GetValue<bool>())
-                {                   
-                    Console.WriteLine("------------------------------");
+                {
+                    Console.WriteLine("----Spells Process Check----Others----");
                     Console.WriteLine("Caster: " + unit.CharData.BaseSkinName);
                     Console.WriteLine("SData.Name: " + spell.SData.Name);
                     
@@ -330,6 +346,42 @@ namespace EndifsCreations.Controller
                     Console.WriteLine("[" + sender.Name + "] " + " Buff Removed: " + args.Buff.Name);
                 }
             }
+        }
+        private static void OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
+        {
+            if (sender.Name.Contains("Minion")) return;
+            if (Menu.Item("EC.DevTools.OnDamage").GetValue<bool>())
+            {
+                Console.WriteLine("----On Damage----");
+                Console.WriteLine("Sender: " + sender.Name);
+                Console.WriteLine("Type: " + args.Damage.GetType());
+                Console.WriteLine("SourceNetworkId: " + args.SourceNetworkId);
+                Console.WriteLine("TargetNetworkId: " + args.TargetNetworkId);
+                Console.WriteLine("------------------------------");
+                //Console.WriteLine("args.Type:" + args.Type); //don't know what the numbers represent
+                //Console.WriteLine("args.HitType:" + args.HitType); //always normal
+            }
+        }
+        private static void OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
+        {
+            if (Menu.Item("EC.DevTools.OnPlayAnimation").GetValue<bool>())
+            {
+                if (sender.IsMe && !args.Animation.Contains("Idle"))
+                {
+                    Console.WriteLine("[Animation]: " + args.Animation);
+                }
+            }
+        }
+        private static void OnDoCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            //Testing new API
+            /*
+            if (sender.IsMinion) return;            
+            DebugMode("sender.Name: " + sender.Name);
+            DebugMode("sender.Type: " + sender.Type);
+            DebugMode("args.SData.Name: " + args.SData.Name);
+            DebugMode("args.Target.Name: " + args.Target.Name);
+             */ 
         }
     }
 }

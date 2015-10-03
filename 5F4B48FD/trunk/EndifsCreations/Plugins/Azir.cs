@@ -47,7 +47,7 @@ namespace EndifsCreations.Plugins
             {
                 combomenu.AddItem(new MenuItem("EC.Azir.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Azir.Combo.W", "Use W").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -55,13 +55,13 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Azir.Farm.W", "Use W").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Azir.Farm.Q.Value", "Q More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Azir.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Azir.Draw.Q", "Q Range").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Azir.DrawSS", "Soldiers AA Range").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -69,8 +69,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range + 250, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Azir.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Azir.Combo.W").GetValue<bool>();
+            var UseQ = Root.Item("EC.Azir.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Azir.Combo.W").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -95,11 +95,11 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Azir.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Azir.Farm.ManaPercent").GetValue<Slider>().Value) return;
             if (Player.UnderTurret(true)) return;
             var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range).OrderBy(x => x.MaxHealth).ToList();
             if (minions == null) return;
-            if (config.Item("EC.Azir.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Azir.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 Vector3 pos;
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
@@ -126,7 +126,7 @@ namespace EndifsCreations.Plugins
                     }
                 }
             }
-            if (config.Item("EC.Azir.Farm.W").GetValue<bool>() && W.IsReady() && W.Instance.Ammo > 0)
+            if (Root.Item("EC.Azir.Farm.W").GetValue<bool>() && W.IsReady() && W.Instance.Ammo > 0)
             {
                 Vector3 pos;
                 if (minions.Count >= 5) //use 3

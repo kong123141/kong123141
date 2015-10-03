@@ -95,6 +95,8 @@ namespace ElRengar
             hydra = new Items.Item(3074, 400f);
             ignite = Player.GetSpellSlot("summonerdot");
 
+            Game.PrintChat(
+                    "[00:00] <font color='#f9eb0b'>New version!</font> There is a new Rengar version, ElRengar:Revamped. Make sure to download that one. Much better.");
             Notifications.AddNotification(String.Format("ElRengar by jQuery v{0}", ScriptVersion), 6000);
             spells[Spells.E].SetSkillshot(0.25f, 70f, 1500f, true, SkillshotType.SkillshotLine);
 

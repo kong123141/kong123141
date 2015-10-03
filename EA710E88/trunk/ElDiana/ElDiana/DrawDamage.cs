@@ -1,33 +1,56 @@
-﻿using System;
-using System.Linq;
-using LeagueSharp;
-using LeagueSharp.Common;
-using SharpDX;
-using Color = System.Drawing.Color;
-
-namespace ElDiana
+﻿namespace ElDiana
 {
-    class DrawDamage //by xSalice
-    {
-        public delegate float DamageToUnitDelegate(Obj_AI_Hero hero);
+    using System;
+    using System.Drawing;
+    using System.Linq;
 
-        private const int XOffset = 10;
-        private const int YOffset = 20;
-        private const int Width = 103;
+    using LeagueSharp;
+    using LeagueSharp.Common;
+
+    internal class DrawDamage //by xSalice
+    {
+        #region Constants
+
         private const int Height = 8;
 
+        private const int Width = 103;
+
+        private const int XOffset = 10;
+
+        private const int YOffset = 20;
+
+        #endregion
+
+        #region Static Fields
+
         public static Color Color = Color.Lime;
-        public static Color FillColor = Color.Goldenrod;
-        public static bool Fill = true;
 
         public static bool Enabled = true;
-        private static DamageToUnitDelegate _damageToUnit;
+
+        public static bool Fill = true;
+
+        public static Color FillColor = Color.Goldenrod;
 
         private static readonly Render.Text Text = new Render.Text(0, 0, "", 14, SharpDX.Color.Red, "monospace");
 
+        private static DamageToUnitDelegate _damageToUnit;
+
+        #endregion
+
+        #region Delegates
+
+        public delegate float DamageToUnitDelegate(Obj_AI_Hero hero);
+
+        #endregion
+
+        #region Public Properties
+
         public static DamageToUnitDelegate DamageToUnit
         {
-            get { return _damageToUnit; }
+            get
+            {
+                return _damageToUnit;
+            }
 
             set
             {
@@ -38,6 +61,10 @@ namespace ElDiana
                 _damageToUnit = value;
             }
         }
+
+        #endregion
+
+        #region Methods
 
         private static void Drawing_OnDraw(EventArgs args)
         {
@@ -67,15 +94,17 @@ namespace ElDiana
 
                 if (Fill)
                 {
-                    float differenceInHP = xPosCurrentHp - xPosDamage;
+                    var differenceInHP = xPosCurrentHp - xPosDamage;
                     var pos1 = barPos.X + 9 + (107 * percentHealthAfterDamage);
 
-                    for (int i = 0; i < differenceInHP; i++)
+                    for (var i = 0; i < differenceInHP; i++)
                     {
                         Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, FillColor);
                     }
                 }
             }
         }
+
+        #endregion
     }
 }

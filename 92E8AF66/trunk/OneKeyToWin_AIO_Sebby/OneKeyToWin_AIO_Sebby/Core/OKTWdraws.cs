@@ -17,6 +17,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         public Spell Q, W, E, R, DrawSpell;
         private static Font Tahoma13, Tahoma13B, TextBold;
+        private float spellFarmTimer = 0;
 
         public void LoadOKTW()
         {
@@ -37,6 +38,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("HpBar", "Dmg indicators BAR OKTW© style").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("SS", "SS notification").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("showWards", "Show hidden objects , wards BETA").SetValue(true));
+            
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("spellFarm", "OKTW SPELLS FARM (°)", true).SetValue(true));
+            Config.Item("spellFarm", true).Permashow(true);
 
             Tahoma13B = new Font( Drawing.Direct3DDevice, new FontDescription
                { FaceName = "Tahoma", Height = 14, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
@@ -52,8 +58,53 @@ namespace OneKeyToWin_AIO_Sebby.Core
             W = new Spell(SpellSlot.W);
             R = new Spell(SpellSlot.R);
 
+            
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += OnDraw;
+            Drawing.OnEndScene += Drawing_OnEndScene;
+            Game.OnWndProc += Game_OnWndProc;
+            
+        }
+
+        private void Game_OnWndProc(WndEventArgs args)
+        {
+            if (args.Msg == 520 && Config.Item("spellFarm", true) != null)
+            {
+                if (!Config.Item("spellFarm", true).GetValue<bool>())
+                {
+                    Config.Item("spellFarm", true).SetValue<bool>(true);
+                    spellFarmTimer = Game.Time;
+
+                    if(Config.Item("farmQ", true) != null)
+                        Config.Item("farmQ", true).SetValue<bool>(true);
+
+                    if (Config.Item("farmW", true) != null)
+                        Config.Item("farmW", true).SetValue<bool>(true);
+
+                    if (Config.Item("farmE", true) != null)
+                        Config.Item("farmE", true).SetValue<bool>(true);
+
+                    if (Config.Item("farmR", true) != null)
+                        Config.Item("farmR", true).SetValue<bool>(true);
+                }
+                else
+                {
+                    Config.Item("spellFarm", true).SetValue<bool>(false);
+                    spellFarmTimer = Game.Time;
+
+                    if (Config.Item("farmQ", true) != null)
+                        Config.Item("farmQ", true).SetValue<bool>(false);
+
+                    if (Config.Item("farmW", true) != null)
+                        Config.Item("farmW", true).SetValue<bool>(false);
+
+                    if (Config.Item("farmE", true) != null)
+                        Config.Item("farmE", true).SetValue<bool>(false);
+
+                    if (Config.Item("farmR", true) != null)
+                        Config.Item("farmR", true).SetValue<bool>(false);
+                }
+            }
         }
 
         private void Game_OnUpdate(EventArgs args)
@@ -86,11 +137,77 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
         }
 
+        private void Drawing_OnEndScene(EventArgs args)
+        {
+            if (Config.Item("showWards").GetValue<bool>())
+            {
+                foreach (var obj in OKTWward.HiddenObjList)
+                {
+                    if (obj.type == 0)
+                    {
+                        Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.White, 3, 20, true);
+                    }
+                    if (obj.type == 1)
+                    {
+                        Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.Yellow, 3, 20,true);
+                    }
+
+                    if (obj.type == 2)
+                    {
+                        Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.HotPink, 3, 20,true);
+                    }
+
+                    if (obj.type == 3)
+                    {
+                        Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.Orange, 3, 20,true);
+                    }
+                }
+            }   
+        }
+
         private void OnDraw(EventArgs args)
         {
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
+            if (Config.Item("showWards").GetValue<bool>())
+            {
+                var circleSize = 60;
+                foreach (var obj in OKTWward.HiddenObjList)
+                {
+                    if (obj.type == 0)
+                    {
+                        Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.White, 5, 1);
+                        DrawFontTextMap(Tahoma13, "" + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.White);
+                    }
+                    if (obj.type == 1)
+                    {
+                        Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.Yellow, 5, 1);
+                        DrawFontTextMap(Tahoma13, "" + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Yellow);
+                    }
+
+                    if (obj.type == 2)
+                    {
+                        Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.HotPink, 5, 1);
+                        DrawFontTextMap(Tahoma13, "VW", obj.pos, SharpDX.Color.HotPink);
+                    }
+                    if (obj.type == 3)
+                    {
+                        Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.Orange, 5, 1);
+                        DrawFontTextMap(Tahoma13, "! " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Orange);
+                    }
+
+                }
+            }
+
+            if (Config.Item("spellFarm", true) != null && spellFarmTimer + 1 > Game.Time)
+            {
+                if (Config.Item("spellFarm", true).GetValue<bool>())
+                    DrawFontTextScreen(TextBold, "SPELLS FARM ON", Drawing.Width * 0.5f, Drawing.Height * 0.4f, SharpDX.Color.GreenYellow);
+                else
+                    DrawFontTextScreen(TextBold, "SPELLS FARM OFF", Drawing.Width * 0.5f , Drawing.Height * 0.4f, SharpDX.Color.OrangeRed);
+            }
             
+
             bool blink = true;
 
             if ((int)(Game.Time * 10) % 2 == 0)

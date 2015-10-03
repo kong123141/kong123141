@@ -46,14 +46,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Urgot.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Urgot.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Urgot.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Urgot.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Urgot.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Urgot.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -61,27 +61,27 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Urgot.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Urgot.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Urgot.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Urgot.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Urgot.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Urgot.QPredHitchance", "Q Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
                 miscmenu.AddItem(new MenuItem("EC.Urgot.Misc.W", "W Shields").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Urgot.Muramana", "Muramana").SetValue(new Slider(50)));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Urgot.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Urgot.Draw.Q2", "Q2").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Urgot.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -89,8 +89,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q2.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Urgot.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Urgot.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Urgot.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Urgot.Combo.E").GetValue<bool>();
             if (UseQ && Q.IsReady())
             {
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && x.IsTargetable);
@@ -113,7 +113,7 @@ namespace EndifsCreations.Plugins
                     }                    
                     if (UseE && E.IsReady())
                     {
-                        mySpellcast.CircularAoe(Target, E, HitChance.High);
+                        mySpellcast.CircularAoe(Target, E, HitChance.High, E.Range, 120);
                     }
                 }
                 catch { }
@@ -122,10 +122,10 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Urgot.Harass.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Urgot.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Urgot.Harass.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Urgot.Harass.E").GetValue<bool>();
 
-            if (UseQ && Q.IsReady() && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (UseQ && Q.IsReady() && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 var corrode = HeroManager.Enemies.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) < Q2.Range && x.HasBuff("urgotcorrosivedebuff")).OrderBy(i => i.Health).FirstOrDefault();
                 if (corrode != null && corrode.IsValidTarget())
@@ -138,19 +138,19 @@ namespace EndifsCreations.Plugins
                     if (targetQ != null && targetQ.IsValidTarget()) CastQ(targetQ);
                 }
             }
-            if (UseE && E.IsReady() && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (UseE && E.IsReady() && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 var targetE = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (targetE != null && targetE.IsValidTarget())
                 {
-                    mySpellcast.CircularAoe(targetE, E, HitChance.High);
+                    mySpellcast.CircularAoe(targetE, E, HitChance.High,E.Range,120);
                 }
             }
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Urgot.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Urgot.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Urgot.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Urgot.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
             {
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 if (minionQ == null) return;
@@ -165,11 +165,11 @@ namespace EndifsCreations.Plugins
                     Q.CastIfHitchanceEquals(nmQ, HitChance.High);
                 }
             }
-            if (config.Item("EC.Urgot.Farm.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Urgot.Farm.E").GetValue<bool>() && E.IsReady())
             {
                 var minionE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range + E.Width);
                 var ECircular = E.GetCircularFarmLocation(minionE);
-                if (ECircular.MinionsHit > config.Item("EC.Urgot.Farm.E.Value").GetValue<Slider>().Value)
+                if (ECircular.MinionsHit > Root.Item("EC.Urgot.Farm.E.Value").GetValue<Slider>().Value)
                 {
                     E.Cast(ECircular.Position);
                 }
@@ -183,7 +183,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Urgot.Jungle.Q").GetValue<bool>() && Q.IsReady())
+                if (Root.Item("EC.Urgot.Jungle.Q").GetValue<bool>() && Q.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -196,7 +196,7 @@ namespace EndifsCreations.Plugins
                         else Q.CastIfHitchanceEquals(mob, HitChance.High);
                     }
                 }
-                if (config.Item("EC.Urgot.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Urgot.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null)
                     {
@@ -224,7 +224,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQHitChance()
         {
-            switch (config.Item("EC.Urgot.QPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Urgot.QPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -259,7 +259,7 @@ namespace EndifsCreations.Plugins
             {
                 case myOrbwalker.OrbwalkingMode.None:
                     myUtility.Reset();
-                    if (Player.HasBuff("Muramana") || (myUtility.PlayerManaPercentage < config.Item("EC.Urgot.Muramana").GetValue<Slider>().Value))
+                    if (Player.HasBuff("Muramana") || (myUtility.PlayerManaPercentage < Root.Item("EC.Urgot.Muramana").GetValue<Slider>().Value))
                     {
                         if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                     }
@@ -284,7 +284,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnBeforeAttack(myOrbwalker.BeforeAttackEventArgs args)
         {
-            if (Player.IsChannelingImportantSpell() || myUtility.TickCount - LastR <= 0.25f)
+            if (Player.IsChannelingImportantSpell() || myUtility.TickCount - LastR <= 0.5f)
             {
                 args.Process = false;
             }
@@ -292,14 +292,14 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Urgot.Combo.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.Urgot.Combo.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }                  
                 }
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Urgot.Harass.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.Urgot.Harass.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }
@@ -322,7 +322,7 @@ namespace EndifsCreations.Plugins
                         if (args.Target is Obj_AI_Hero)
                         {
                             var x = (Obj_AI_Hero)args.Target;
-                            if (x.HasBuff("urgotcorrosivedebuff") && ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > config.Item("EC.Urgot.Muramana").GetValue<Slider>().Value)
+                            if (x.HasBuff("urgotcorrosivedebuff") && ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > Root.Item("EC.Urgot.Muramana").GetValue<Slider>().Value)
                             {
                                 if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                             }
@@ -336,7 +336,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if (config.Item("EC.Urgot.Misc.W").GetValue<bool>() && W.IsReady())
+                if (Root.Item("EC.Urgot.Misc.W").GetValue<bool>() && W.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -364,19 +364,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Urgot.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Urgot.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Urgot.Draw.Q2").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Urgot.Draw.Q2").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q2.Range, Color.White);
             }
-            if (config.Item("EC.Urgot.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Urgot.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Urgot.Draw.E").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Urgot.Draw.E").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

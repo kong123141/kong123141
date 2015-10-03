@@ -42,19 +42,19 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Karma.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Karma.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Karma.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Karma.Misc.W", "W Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Karma.Misc.E", "E Shields").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Karma.UseESupport", "E Supports").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Karma.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -62,8 +62,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Karma.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Karma.Combo.W").GetValue<bool>();
+            var UseQ = Root.Item("EC.Karma.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Karma.Combo.W").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -127,7 +127,7 @@ namespace EndifsCreations.Plugins
         {      
             if (unit is Obj_AI_Hero && unit.IsAlly && !unit.IsMe)
             {
-                if (config.Item("EC.Karma.UseESupport").GetValue<bool>())
+                if (Root.Item("EC.Karma.UseESupport").GetValue<bool>())
                 {
                     if (spell.Target is Obj_AI_Hero && spell.SData.IsAutoAttack() && spell.Target.IsEnemy)
                     {
@@ -137,7 +137,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if (config.Item("EC.Karma.Misc.E").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Karma.Combo.E").GetValue<bool>()) && E.IsReady())
+                if (Root.Item("EC.Karma.Misc.E").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Karma.Combo.E").GetValue<bool>()) && E.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -171,7 +171,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Karma.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Karma.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= W.Range)
                 {
@@ -187,7 +187,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Karma.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Karma.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {                
                 if (Player.HasBuff("KarmaMantra"))
                 {

@@ -13,6 +13,7 @@ namespace PRADA_Vayne.MyLogic.Q
     {
         public static void AfterAttack(AttackableUnit sender, AttackableUnit target)
         {
+            if (!Program.Q.IsReady()) return;
             if (sender.IsMe && target.IsValid<Obj_AI_Hero>())
             {
                 var tg = target as Obj_AI_Hero;
@@ -32,10 +33,13 @@ namespace PRADA_Vayne.MyLogic.Q
             }
             if (sender.IsMe && target.IsValid<Obj_AI_Minion>())
             {
-                if (Program.Orbwalker.ActiveMode == MyOrbwalker.OrbwalkingMode.LaneClear)
+                if (Program.LaneClearMenu.Item("QWaveClear").GetValue<bool>() &&
+                       Program.Orbwalker.ActiveMode == MyOrbwalker.OrbwalkingMode.LaneClear)
                 {
                     var meleeMinion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(m => m.IsMelee);
-                    if (Program.LaneClearMenu.Item("QWaveClear").GetValue<bool>() && ObjectManager.Player.ManaPercent >= Program.LaneClearMenu.Item("QWaveClearMana").GetValue<Slider>().Value && meleeMinion.IsValidTarget())
+                    if (ObjectManager.Player.ManaPercent >=
+                        Program.LaneClearMenu.Item("QWaveClearMana").GetValue<Slider>().Value &&
+                        meleeMinion.IsValidTarget())
                     {
                         if (ObjectManager.Player.Level == 1)
                         {
@@ -49,6 +53,26 @@ namespace PRADA_Vayne.MyLogic.Q
                     if (target.Name.Contains("SRU_"))
                     {
                         Tumble.Cast(((Obj_AI_Base)target).GetTumblePos());
+                    }
+                }
+                if (Program.LaneClearMenu.Item("QLastHit").GetValue<bool>() &&
+                    ObjectManager.Player.ManaPercent >=
+                    Program.LaneClearMenu.Item("QLastHitMana").GetValue<Slider>().Value &&
+                    Program.Orbwalker.ActiveMode == MyOrbwalker.OrbwalkingMode.LastHit ||
+                    Program.Orbwalker.ActiveMode == MyOrbwalker.OrbwalkingMode.LaneClear)
+                {
+                    if (ObjectManager.Get<Obj_AI_Minion>()
+                            .Where(
+                                m =>
+                                    MyOrbwalker.InAutoAttackRange(m)).Count(m =>
+                                    m.Health <= ObjectManager.Player.GetAutoAttackDamage(m)) > 2)
+                    {
+                        var cursorPos = Game.CursorPos;
+                        if (!cursorPos.IsDangerousPosition())
+                        {
+                            Program.Q.Cast(ObjectManager.Player.GetTumblePos());
+                            return;
+                        }
                     }
                 }
             }

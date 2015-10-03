@@ -47,18 +47,18 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Sion.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Sion.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Sion.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Sion.Misc.W", "W Shields").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Sion.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Sion.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -66,10 +66,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Sion.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Sion.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Sion.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Sion.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Sion.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Sion.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Sion.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Sion.Combo.Items").GetValue<bool>();
             if (UseQ)
             {
                 if (Q.IsCharging && myUtility.TickCount - LastQ > 1000)
@@ -77,23 +77,19 @@ namespace EndifsCreations.Plugins
                     Q.Cast();
                 }
             }
-            if (UseW && W.IsReady())
+            if (UseW && W.IsReady() && myUtility.TickCount - LastW > 3000 && Player.HasBuff("sionwshieldstacks"))
             {
-                if (Player.CountEnemiesInRange(500) > 0 && myUtility.TickCount - LastW > 3000 && Player.HasBuff("sionwshieldstacks"))
-                {
-                    W.Cast();
-                }
+                mySpellcast.PointBlank(null, W, 500);
             }
             if (UseE && E.IsReady())
             {
-                if (!Target.IsValidTarget())
+                if (Target == null || !Target.IsValidTarget())
                 {
                     mySpellcast.Extension(null, E, E.Range, E2.Range);
                 }
             }
-            if (Target.IsValidTarget())
-            {
-                if (Target.InFountain()) return;                
+            if (Target != null && Target.IsValidTarget())
+            {           
                 try
                 {
                     if (myUtility.ImmuneToDeath(Target)) return;
@@ -176,7 +172,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if ((config.Item("EC.Sion.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Sion.Combo.W").GetValue<bool>())) && W.IsReady())
+                if ((Root.Item("EC.Sion.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Sion.Combo.W").GetValue<bool>())) && W.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -204,11 +200,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Sion.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Sion.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Sion.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Sion.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
                 Render.Circle.DrawCircle(Player.Position, E2.Range, Color.Cyan);

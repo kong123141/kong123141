@@ -44,7 +44,7 @@ namespace Activator.Spells.Evaders
             {
                 if (hero.Player.NetworkId == Activator.Player.NetworkId)
                 {
-                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                         continue;
 
                     if (Menu.Item("use" + Name + "norm").GetValue<bool>())

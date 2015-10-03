@@ -36,12 +36,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Zyra.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Zyra.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Zyra.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Zyra.Misc.E", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -49,16 +49,16 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Zyra.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Zyra.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Zyra.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         private void Combo()
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Zyra.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Zyra.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Zyra.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Zyra.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Zyra.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Zyra.Combo.E").GetValue<bool>();
             if (AllSeeds.Any())
             {
                 if (UseQ && Q.IsReady())
@@ -67,7 +67,7 @@ namespace EndifsCreations.Plugins
                     {
                         if (x.CountEnemiesInRange(750) > 0)
                         {
-                            mySpellcast.LinearVector(x.ServerPosition, Q, 125);
+                            mySpellcast.PointVector(x.ServerPosition, Q, 125);
                         }
                     }
                 }
@@ -77,7 +77,7 @@ namespace EndifsCreations.Plugins
                     {
                         if (x.CountEnemiesInRange(400) > 0)
                         {
-                            mySpellcast.LinearVector(x.ServerPosition, E, 125);
+                            mySpellcast.PointVector(x.ServerPosition, E, 125);
                         }
                     }
                 }
@@ -90,17 +90,17 @@ namespace EndifsCreations.Plugins
                     if (myUtility.ImmuneToMagic(Target)) return;
                     if (UseQ && Q.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, Q, HitChance.High);
+                        mySpellcast.CircularAoe(Target, Q, HitChance.High, Q.Range, 150);
                     }
                     if (UseW && W.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
                         if (myUtility.MovementDisabled(Target))
                         {
-                            mySpellcast.CircularPrecise(Target, W, HitChance.High);
+                            mySpellcast.CircularPrecise(Target, W, HitChance.High, W.Range, 0,0,0,0);
                         }
                         else if (myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                         {
-                            mySpellcast.CircularPrecise(Target, W, HitChance.High, 10, 50, 50);
+                            mySpellcast.CircularPrecise(Target, W, HitChance.High, W.Range, 0, 10, 50, 50);
                         }
                     }
                     if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
@@ -169,31 +169,31 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Zyra.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Zyra.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
                     if (myUtility.ImmuneToMagic(gapcloser.Sender) || myUtility.ImmuneToCC(gapcloser.Sender)) return;
-                    Utility.DelayAction.Add(myHumazier.ReactionDelay, () => mySpellcast.LinearVector(gapcloser.End, E));                   
+                    Utility.DelayAction.Add(myHumazier.ReactionDelay, () => mySpellcast.PointVector(gapcloser.End, E));                   
                 }
             }
         }
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Zyra.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Zyra.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Zyra.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Zyra.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Zyra.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Zyra.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Zyra.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Zyra.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
                 var tomouse = Player.ServerPosition.Extend(Game.CursorPos, Vector3.Distance(Player.ServerPosition, Game.CursorPos));

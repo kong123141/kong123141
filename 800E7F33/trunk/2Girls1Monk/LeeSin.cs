@@ -125,7 +125,7 @@ namespace two_girls_one_monk
                 {
                     W.Cast(Player, true);
                 }
-                else if ((Player.HasBuff("BlindMonkWOne", true) && (Player.HealthPercent <= 65)))
+                else if ((Player.HasBuff("BlindMonkWOne", true) && (Player.HealthPercent <= 65) && Player.Distance(LockedTarget) <= 375))
                     W.Cast();
             }
             if(inDistance(LockedTarget.Position.To2D(), Player.ServerPosition.To2D(), 375))

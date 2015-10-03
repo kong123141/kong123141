@@ -50,7 +50,7 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Nidalee.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Nidalee.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Nidalee.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }            
 
             var drawmenu = new Menu("Draw", "Draw");
@@ -58,7 +58,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Nidalee.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nidalee.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nidalee.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -69,11 +69,11 @@ namespace EndifsCreations.Plugins
                 Human ? TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical) :           
                 Hunted != null && Hunted.IsValidTarget() ? Hunted : TargetSelector.GetTarget(W2.Range, TargetSelector.DamageType.Magical);                                               
 
-            var UseQ = config.Item("EC.Nidalee.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Nidalee.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Nidalee.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Nidalee.Combo.R").GetValue<bool>();            
-            var CastItems = config.Item("EC.Nidalee.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Nidalee.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Nidalee.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Nidalee.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Nidalee.Combo.R").GetValue<bool>();            
+            var CastItems = Root.Item("EC.Nidalee.Combo.Items").GetValue<bool>();
             if (Human)
             {
                 if (UseE && E.IsReady())
@@ -110,7 +110,7 @@ namespace EndifsCreations.Plugins
                         }
                         if (UseW && W.IsReady())
                         {
-                            mySpellcast.CircularPrecise(Target, W, HitChance.High);
+                            mySpellcast.CircularPrecise(Target, W, HitChance.High, W.Range, 50);
                         }
                         if (UseR && R.IsReady())
                         {
@@ -234,14 +234,14 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Nidalee.Combo.Q").GetValue<bool>())
+                    if (Root.Item("EC.Nidalee.Combo.Q").GetValue<bool>())
                     {
                         if (Cougar)
                         {
                             Q2.Cast();
                         }
                     }
-                    if (config.Item("EC.Nidalee.Combo.E").GetValue<bool>())
+                    if (Root.Item("EC.Nidalee.Combo.E").GetValue<bool>())
                     {
                         if (Human)
                         {
@@ -258,7 +258,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Nidalee.Combo.E").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.Nidalee.Combo.E").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
                     {
                         if (Cougar)
                         {
@@ -273,14 +273,14 @@ namespace EndifsCreations.Plugins
             if (Player.IsDead) return;
             if (Human)
             {
-                if (config.Item("EC.Nidalee.Draw.Q").GetValue<bool>() && Q.Level > 0)
+                if (Root.Item("EC.Nidalee.Draw.Q").GetValue<bool>() && Q.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
                 }
             }
             if (Cougar)
             {
-                if (config.Item("EC.Nidalee.Draw.W").GetValue<bool>() && W2.Level > 0)
+                if (Root.Item("EC.Nidalee.Draw.W").GetValue<bool>() && W2.Level > 0)
                 {
                     if (W2.Range >= 750)
                     {

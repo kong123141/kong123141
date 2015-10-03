@@ -41,20 +41,20 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Jinx.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Jinx.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Jinx.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Jinx.Misc.E", "E Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Jinx.Misc.E2", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Jinx.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Jinx.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Jinx.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -62,8 +62,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(W.Range, TargetSelector.DamageType.Physical);
 
-            var UseW = config.Item("EC.Jinx.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Jinx.Combo.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Jinx.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Jinx.Combo.E").GetValue<bool>();
             
             if (Target.IsValidTarget())
             {
@@ -131,7 +131,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Jinx.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Jinx.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range)
                 {
@@ -142,7 +142,7 @@ namespace EndifsCreations.Plugins
         }        
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Jinx.Misc.E2").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Jinx.Misc.E2").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -157,15 +157,12 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (Player.HasBuff("JinxQ"))
+                    if (Root.Item("EC.Jinx.Combo.Q").GetValue<bool>() && Player.HasBuff("JinxQ"))
                     {
-                        if (config.Item("EC.Jinx.Combo.Q").GetValue<bool>())
+                        if (args.Target.CountEnemiesInRange(300) <= 1 && Vector3.Distance(Player.ServerPosition, args.Target.ServerPosition) <= 525)
                         {
-                            if (args.Target.CountEnemiesInRange(300) <= 1 && Vector3.Distance(Player.ServerPosition, args.Target.ServerPosition) <= 525)
-                            {
-                                Q.Cast();
-                            }
-                        }
+                            Q.Cast();
+                        } 
                     }
                 }
             }
@@ -173,16 +170,16 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Jinx.Draw.Q").GetValue<bool>() && Q.Level > 0 )
+            if (Root.Item("EC.Jinx.Draw.Q").GetValue<bool>() && Q.Level > 0 )
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
 
-            if (config.Item("EC.Jinx.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Jinx.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Jinx.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Jinx.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

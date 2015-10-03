@@ -39,31 +39,31 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.MasterYi.Combo.R", "Use R").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.MasterYi.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.MasterYi.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.MasterYi.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.MasterYi.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
                 laneclearmenu.AddItem(new MenuItem("EC.MasterYi.Farm.Q", "Use Q").SetValue(false));
                 laneclearmenu.AddItem(new MenuItem("EC.MasterYi.QFarmType", "Q").SetValue(new StringList(new[] { "Any", "Furthest" })));
                 laneclearmenu.AddItem(new MenuItem("EC.MasterYi.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.MasterYi.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.MasterYi.Jungle.E", "Use E").SetValue(true)); 
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.MasterYi.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -71,9 +71,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range * 2, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.MasterYi.Combo.Q").GetValue<bool>();
-            var UseR = config.Item("EC.MasterYi.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.MasterYi.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.MasterYi.Combo.Q").GetValue<bool>();
+            var UseR = Root.Item("EC.MasterYi.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.MasterYi.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -82,7 +82,7 @@ namespace EndifsCreations.Plugins
                 {
                     if (UseQ && Q.IsReady())
                     {
-                        if (Target.UnderTurret(true) && !config.Item("EC.MasterYi.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.UnderTurret(true) && !Root.Item("EC.MasterYi.Combo.Dive").GetValue<bool>()) return;
                         if (Q.IsKillable(Target)) mySpellcast.Unit(Target, Q);
                         else if (!Orbwalking.InAutoAttackRange(Target))
                         {
@@ -135,7 +135,7 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.MasterYi.Harass.Q").GetValue<bool>();
+            var UseQ = Root.Item("EC.MasterYi.Harass.Q").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (target.IsValidTarget() )
             {
@@ -147,13 +147,13 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.MasterYi.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.MasterYi.Farm.ManaPercent").GetValue<Slider>().Value) return;
             var minions = MinionManager.GetMinions(Player.ServerPosition, Player.AttackRange * 2, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None);
-            if (minions.Count >= 3 && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (minions.Count >= 3 && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 myItemManager.UseItems(2, null);
             }
-            if (config.Item("EC.MasterYi.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.MasterYi.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 if (allMinionsQ == null) return;
@@ -164,7 +164,7 @@ namespace EndifsCreations.Plugins
                 }
                 else
                 {
-                    switch (config.Item("EC.MasterYi.QFarmType").GetValue<StringList>().SelectedIndex)
+                    switch (Root.Item("EC.MasterYi.QFarmType").GetValue<StringList>().SelectedIndex)
                     {
                         case 0:
                             var AnyQ = allMinionsQ.OrderByDescending(i => i.Distance(Player)).FirstOrDefault(x => !x.UnderTurret(true));
@@ -194,7 +194,7 @@ namespace EndifsCreations.Plugins
             if (mobs.Count <= 0) return;
             var mob = mobs[0];
             if (mob == null) return;
-            if (config.Item("EC.MasterYi.Jungle.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.MasterYi.Jungle.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (largemobs != null)
                 {
@@ -242,7 +242,7 @@ namespace EndifsCreations.Plugins
             if (args.Target is Obj_AI_Minion && args.Target.Team == GameObjectTeam.Neutral)
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.JungleClear &&
-                    config.Item("EC.MasterYi.Jungle.E").GetValue<bool>() && E.IsReady() &&
+                    Root.Item("EC.MasterYi.Jungle.E").GetValue<bool>() && E.IsReady() &&
                     !args.Target.Name.Contains("Mini") &&
                     !Player.IsWindingUp &&
                     Orbwalking.InAutoAttackRange(args.Target))
@@ -254,7 +254,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.MasterYi.Combo.E").GetValue<bool>() && E.IsReady())
+                    if (Root.Item("EC.MasterYi.Combo.E").GetValue<bool>() && E.IsReady())
                     {
                         E.Cast();
                     }
@@ -276,7 +276,7 @@ namespace EndifsCreations.Plugins
                 }
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.MasterYi.Combo.Items").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.MasterYi.Combo.Items").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
                     {
                         myItemManager.UseItems(2, null);
                     }
@@ -285,7 +285,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R && config.Item("EC.MasterYi.Combo.Items").GetValue<bool>())
+            if (args.Slot == SpellSlot.R && Root.Item("EC.MasterYi.Combo.Items").GetValue<bool>())
             {
                 Utility.DelayAction.Add(myHumazier.ReactionDelay, () => myItemManager.UseGhostblade());
             }
@@ -293,7 +293,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.MasterYi.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.MasterYi.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }

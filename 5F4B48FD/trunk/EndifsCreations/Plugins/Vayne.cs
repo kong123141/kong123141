@@ -37,18 +37,18 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Vayne.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Vayne.Combo.E", "Use E").SetValue(true));                
                 combomenu.AddItem(new MenuItem("EC.Vayne.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Vayne.Misc.E", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Vayne.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Vayne.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -56,10 +56,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Player.AttackRange, TargetSelector.DamageType.Physical, true);
 
-            var UseQ = config.Item("EC.Vayne.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Vayne.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Vayne.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Vayne.Combo.E").GetValue<bool>();
             
-            var CastItems = config.Item("EC.Vayne.Combo.Items").GetValue<bool>(); 
+            var CastItems = Root.Item("EC.Vayne.Combo.Items").GetValue<bool>(); 
             if (Target.IsValidTarget())
             {
                 try
@@ -148,14 +148,14 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R && config.Item("EC.Vayne.Combo.Items").GetValue<bool>())
+            if (args.Slot == SpellSlot.R && Root.Item("EC.Vayne.Combo.Items").GetValue<bool>())
             {
                 Utility.DelayAction.Add(myHumazier.ReactionDelay, () => myItemManager.UseGhostblade());
             }
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (gapcloser.Sender.IsEnemy && config.Item("EC.Vayne.Misc.E").GetValue<bool>() && E.IsReady())
+            if (gapcloser.Sender.IsEnemy && Root.Item("EC.Vayne.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Player.BoundingRadius)
                 {
@@ -167,11 +167,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Vayne.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Vayne.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Vayne.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Vayne.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
                 Target = myUtility.GetTarget(Player.AttackRange, TargetSelector.DamageType.Physical);

@@ -36,7 +36,7 @@ namespace EndifsCreations.Plugins
             var custommenu = new Menu("Undying Rage", "Custom");
             {
                 custommenu.AddItem(new MenuItem("EC.Tryndamere.UndyingRageHP", "HP <").SetValue(new Slider(20)));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -46,31 +46,31 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Tryndamere.Combo.EValue", "E Extends").SetValue(new Slider(50, 0, 225)));
                 combomenu.AddItem(new MenuItem("EC.Tryndamere.Combo.Dive", "Turret Dive").SetValue(false));                
                 combomenu.AddItem(new MenuItem("EC.Tryndamere.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Tryndamere.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Tryndamere.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
                 laneclearmenu.AddItem(new MenuItem("EC.Tryndamere.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Tryndamere.EFarmType", "E").SetValue(new StringList(new[] { "Any (Slider Value)", "Furthest" })));
                 laneclearmenu.AddItem(new MenuItem("EC.Tryndamere.Farm.E.Value", "(Any) E More Than").SetValue(new Slider(1, 1, 5)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Tryndamere.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Tryndamere.EPredHitchance", "E Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
                 miscmenu.AddItem(new MenuItem("EC.Tryndamere.Misc.W", "W Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -78,15 +78,15 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Tryndamere.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Tryndamere.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Tryndamere.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
         private void Combo()
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            var UseE = config.Item("EC.Tryndamere.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Tryndamere.Combo.Items").GetValue<bool>();
+            var UseE = Root.Item("EC.Tryndamere.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Tryndamere.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -116,8 +116,8 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseW = config.Item("EC.Tryndamere.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Tryndamere.Harass.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Tryndamere.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Tryndamere.Harass.E").GetValue<bool>();
 
             if (UseW && W.IsReady() && !Player.IsWindingUp && !Player.IsDashing())
             {                
@@ -136,16 +136,16 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (config.Item("EC.Tryndamere.Farm.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Tryndamere.Farm.E").GetValue<bool>() && E.IsReady())
             {
                 var MinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
-                switch (config.Item("EC.Tryndamere.EFarmType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Tryndamere.EFarmType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         var ELine = E.GetLineFarmLocation(MinionsE);
                         if (ELine.Position.IsValid() && !ELine.Position.To3D().UnderTurret(true) && Vector3.Distance(Player.ServerPosition, ELine.Position.To3D()) > Player.AttackRange)
                         {
-                            if (ELine.MinionsHit > config.Item("EC.Tryndamere.Farm.E.Value").GetValue<Slider>().Value && !Player.IsWindingUp && !myOrbwalker.IsWaiting())
+                            if (ELine.MinionsHit > Root.Item("EC.Tryndamere.Farm.E.Value").GetValue<Slider>().Value && !Player.IsWindingUp && !myOrbwalker.Waiting)
                             {
                                 E.Cast(Player.ServerPosition.Extend(ELine.Position.To3D(), Vector3.Distance(Player.ServerPosition, ELine.Position.To3D())));
                             }
@@ -172,7 +172,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Tryndamere.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Tryndamere.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null)
                     {
@@ -189,7 +189,7 @@ namespace EndifsCreations.Plugins
         {
             if (R.IsReady())
             {
-                if (myUtility.PlayerHealthPercentage <= config.Item("EC.Tryndamere.UndyingRageHP").GetValue<Slider>().Value)
+                if (myUtility.PlayerHealthPercentage <= Root.Item("EC.Tryndamere.UndyingRageHP").GetValue<Slider>().Value)
                 {
                     if (Q.IsReady()) Q.Cast();
                     else R.Cast();
@@ -216,7 +216,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetEHitChance()
         {
-            switch (config.Item("EC.Tryndamere.EPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Tryndamere.EPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -235,11 +235,11 @@ namespace EndifsCreations.Plugins
             {
                 if (pred.Hitchance >= EHitChance)
                 {
-                    var pos = Player.ServerPosition.Extend(pred.CastPosition, Vector3.Distance(Player.ServerPosition, target.ServerPosition) + target.BoundingRadius + Player.BoundingRadius);//config.Item("EC.Tryndamere.Combo.EValue").GetValue<Slider>().Value);
+                    var pos = Player.ServerPosition.Extend(pred.CastPosition, Vector3.Distance(Player.ServerPosition, target.ServerPosition) + target.BoundingRadius + Player.BoundingRadius);//Root.Item("EC.Tryndamere.Combo.EValue").GetValue<Slider>().Value);
                     if (pos.UnderTurret(true))
                     {
-                        if (!config.Item("EC.Tryndamere.Combo.Dive").GetValue<bool>()) return;
-                        if (config.Item("EC.Tryndamere.Combo.Dive").GetValue<bool>() && config.Item("EC.Tryndamere.TDHaveR").GetValue<bool>() && !R.IsReady()) return;
+                        if (!Root.Item("EC.Tryndamere.Combo.Dive").GetValue<bool>()) return;
+                        if (Root.Item("EC.Tryndamere.Combo.Dive").GetValue<bool>() && Root.Item("EC.Tryndamere.TDHaveR").GetValue<bool>() && !R.IsReady()) return;
                         E.Cast(pos);
                     }
                     E.Cast(pos);
@@ -280,26 +280,25 @@ namespace EndifsCreations.Plugins
                     break;
             }
         }
-        protected override void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, myCustomEvents.DamageTriggerType type)
+        protected override void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, float damage, myDamageBuffer.DamageTriggers type)
         {
             if (sender != null && target.IsMe)
             {
                 switch (type)
                 {
-                    case myCustomEvents.DamageTriggerType.Killable:
-                        if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo &&
-                            config.Item("EC.Tryndamere.Combo.R").GetValue<bool>() &&
-                            R.IsReady())
-                        {
-                            R.Cast();
-                        }
-                        break;
-                    case myCustomEvents.DamageTriggerType.TonsOfDamage:
+                    case myDamageBuffer.DamageTriggers.TonsOfDamage:
                         if (Q.IsReady())
                         {
                             Q.Cast();
                         }
                         break;
+                    case myDamageBuffer.DamageTriggers.Killable:
+                        if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Tryndamere.Combo.R").GetValue<bool>() && R.IsReady())
+                        {
+                            R.Cast();
+                        }
+                        break;
+                    
                 }
             }
         }
@@ -309,7 +308,7 @@ namespace EndifsCreations.Plugins
             if (unit.IsMe)
             {
                 if (!Player.IsWindingUp &&
-                    (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Tryndamere.Combo.Items").GetValue<bool>()) &&
+                    (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Tryndamere.Combo.Items").GetValue<bool>()) &&
                     Orbwalking.InAutoAttackRange(target))
                 {
                     myItemManager.UseItems(2, null);                    
@@ -318,7 +317,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Tryndamere.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Tryndamere.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= W.Range)
                 {
@@ -330,11 +329,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Tryndamere.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Tryndamere.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Tryndamere.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Tryndamere.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

@@ -4,7 +4,7 @@ using Activator.Base;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-namespace Activator.Summoners.Hero
+namespace Activator.Summoners
 {
     internal class smite : CoreSum
     {

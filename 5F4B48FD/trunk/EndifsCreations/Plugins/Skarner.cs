@@ -40,12 +40,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Skarner.Combo.E", "Use E").SetValue(true));
                 //combomenu.AddItem(new MenuItem("EC.Skarner.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Skarner.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Skarner.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -53,8 +53,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             
-            var UseE = config.Item("EC.Skarner.Combo.E").GetValue<bool>();            
-            var CastItems = config.Item("EC.Skarner.Combo.Items").GetValue<bool>();
+            var UseE = Root.Item("EC.Skarner.Combo.E").GetValue<bool>();            
+            var CastItems = Root.Item("EC.Skarner.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;                
@@ -105,7 +105,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {                    
-                    if (config.Item("EC.Skarner.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Skarner.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
@@ -116,7 +116,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Skarner.Combo.W").GetValue<bool>())
+                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Skarner.Combo.W").GetValue<bool>())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -150,7 +150,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Skarner.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Skarner.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

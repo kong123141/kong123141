@@ -8,10 +8,6 @@
 
     internal static class Offensive
     {
-        /*
-        *   CREDITS TO KURISU, ORACLE.
-        */
-
         #region Static Fields
 
         public static bool CanManamune;

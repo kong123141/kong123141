@@ -37,13 +37,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Shen.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Shen.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Shen.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Shen.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Shen.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -51,9 +51,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Shen.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Shen.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Shen.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Shen.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Shen.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Shen.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;                
@@ -111,7 +111,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Shen.Combo.W").GetValue<bool>()))
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Shen.Combo.W").GetValue<bool>()))
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -135,11 +135,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Shen.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Shen.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Shen.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Shen.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

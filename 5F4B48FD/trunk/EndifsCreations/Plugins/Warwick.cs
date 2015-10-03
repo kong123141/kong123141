@@ -42,18 +42,18 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Warwick.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Warwick.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Warwick.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Warwick.UseQAuto", "Auto Q").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Warwick.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Warwick.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -61,9 +61,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Warwick.Combo.Q").GetValue<bool>();
-            var UseR = config.Item("EC.Warwick.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Warwick.Combo.Items").GetValue<bool>();           
+            var UseQ = Root.Item("EC.Warwick.Combo.Q").GetValue<bool>();
+            var UseR = Root.Item("EC.Warwick.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Warwick.Combo.Items").GetValue<bool>();           
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;                
@@ -111,7 +111,7 @@ namespace EndifsCreations.Plugins
             switch (myOrbwalker.ActiveMode)
             {
                 case myOrbwalker.OrbwalkingMode.None:
-                    if (config.Item("EC.Warwick.UseQAuto").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Warwick.UseQAuto").GetValue<bool>() && Q.IsReady())
                     {
                         var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && x.IsTargetable && !myUtility.ImmuneToMagic(x));
                         var qt = EnemyList.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range).OrderBy(i => i.Health).FirstOrDefault();
@@ -149,34 +149,42 @@ namespace EndifsCreations.Plugins
                     break;
             } 
         }
-        protected override void OnIssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
-        {
-            if (myOrbwalker.Active())
-            {
-                if (Player.IsChannelingImportantSpell() || Player.IsCastingInterruptableSpell()) args.Process = false;
-            }
-        }
         protected override void OnBeforeAttack(myOrbwalker.BeforeAttackEventArgs args)
         {
+            if (Player.IsChannelingImportantSpell() || myUtility.TickCount - LastR <= 0.5f)
+            {
+                args.Process = false;
+            }
             if (args.Target is Obj_AI_Hero && args.Target.Team != Player.Team)
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Warwick.Combo.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.Warwick.Combo.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }
                 }
             }
         }
+        protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (sender.Owner.IsMe)
+            {
+                if (args.Slot == SpellSlot.R)
+                {
+                    LastR = myUtility.TickCount;
+                    mySpellcast.Pause(2000 + Game.Ping);
+                }
+            }
+        }
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Warwick.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Warwick.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Warwick.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Warwick.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

@@ -1,6 +1,6 @@
-﻿#region Todo
-    //      Explore more methods.
-    //      Block spellcast last hitting
+﻿#region Todo    
+    //      Use HealthPrediction
+    //      https://github.com/LeagueSharp/LeagueSharp.Common/blob/master/HealthPrediction.cs#L136
 #endregion Todo
 
 using System;
@@ -17,22 +17,29 @@ namespace EndifsCreations.Controller
         private static Vector3 Pos;
         private static PredictionOutput Pred;
 
+        //  <summary>
+        //      Spell cast blocking
+        //  </summary>
+        private static bool AllowCasting = true;
+        private static void SetAllow(bool value)
+        {
+            AllowCasting = value;            
+        }
         public enum ObjectOrderTypes
         {
             None,
             NearestToPlayer,
             NearestToMouse
         }
-                
         //  <summary>
         //      Strings of neutral minion base skin names
         //  </summary>
         public static readonly string[] NeutralCampList =
         {
-            "SRU_Baron", "SRU_Dragon", "SRU_Blue", "SRU_Red", "SRU_Gromp", "SRU_Murkwolf", "SRU_Krug", "SRU_Razorbeak", "SRU_Crab",
+            "SRU_Baron", "SRU_Dragon", "SRU_Blue", "SRU_Red", "SRU_Gromp", "SRU_Murkwolf", "SRU_Krug", "SRU_Razorbeak", "Sru_Crab",
             "TT_Spiderboss", "TT_NGolem", "TT_NWolf", "TT_NWraith"
         };
-
+        
         //  <summary>
         //      Filters NeutralCampList to get legendary, epic, buffs neutral minions
         //  </summary>
@@ -112,18 +119,15 @@ namespace EndifsCreations.Controller
 
         public static bool IsMinion(Obj_AI_Minion minion)
         {
-            var name = minion.CharData.BaseSkinName.ToLower();
-            return 
-                name.Contains("minion");
+            return minion.CharData.BaseSkinName.ToLower().Contains("minion");
         }
+
         public static bool IsWard(Obj_AI_Minion minion)
         {
             var name = minion.CharData.BaseSkinName.ToLower();
-            return 
-                name.Contains("ward") || 
-                name.Contains("trinket");
+            return  name.Contains("ward") || name.Contains("trinket");
         }
-         
+
         //https://github.com/LeagueSharp/LeagueSharp.Common/commit/e2be4e013bc83a6c8054f41bdafc273f32979492
 
         private static readonly string[] PetsList =
@@ -176,44 +180,46 @@ namespace EndifsCreations.Controller
         //  </summary>
         public static void LaneLinear(Spell spell, float castrange = 0, bool max = false, bool collision = false, int passable = 0)
         {
+            if (!AllowCasting) return;
             Minions = GetMinions(ObjectManager.Player.Position, castrange);
             switch (collision)
             {
                 case true:
-                    var test = Minions.Where(m => !m.IsDead && spell.IsKillable(m) && Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= spell.Range);
                     if (ObjectManager.Player.ChampionName == "Veigar")
                     {
-                        foreach (var loop in test)
+                        myOrbwalker.SetAttack(false);
+                        foreach (var testloop in Minions.Where(x => spell.IsKillable(x) && x.IsValidTarget() && !x.IsDead))
                         {
-                            Pred = spell.GetPrediction(loop, false, castrange);
-
-                            var frontbox = new Geometry.Polygon.Rectangle(Player.Position, Pred.CastPosition, spell.Width);
-                            var backbox = new Geometry.Polygon.Rectangle(Pred.CastPosition, Player.Position.Extend(Pred.CastPosition, spell.Range), spell.Width);
-
+                            Pred = spell.GetPrediction(testloop, false, castrange);
+                            var frontbox = new Geometry.Polygon.Rectangle(Player.ServerPosition, testloop.ServerPosition, spell.Width);
+                            var backbox = new Geometry.Polygon.Rectangle(testloop.ServerPosition, Player.Position.Extend(testloop.ServerPosition, castrange), spell.Width);                           
                             if (Pred.CollisionObjects.Count == 0)
                             {
-                                if (backbox.Points.Any(
-                                    point => 
-                                        Minions.Where(x => x != loop && !x.IsDead && spell.IsKillable(x))
-                                        .Select(m => m.ServerPosition.To2D()).ToList().Any()))
+                                var next = Minions.Where(x => x != testloop && backbox.IsInside(x)).OrderBy(i => i.Distance(testloop)).FirstOrDefault();
+                                if (next != null && spell.IsKillable(next))
                                 {
                                     spell.Cast(Pred.CastPosition);
+                                    //myDevTools.DebugMode("backbox next killable");
                                 }
+                                spell.Cast(Pred.CastPosition);
+                                //myDevTools.DebugMode("backbox null");
                             }
-                            else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
+                            if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
                             {
-                                if (frontbox.Points.Any(
-                                    point => 
-                                        Minions.Where(x => x != loop && !x.IsDead && spell.IsKillable(x))
-                                        .Select(m => m.ServerPosition.To2D()).ToList().Any()))
+                                var before = Minions.Where(x => x != testloop && frontbox.IsInside(x)).OrderByDescending(i => i.Distance(testloop));
+                                myDevTools.DebugMode("before:" + before.Count());
+                                if (before.Count() <= passable)
                                 {
                                     spell.Cast(Pred.CastPosition);
+                                    //myDevTools.DebugMode("before");
                                 }
                             }
                         }
+                        myOrbwalker.SetAttack(true); 
                     }
                     else
                     {
+                        var test = Minions.Where(m => m.IsValidTarget() && m.IsHPBarRendered && !m.IsDead && spell.IsKillable(m) && Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= castrange);
                         foreach (var loop in test)
                         {
                             Pred = spell.GetPrediction(loop, false, castrange);
@@ -226,7 +232,7 @@ namespace EndifsCreations.Controller
                     break;
                 case false:
                     if (Minions.Count() <= 1) return;
-                    var result = MinionManager.GetBestLineFarmLocation(Minions.Where(m => Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= spell.Range).Select(m => m.ServerPosition.To2D()).ToList(), spell.Width, castrange);
+                    var result = MinionManager.GetBestLineFarmLocation(Minions.Where(m => m.IsValidTarget() && m.IsHPBarRendered && !m.IsDead && Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= spell.Range).Select(m => m.ServerPosition.To2D()).ToList(), spell.Width, castrange);
                     if (Vector2.Distance(result.Position, Player.Position.To2D()) <= castrange)
                     {
                         if (max)
@@ -248,24 +254,22 @@ namespace EndifsCreations.Controller
                         {
                             spell.Cast(result.Position);
                         }
-                        else
-                        {
-                            //Console.WriteLine("Skipping. Hit: " + result.MinionsHit + " Count: " + Minions.Count());
-                        }
                     }
                     break;
             }
         }
 
         //  <summary>
+        //      Floor targetted spells
         //      GetBestCircularFarmLocation
         //      https://github.com/LeagueSharp/LeagueSharp.Common/blob/master/MinionManager.cs#L120      
         //  </summary>
         public static void LaneCircular(Spell spell, float castrange = 0, float radius = 0)
         {
+            if (!AllowCasting) return;
             Minions = GetMinions(ObjectManager.Player.Position, castrange);
             if (Minions.Count() <= 1) return;
-            var result = MinionManager.GetBestCircularFarmLocation(Minions.Where(m => Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= spell.Range).Select(m => m.ServerPosition.To2D()).ToList(), radius, castrange);
+            var result = MinionManager.GetBestCircularFarmLocation(Minions.Where(m => m.IsValidTarget() && m.IsHPBarRendered && !m.IsDead && Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= spell.Range).Select(m => m.ServerPosition.To2D()).ToList(), radius, castrange);
             if (Vector2.Distance(result.Position, Player.Position.To2D()) <= castrange)
             {
                 if (Minions.Count() >= result.MinionsHit && Minions.Count() >= 6)
@@ -280,10 +284,6 @@ namespace EndifsCreations.Controller
                 {
                     spell.Cast(result.Position);
                 }
-                else
-                {
-                    //Console.WriteLine("Skipping. Hit: " + result.MinionsHit + " Count: " + Minions.Count());
-                }
             }
         }
 
@@ -292,22 +292,23 @@ namespace EndifsCreations.Controller
         //  </summary>
         public static void LaneLastHit(Spell spell, float castrange = 0, List<Obj_AI_Base> list = null, bool disableattack = false)
         {
+            if (!AllowCasting) return;
             var disabled = false;
             if (disableattack)
             {
                 myOrbwalker.SetAttack(false);
                 disabled = true;
             }
-            if (list == null)
+            if (list == null && !Player.IsWindingUp)
             {
                 Minions = GetMinions(ObjectManager.Player.Position, castrange)
                     .Where(
                     x => 
-                        spell.IsKillable(x) && 
-                        x.NetworkId == myOrbwalker.LaneClearID ||
-                        Player.IsMelee() && x.NetworkId != myOrbwalker.LastHitID ||
-                        !Player.IsMelee() && x.NetworkId == myOrbwalker.LastHitID)
-                        .ToList();
+                        spell.IsKillable(x) &&
+                        x.IsValidTarget() && x.IsHPBarRendered && !x.IsDead &&
+                        (x.NetworkId == myOrbwalker.LaneClearID || x.NetworkId == myOrbwalker.LastHitID || x.NetworkId == myTowerAggro.TurretTargetID)
+                        )
+                    .ToList();
                 Sieges = Minions
                     .Where(
                     x =>
@@ -331,17 +332,30 @@ namespace EndifsCreations.Controller
                     }
                 }
             }
-            else
+            else if (list != null && !Player.IsWindingUp)
             {
-                foreach (var x in list
+                Minions = list.Where(x => spell.IsKillable(x) && x.IsValidTarget() && x.IsHPBarRendered && !x.IsDead && (x.NetworkId == myOrbwalker.LaneClearID || x.NetworkId == myOrbwalker.LastHitID || x.NetworkId == myTowerAggro.TurretTargetID)).ToList();
+                Sieges = Minions
                     .Where(
-                    x => 
-                        spell.IsKillable(x) &&
-                        x.NetworkId == myOrbwalker.LaneClearID ||
-                        Player.IsMelee() && x.NetworkId != myOrbwalker.LastHitID ||
-                        !Player.IsMelee() && x.NetworkId == myOrbwalker.LastHitID))
+                    x =>
+                        x.IsValidTarget() && (
+                        x.CharData.BaseSkinName.ToLower().Contains("super") ||
+                        x.CharData.BaseSkinName.ToLower().Contains("siege") ||
+                        x.CharData.BaseSkinName.ToLower().Contains("cannon")))
+                    .OrderBy(i => i.Health).ToList();
+                if (Sieges.Any())
                 {
-                    spell.Cast(x);
+                    foreach (var x in Sieges)
+                    {
+                        spell.Cast(x);
+                    }
+                }
+                else
+                {
+                    foreach (var x in Minions)
+                    {
+                        spell.Cast(x);
+                    }
                 }
             }
             if (disabled) { myOrbwalker.SetAttack(true); }            
@@ -352,39 +366,86 @@ namespace EndifsCreations.Controller
         //  </summary>
         public static void LaneLinearTargetted(Spell spell, float castrange = 0, float width = 0, float extend = 0, bool front = true, bool back = true)
         {
-            Minions = GetMinions(ObjectManager.Player.Position, castrange + extend);
-            Geometry.Polygon.Rectangle frontbox;
-            Geometry.Polygon.Rectangle backbox;
+            if (!AllowCasting) return;            
+            Geometry.Polygon.Rectangle frontbox, backbox;
             var total = 0;
             var max = 0;
-            foreach (var loop in Minions)
+            Minions = GetMinions(ObjectManager.Player.Position, castrange + extend);
+            foreach (var loop in Minions.Where(x => x.IsValidTarget() && !x.IsDead && x.IsHPBarRendered))
             {             
                 if (front)
                 {
                      frontbox = new Geometry.Polygon.Rectangle(Player.Position, loop.Position, width);
-                     total += MinionManager.GetMinions(castrange).Where(x => x != loop).Count(x => frontbox.IsInside(x));
+                     total += MinionManager.GetMinions(castrange).Where(x => x != loop && x.IsValidTarget() && x.IsHPBarRendered && !x.IsDead).Count(x => frontbox.IsInside(x));
                      max += 3;
                 }
                 if (back)
                 {
                     backbox = new Geometry.Polygon.Rectangle(loop.Position, Player.Position.Extend(loop.Position, castrange) + extend, width);
-                    total += MinionManager.GetMinions(castrange + extend).Where(x => x != loop).Count(x => backbox.IsInside(x));
+                    total += MinionManager.GetMinions(castrange + extend).Where(x => x != loop && x.IsValidTarget() && x.IsHPBarRendered && !x.IsDead).Count(x => backbox.IsInside(x));
                     max += 3;
                 }                                                
                 if (Minions.Count() >= total && Minions.Count() >= max)
                 {
                     spell.Cast(loop);
                 }
-                else if (total >= Math.Abs((Minions.Count() * 3 / 4)) && total >= Math.Max(3,(max/2)))
+                else if (total >= (Minions.Count() * 3 / 4) && total >= Math.Max(3,(max/2)))
                 {
                     spell.Cast(loop);  
-                }
-                else
-                {
-                    //Console.WriteLine("Skipping. Hit: " + total + " Count: " + Minions.Count());
-                }                
+                }              
             }
         }
+
+        //  <summary>
+        //      PointBlank, AOE spells surrounding the player.
+        //  </summary>
+        public static void LanePointBlank(Spell spell, float radius, bool toggle = false, bool max = false)
+        {
+            if (!AllowCasting) return;
+            Minions = GetMinions(ObjectManager.Player.Position, radius);
+            if (Minions.Count() <= 1) return;
+            switch (toggle)
+            {
+                case true:
+                    switch (max)
+                    {
+                        case true:
+                            break;
+                        case false:
+                            break;
+                    }
+                    break;
+                case false:
+                    switch (max)
+                    {
+                        case true:
+                            if (Minions.Count() >= 6)
+                            {
+                                spell.Cast();
+                            }
+                            break;
+                        case false:
+                            if (Minions.Count() >= 6)
+                            {
+                                spell.Cast();
+                                myDevTools.DebugMode("Minions.Count(): " + Minions.Count() + " 6");
+                            }
+                            else if (Minions.Count() >= (Minions.Count() * 3 / 4) && Minions.Count() >= 4)
+                            {
+                                spell.Cast();
+                                myDevTools.DebugMode("Minions.Count(): " + Minions.Count() + " 3/4? " + Minions.Count() * 3 / 4);
+                            }
+                            else if (Minions.Count() >= (Minions.Count() * 1 / 3) && Minions.Count() >= 3)
+                            {
+                                spell.Cast();
+                                myDevTools.DebugMode("Minions.Count(): " + Minions.Count() + " 1/3? " + Minions.Count() * 1 / 3);
+                            }
+                            break;
+                    }
+                    break;
+            }
+        }
+
         #endregion Laning
 
         #region Jungling
@@ -393,54 +454,45 @@ namespace EndifsCreations.Controller
         //  </summary>
         public static void JungleLinear(Spell spell, float castrange = 0, bool aoe = false, bool collision = false, int passable = 0, ObjectOrderTypes order = ObjectOrderTypes.None)
         {
+            if (!AllowCasting) return;
             NeutralMinionCamp = GetNearestCamp(Player.Position, castrange, order);
             if (NeutralMinionCamp.Any())
             {
                 var camp = NeutralMinionCamp[0];
-                JungleMinions = GetMinions(NeutralMinionCamp[0].Position, castrange,MinionTypes.All,MinionTeam.Neutral);
-                var result = MinionManager.GetBestLineFarmLocation(JungleMinions.Where(m => Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= spell.Range).Select(m => m.ServerPosition.To2D()).ToList(), spell.Width, castrange);
+                JungleMinions = GetMinions(camp.Position, castrange, MinionTypes.All, MinionTeam.Neutral);
                 switch (camp.Name)
                 {
-                    //Baron
+                    #region Baron
                     case "monsterCamp_12":
-                        var baron = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Baron"));
+                        var baron = GetLargeMonsters(camp.Position, castrange).Where(x =>x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Baron"));
                         if (baron != null && baron.IsValidTarget())
                         {
                             if (collision)
                             {
                                 Pred = spell.GetPrediction(baron, aoe, castrange);
-                                if (Pred.CollisionObjects.Count == 0)
+                                if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                 {
-                                    spell.Cast(Pred.CastPosition);
-                                }
-                                else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
-                                {
-                                    spell.Cast(Pred.CastPosition);
+                                    if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                 }
                             }
                             else
                             {
                                 spell.Cast(baron.ServerPosition);
                             }
-                           
                         }
                         break;
-
-                    //Dragon
+                    #endregion
+                    #region Dragon
                     case "monsterCamp_6":
-                        var dragon = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Dragon"));
+                        var dragon = GetLargeMonsters(camp.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Dragon"));
                         if (dragon != null && dragon.IsValidTarget())
                         {
                             if (collision)
                             {
                                 Pred = spell.GetPrediction(dragon, aoe, castrange);
-                                if (Pred.CollisionObjects.Count == 0)
+                                if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                 {
-                                    spell.Cast(Pred.CastPosition);
-                                }
-                                else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
-                                {
-                                    spell.Cast(Pred.CastPosition);
+                                    if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                 }
                             }
                             else
@@ -449,66 +501,86 @@ namespace EndifsCreations.Controller
                             }
                         }
                         break;
-
-                    //Red Brambleback                        
+                    #endregion
+                    #region Red Brambleback
                     case "monsterCamp_4":
                     case "monsterCamp_10":
-                        var bramblebackl = GetLargeMonsters(Player.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Red"));
-                        if (bramblebackl != null && bramblebackl.IsValidTarget())
+                        var bramblebackl = GetLargeMonsters(Player.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Red"));
+                        var bramblebacks = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead &&x.CharData.BaseSkinName.Contains("SRU_Red")).ToList();
+                        switch (collision)
                         {
-                            switch (collision)
-                            {
-                                case true:
+                            case true:
+                                if (bramblebackl != null && bramblebackl.IsValidTarget())
+                                {
                                     Pred = spell.GetPrediction(bramblebackl, aoe, castrange);
-                                    if (Pred.CollisionObjects.Count == 0)
+                                    if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                     }
-                                    else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
+                                }
+                                else
+                                {
+                                    foreach (var loop in bramblebacks)
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        Pred = spell.GetPrediction(loop, aoe, castrange);
+                                        if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
+                                        {
+                                            if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
+                                        }
                                     }
-                                    break;
-                                case false:
-                                    if (JungleMinions.Count() >= 3 && result.MinionsHit >= 2)
-                                    {
-                                        spell.Cast(result.Position);
-                                    }
-                                    break;
-                            }
+                                }
+                                break;
+                            case false:
+                                var result = MinionManager.GetBestLineFarmLocation(bramblebacks.Select(m => m.ServerPosition.To2D()).ToList(), spell.Width, castrange);
+                                if (result.MinionsHit >= bramblebacks.Count() || result.MinionsHit >= Math.Max(1, bramblebacks.Count() - 1))
+                                {
+                                    spell.Cast(result.Position);
+                                    myDevTools.DebugMode("[Red Bramblebacks] Hit: " + result.MinionsHit + " Count: " + bramblebacks.Count());
+                                }
+                                break;
                         }
                         break;
-
-                    //Blue Sentinel
+                    #endregion
+                    #region Blue Sentinel
                     case "monsterCamp_1":
                     case "monsterCamp_7":
-                        var sentinell = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Blue"));
-                        if (sentinell != null && sentinell.IsValidTarget())
+                        var sentinell = GetLargeMonsters(camp.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Blue"));
+                        var sentinels = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Blue")).ToList();
+                        switch (collision)
                         {
-                            switch (collision)
-                            {
-                                case true:
+                            case true:
+                                if (sentinell != null && sentinell.IsValidTarget())
+                                {
                                     Pred = spell.GetPrediction(sentinell, aoe, castrange);
-                                    if (Pred.CollisionObjects.Count == 0)
+                                    if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                     }
-                                    else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
+                                }
+                                else
+                                {
+                                    foreach (var loop in sentinels)
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        Pred = spell.GetPrediction(loop, aoe, castrange);
+                                        if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
+                                        {
+                                            if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
+                                        }
                                     }
-                                    break;
-                                case false:
-                                    if (JungleMinions.Count() >= 3 && result.MinionsHit >= 2)
-                                    {
-                                        spell.Cast(result.Position);
-                                    }
-                                    break;
-                            }
+                                }
+                                break;
+                            case false:
+                                var result = MinionManager.GetBestLineFarmLocation(sentinels.Select(m => m.ServerPosition.To2D()).ToList(), spell.Width, castrange);
+                                if (result.MinionsHit >= sentinels.Count() || result.MinionsHit >= Math.Max(1, sentinels.Count() - 1))
+                                {
+                                    spell.Cast(result.Position);
+                                    myDevTools.DebugMode("[Blue Sentinels] Hit: " + result.MinionsHit + " Count: " + sentinels.Count());
+                                }
+                                break;
                         }
                         break;
-
-                    //Gromp
+                    #endregion
+                    #region Gromp
                     case "monsterCamp_13":
                     case "monsterCamp_14":
                         var gromp = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Gromp"));
@@ -517,13 +589,9 @@ namespace EndifsCreations.Controller
                             if (collision)
                             {
                                 Pred = spell.GetPrediction(gromp, aoe, castrange);
-                                if (Pred.CollisionObjects.Count == 0)
+                                if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                 {
-                                    spell.Cast(Pred.CastPosition);
-                                }
-                                else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
-                                {
-                                    spell.Cast(Pred.CastPosition);
+                                    if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                 }
                             }
                             else
@@ -533,319 +601,304 @@ namespace EndifsCreations.Controller
                            
                         }                        
                         break;
-
-                    //Krugs
+                    #endregion
+                    #region Krugs
                     case "monsterCamp_5":
                     case "monsterCamp_11":
-                        var krugl = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Krug"));
-                        if (krugl != null && krugl.IsValidTarget())
+                        var krugl = GetLargeMonsters(camp.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Krug"));
+                        var krugs = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Krug")).ToList();
+                        switch (collision)
                         {
-                            switch (collision)
-                            {
-                                case true:
+                            case true:
+                                if (krugl != null && krugl.IsValidTarget())
+                                {
                                     Pred = spell.GetPrediction(krugl, aoe, castrange);
-                                    if (Pred.CollisionObjects.Count == 0)
+                                    if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                     }
-                                    else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
+                                }
+                                else
+                                {
+                                    foreach (var loop in krugs)
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        Pred = spell.GetPrediction(loop, aoe, castrange);
+                                        if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
+                                        {
+                                            if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
+                                        }
                                     }
-                                    break;
-                                case false:
-                                    if (JungleMinions.Count() >= 2 && result.MinionsHit >= 2)
-                                    {
-                                        spell.Cast(result.Position);
-                                    }
-                                    break;
-                            }
+                                }
+                                break;
+                            case false:
+                                var result = MinionManager.GetBestLineFarmLocation(krugs.Select(m => m.ServerPosition.To2D()).ToList(), spell.Width, castrange);
+                                if (krugl != null && krugl.IsValidTarget())
+                                {
+                                    spell.Cast(krugl.Position);
+                                }
+                                else
+                                {
+                                    spell.Cast(result.Position);
+                                    myDevTools.DebugMode("[Krugs] Hit: " + result.MinionsHit + " Count: " + krugs.Count());
+                                }
+                                break;
                         }
                         break;
-
-                    //wolf
+                    #endregion
+                    #region Murkwolves
                     case "monsterCamp_2":
                     case "monsterCamp_8":
-                        var murkwolfl = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Murkwolf"));
-                        if (murkwolfl != null && murkwolfl.IsValidTarget())
+                        var murkwolfl = GetLargeMonsters(camp.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Murkwolf"));
+                        var murkwolfls = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Murkwolf")).ToList();
+                        switch (collision)
                         {
-                            switch (collision)
-                            {
-                                case true:
+                            case true:
+                                if (murkwolfl != null && murkwolfl.IsValidTarget())
+                                {
                                     Pred = spell.GetPrediction(murkwolfl, aoe, castrange);
-                                    if (Pred.CollisionObjects.Count == 0)
+                                    if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                     }
-                                    else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
+                                }
+                                else
+                                {
+                                    foreach (var loop in murkwolfls)
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        Pred = spell.GetPrediction(loop, aoe, castrange);
+                                        if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
+                                        {
+                                            if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
+                                        }
                                     }
-                                    break;
-                                case false:
-                                    if (JungleMinions.Count() >= 3 && result.MinionsHit >= 2)
-                                    {
-                                        spell.Cast(result.Position);
-                                    }
-                                    break;
-                            }
+                                }
+                                break;
+                            case false:
+                                var result = MinionManager.GetBestLineFarmLocation(murkwolfls.Select(m => m.ServerPosition.To2D()).ToList(), spell.Width, castrange);
+                                if (result.MinionsHit >= murkwolfls.Count() || result.MinionsHit >= Math.Max(1, murkwolfls.Count() - 1))
+                                {
+                                    spell.Cast(result.Position);
+                                    myDevTools.DebugMode("[Murkwolves] Hit: " + result.MinionsHit + " Count: " + murkwolfls.Count());
+                                }
+                                break;
                         }
                         break;
-
-                    //Razorbeak
+                    #endregion
+                    #region Razorbeak
                     case "monsterCamp_3":
                     case "monsterCamp_9":
-                        var razorbeak = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Razorbeak"));
-                        if (razorbeak != null && razorbeak.IsValidTarget())
+                        var razorbeakl = GetLargeMonsters(camp.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Razorbeak"));
+                        var razorbeaks = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Razorbeak")).ToList();
+                        switch (collision)
                         {
-                            switch (collision)
-                            {
-                                case true:
-                                    Pred = spell.GetPrediction(razorbeak, aoe, castrange);
-                                    if (Pred.CollisionObjects.Count == 0)
+                            case true:
+                                if (razorbeakl != null && razorbeakl.IsValidTarget())
+                                {
+                                    Pred = spell.GetPrediction(razorbeakl, aoe, castrange);
+                                    if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                     }
-                                    else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
+                                }
+                                else
+                                {
+                                    foreach (var loop in razorbeaks)
                                     {
-                                        spell.Cast(Pred.CastPosition);
+                                        Pred = spell.GetPrediction(loop, aoe, castrange);
+                                        if (Pred.CollisionObjects.Count == 0 || (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
+                                        {
+                                            if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
+                                        }
                                     }
-                                    break;
-                                case false:
-                                    if (JungleMinions.Count() >= 4 && result.MinionsHit >= 4)
-                                    {
-                                        spell.Cast(result.Position);
-                                    }
-                                    break;
-                            }
+                                }
+                                break;
+                            case false:
+                                var result = MinionManager.GetBestLineFarmLocation(razorbeaks.Select(m => m.ServerPosition.To2D()).ToList(), spell.Width, castrange);
+                                if (result.MinionsHit >= razorbeaks.Count() || result.MinionsHit >= Math.Max(1, razorbeaks.Count() - 1))
+                                {
+                                    spell.Cast(result.Position);
+                                    myDevTools.DebugMode("[Murkwolves] Hit: " + result.MinionsHit + " Count: " + razorbeaks.Count());
+                                }
+                                break;
                         }
                         break;
-
-                    //Crab
+                    #endregion
+                    #region Crab
                     case "monsterCamp_15":
                     case "monsterCamp_16":
-                        var crab = GetLargeMonsters(Player.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Crab"));
+                        var crab = GetLargeMonsters(Player.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("Crab"));
                         if (crab != null && crab.IsValidTarget())
                         {
                             if (collision)
                             {
                                 Pred = spell.GetPrediction(crab, aoe, castrange);
-                                if (Pred.CollisionObjects.Count == 0)
+                                if (Pred.CollisionObjects.Count == 0 ||  (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable))
                                 {
-                                    spell.Cast(Pred.CastPosition);
-                                }
-                                else if (Pred.CollisionObjects.Count > 0 && Pred.CollisionObjects.Count <= passable)
-                                {
-                                    spell.Cast(Pred.CastPosition);
+                                    if (Pred.Hitchance >= HitChance.High) spell.Cast(Pred.CastPosition);
                                 }
                             }
                             else
                             {
                                 spell.Cast(crab.ServerPosition);
-                            }
-                           
+                            }                           
                         }
                         break;
+                    #endregion
                 }
             }
         }
 
         //  <summary>
-        //      GetBestCircularFarmLocation, max jungle minion then -1.
+        //      GetBestCircularFarmLocation, max jungle minion.
         //      Single = randomized
         //  </summary>
         public static void JungleCircular(Spell spell, float castrange = 0, float radius = 0, ObjectOrderTypes order = ObjectOrderTypes.None)
         {
-            NeutralMinionCamp = GetNearestCamp(Player.Position, castrange, order);
+            if (!AllowCasting) return;
+            var findrange = castrange + Math.Max(0, radius > 300 ? (radius * 2 / 3) : radius);
+            NeutralMinionCamp = GetNearestCamp(Player.Position, findrange, order);
             if (NeutralMinionCamp.Any())
             {
                 var camp = NeutralMinionCamp[0];
-                JungleMinions = GetMinions(NeutralMinionCamp[0].Position, castrange, MinionTypes.All, MinionTeam.Neutral);
-                var result = MinionManager.GetBestCircularFarmLocation(JungleMinions.Where(m => Vector3.Distance(m.ServerPosition, Player.ServerPosition) <= spell.Range).Select(m => m.ServerPosition.To2D()).ToList(), radius, castrange);
+                JungleMinions = GetMinions(camp.Position, findrange, MinionTypes.All, MinionTeam.Neutral);                
                 switch (camp.Name)
                 {
-                    //Baron
+                    #region Baron
                     case "monsterCamp_12":
-                        var baron = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Baron"));
+                        var baron = GetLargeMonsters(camp.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Baron"));
                         if (baron != null && baron.IsValidTarget())
                         {
                             Pred = spell.GetPrediction(baron);
-                            if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= spell.Range + radius)
+                            if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= findrange)
                             {
                                 if (Pred.Hitchance >= HitChance.High)
                                 {
-                                    Pos = myUtility.RandomPos(1, 25, 25, Pred.CastPosition.Extend(Player.ServerPosition, radius));
+                                    Pos = myUtility.RandomPos(5, 5, 5, Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, baron.ServerPosition)));
                                     spell.Cast(Pos);
                                 }
                             }
                         }
                         break;
-
-                    //Dragon
+                    #endregion
+                    #region Dragon
                     case "monsterCamp_6":
-                        var dragon = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Dragon"));
+                        var dragon = GetLargeMonsters(camp.Position, castrange).Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Dragon"));
                         if (dragon != null && dragon.IsValidTarget())
                         {
                             Pred = spell.GetPrediction(dragon);
-                            if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= spell.Range + radius)
+                            if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= findrange)
                             {
                                 if (Pred.Hitchance >= HitChance.High)
                                 {
-                                    Pos = myUtility.RandomPos(1, 25, 25, Pred.CastPosition.Extend(Player.ServerPosition, radius));
+                                    Pos = myUtility.RandomPos(5, 5, 5, Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, dragon.ServerPosition)));
                                     spell.Cast(Pos);
                                 }
                             }
                         }
                         break;
-
-                    //Red Brambleback                        
+                    #endregion
+                    #region Red Brambleback
                     case "monsterCamp_4":
                     case "monsterCamp_10":
-                        var bramblebackl = GetLargeMonsters(Player.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Red"));
-                        if (bramblebackl != null && bramblebackl.IsValidTarget())
+                        var bramblebacks = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Red")).ToList();
+                        var redresult = MinionManager.GetBestCircularFarmLocation(bramblebacks.Select(m => m.ServerPosition.To2D()).ToList(), radius, findrange);
+                        if (redresult.MinionsHit >= bramblebacks.Count())
                         {
-                            if (Vector2.Distance(result.Position, Player.Position.To2D()) <= castrange)
-                            {
-                                if (Minions.Count() >= result.MinionsHit && Minions.Count() >= 3)
-                                {
-                                    spell.Cast(result.Position);
-                                }
-                                else if (Minions.Count() >= 2 && result.MinionsHit >= 2)
-                                {
-                                    spell.Cast(result.Position);
-                                }
-                                else
-                                {
-                                    //Console.WriteLine("Skipping. Hit: " + result.MinionsHit + " Count: " + Minions.Count());
-                                }
-                            }
+                            spell.Cast(redresult.Position);
+                            myDevTools.DebugMode("[Red Bramblebacks] Hit: " + redresult.MinionsHit + " Count: " + bramblebacks.Count());
                         }
                         break;
-
-                    //Blue Sentinel
+                    #endregion
+                    #region Blue Sentinel
                     case "monsterCamp_1":
                     case "monsterCamp_7":
-                        var sentinell = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Blue"));
-                        if (sentinell != null && sentinell.IsValidTarget())
+                        var sentinels = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Blue")).ToList();
+                        var blueresult = MinionManager.GetBestCircularFarmLocation(sentinels.Select(m => m.ServerPosition.To2D()).ToList(), radius, findrange);
+                        if (blueresult.MinionsHit >= sentinels.Count())
                         {
-                            if (Vector2.Distance(result.Position, Player.Position.To2D()) <= castrange)
-                            {
-                                if (Minions.Count() >= result.MinionsHit && Minions.Count() >= 3)
-                                {
-                                    spell.Cast(result.Position);
-                                }
-                                else if (Minions.Count() >= 2 && result.MinionsHit >= 2)
-                                {
-                                    spell.Cast(result.Position);
-                                }
-                                else
-                                {
-                                    //Console.WriteLine("Skipping. Hit: " + result.MinionsHit + " Count: " + Minions.Count());
-                                }
-                            }
+                            spell.Cast(blueresult.Position);
+                            myDevTools.DebugMode("[Blue Sentinels] Hit: " + blueresult.MinionsHit + " Count: " + sentinels.Count());
                         }
                         break;
-
-                    //Gromp
+                    #endregion
+                    #region Gromp
                     case "monsterCamp_13":
                     case "monsterCamp_14":
-                        var gromp = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Gromp"));
+                        var gromp = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Gromp"));
                         if (gromp != null && gromp.IsValidTarget())
                         {
                             Pred = spell.GetPrediction(gromp);
-                            if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= spell.Range + radius)
+                            if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= findrange)
                             {
                                 if (Pred.Hitchance >= HitChance.High)
                                 {
-                                    Pos = myUtility.RandomPos(1, 25, 25, Pred.CastPosition.Extend(Player.ServerPosition, radius));
+                                    Pos = myUtility.RandomPos(5, 5, 5, Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, gromp.ServerPosition)));
                                     spell.Cast(Pos);
                                 }
                             }
                         }
                         break;
-
-                    //Krugs
+                    #endregion
+                    #region Krugs
                     case "monsterCamp_5":
                     case "monsterCamp_11":
-                        var krugl = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Krug"));
-                        if (krugl != null && krugl.IsValidTarget())
+                        var krugs = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Krug")).ToList();
+                        var krugresult = MinionManager.GetBestCircularFarmLocation(krugs.Select(m => m.ServerPosition.To2D()).ToList(), radius, findrange);
+                        if (krugresult.MinionsHit >= krugs.Count())
                         {
-                            if (Minions.Count() >= result.MinionsHit && Minions.Count() >= 2)
-                            {
-                                spell.Cast(result.Position);
-                            }
-                            else
-                            {
-                                //Console.WriteLine("Skipping. Hit: " + result.MinionsHit + " Count: " + Minions.Count());
-                            }
+                            spell.Cast(krugresult.Position);
+                            myDevTools.DebugMode("[Krugs] Hit: " + krugresult.MinionsHit + " Count: " + krugs.Count());
                         }
                         break;
-
-                    //wolf
+                    #endregion
+                    #region Murkwolves
                     case "monsterCamp_2":
                     case "monsterCamp_8":
-                        var murkwolfl = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Murkwolf"));
-                        if (murkwolfl != null && murkwolfl.IsValidTarget())
+                        var wolves = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Murkwolf")).ToList();
+                        var wolvesresult = MinionManager.GetBestCircularFarmLocation(wolves.Select(m => m.ServerPosition.To2D()).ToList(), radius, findrange);
+                        if (wolvesresult.MinionsHit >= wolves.Count())
                         {
-                            if (Minions.Count() >= result.MinionsHit && Minions.Count() >= 3)
-                            {
-                                spell.Cast(result.Position);
-                            }
-                            else
-                            {
-                                //Console.WriteLine("Skipping. Hit: " + result.MinionsHit + " Count: " + Minions.Count());
-                            }
+                            spell.Cast(wolvesresult.Position);
+                            myDevTools.DebugMode("[Murkwolves] Hit: " + wolvesresult.MinionsHit + " Count: " + wolves.Count());
                         }
                         break;
-
-                    //Razorbeak
+                    #endregion
+                    #region Razorbeak
                     case "monsterCamp_3":
                     case "monsterCamp_9":
-                        var razorbeak = GetLargeMonsters(camp.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Razorbeak"));
-                        if (razorbeak != null && razorbeak.IsValidTarget())
+                        var razorbeak = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead && x.CharData.BaseSkinName.Contains("SRU_Razorbeak")).ToList();
+                        var result = MinionManager.GetBestCircularFarmLocation(razorbeak.Select(m => m.ServerPosition.To2D()).ToList(), radius, findrange);
+                        if (result.MinionsHit >= razorbeak.Count())
                         {
-                            if (Minions.Count() >= result.MinionsHit && Minions.Count() >= 4)
-                            {
-                                spell.Cast(result.Position);
-                            }
-                            else if (Minions.Count() >= 3 && result.MinionsHit >= 3)
-                            {
-                                spell.Cast(result.Position);
-                            }
-                            else
-                            {
-                                //Console.WriteLine("Skipping. Hit: " + result.MinionsHit + " Count: " + Minions.Count());
-                            }
+                            spell.Cast(result.Position);
+                            myDevTools.DebugMode("[Razorbeak] Hit: " + result.MinionsHit + " Count: " + razorbeak.Count());
                         }
                         break;
-
-                    //Crab
+                    #endregion
+                    #region Crab
                     case "monsterCamp_15":
                     case "monsterCamp_16":
-                        var crab = GetLargeMonsters(Player.Position, castrange).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("SRU_Crab"));
+                        var crab = JungleMinions.Where(x => x.IsValidTarget() && !x.IsDead).FirstOrDefault(x => x.CharData.BaseSkinName.Contains("Crab"));
                         if (crab != null && crab.IsValidTarget())
                         {
                             Pred = spell.GetPrediction(crab);
-                            if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= spell.Range + radius)
+                            if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= findrange)
                             {
                                 if (Pred.Hitchance >= HitChance.High)
                                 {
-                                    Pos = myUtility.RandomPos(1, 25, 25, Pred.CastPosition.Extend(Player.ServerPosition, radius));
-                                    spell.Cast(Pos);
+                                    spell.Cast(Pred.CastPosition);
                                 }
                             }
                         }
                         break;
+                    #endregion
                 }
             }
         }
-     
-        public static void JungleLastHit(Spell spell, float castrange = 0)
-        {
-            //filters legendary, epic, buffs
-            //+smite
-        }
 
+        public static void JungleTest(Spell spell, float castrange = 0, bool smite = false)
+        {
+        }
         #endregion Jungling
     }
 }

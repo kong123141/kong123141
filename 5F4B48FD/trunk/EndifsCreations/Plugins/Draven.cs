@@ -39,14 +39,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Draven.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Draven.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Draven.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Draven.Misc.E", "E Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Draven.Misc.E2", "E Interrupts").SetValue(false));
                 
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -54,14 +54,14 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Draven.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Draven.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Draven.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
         private void Combo()
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            var UseE = config.Item("EC.Draven.Combo.E").GetValue<bool>();
+            var UseE = Root.Item("EC.Draven.Combo.E").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 try
@@ -99,11 +99,11 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Draven.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Draven.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
-                    if (config.Item("EC.Draven.Combo.W").GetValue<bool>() && W.IsReady() && Player.HasBuff("dravenspinningattack") && !Player.HasBuff("dravenfurybuff"))
+                    if (Root.Item("EC.Draven.Combo.W").GetValue<bool>() && W.IsReady() && Player.HasBuff("dravenspinningattack") && !Player.HasBuff("dravenfurybuff"))
                     {
                         W.Cast();
                     }
@@ -112,18 +112,18 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Draven.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Draven.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
                     if (myUtility.ImmuneToCC(gapcloser.Sender)) return;
-                    Utility.DelayAction.Add(myHumazier.ReactionDelay, () => mySpellcast.LinearVector(gapcloser.End,E));                    
+                    Utility.DelayAction.Add(myHumazier.ReactionDelay, () => mySpellcast.PointVector(gapcloser.End,E));                    
                 }
             }
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Draven.Misc.E2").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Draven.Misc.E2").GetValue<bool>() && E.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range)
                 {
@@ -135,19 +135,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Draven.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Draven.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Draven.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Draven.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Draven.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Draven.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Draven.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Draven.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var wtc = Drawing.WorldToScreen(Game.CursorPos);
                 var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Game.CursorPos, R.Range), R.Width);

@@ -42,10 +42,7 @@ namespace EndifsCreations.Controller
         private static readonly Render.Rectangle DamageBar = new Render.Rectangle(0, 0, 1, 8, Color.White);
         private static readonly Render.Line HealthLine = new Render.Line(Vector2.Zero, Vector2.Zero, 1, Color.White);
         public static DamageToUnitDelegate DamageToUnit { get; set; }
-        private static bool Enable
-        {
-            get { return Menu.Item("EC." + ObjectManager.Player.ChampionName + ".Draw").GetValue<bool>(); }
-        }
+
         private static Color LineColor
         {
             get { return Color.Cyan; }
@@ -59,14 +56,14 @@ namespace EndifsCreations.Controller
         public static void AddToMenu(Menu menu)
         {
             Menu = menu;
-            Menu.AddItem(new MenuItem("EC." + ObjectManager.Player.ChampionName + ".Draw", "Enable").SetValue(true));
-            Menu.AddItem(new MenuItem("EC." + ObjectManager.Player.ChampionName + ".PredictedHealth", "Predicted Health").SetValue(true));
-            Menu.AddItem(new MenuItem("EC." + ObjectManager.Player.ChampionName + ".Fill", "Fill Bar").SetValue(true));
+            Menu.AddItem(new MenuItem("EC." + ObjectManager.Player.ChampionName + ".DI.Draw", "Enable").SetValue(true));
+            Menu.AddItem(new MenuItem("EC." + ObjectManager.Player.ChampionName + ".DI.PredictedHealth", "Predicted Health").SetValue(true));
+            Menu.AddItem(new MenuItem("EC." + ObjectManager.Player.ChampionName + ".DI.Fill", "Fill Bar").SetValue(true));
         }
 
         private static void OnDraw(EventArgs args)
         {
-            if (Enable && DamageToUnit != null)
+            if (Menu.Item("EC." + ObjectManager.Player.ChampionName + ".DI.Draw").GetValue<bool>() && DamageToUnit != null)
             {
                 foreach (var unit in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValid && h.IsHPBarRendered && h.IsEnemy))
                 {
@@ -85,7 +82,7 @@ namespace EndifsCreations.Controller
                         Text.OnEndScene();
                     }
 
-                    if (Menu.Item("EC." + ObjectManager.Player.ChampionName + ".PredictedHealth").GetValue<bool>())
+                    if (Menu.Item("EC." + ObjectManager.Player.ChampionName + ".DI.PredictedHealth").GetValue<bool>())
                     {
                         HealthLine.Start = new Vector2(xPosDamage, yPos);
                         HealthLine.End = new Vector2(xPosDamage, yPos + Height);
@@ -94,7 +91,7 @@ namespace EndifsCreations.Controller
                         HealthLine.OnEndScene();
                     }
 
-                    if (Menu.Item("EC." + ObjectManager.Player.ChampionName + ".Fill").GetValue<bool>())
+                    if (Menu.Item("EC." + ObjectManager.Player.ChampionName + ".DI.Fill").GetValue<bool>())
                     {
                         var differenceInHp = xPosCurrentHp - xPosDamage;
                         DamageBar.Color = FillColor;

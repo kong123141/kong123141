@@ -11,15 +11,19 @@ namespace Slutty_Utility.MenuConfig
     {
         public static void LoadEnviormentMenu()
         {
-            var antirengar = new Menu("Anti Rengar", "Anti Rengar");
+            var antirengar = new Menu("Anti-Rengar", "Anti Rengar");
             {
-                AddBool(antirengar, "Use Anti Rengar", "enviorment.antirengar", true);
+                AddBool(antirengar, "Use Anti-Rengar", "enviorment.antirengar", true);
+                if (Player.ChampionName == "Vayne")
+                {
+                    AddBool(antirengar, "Use R in Anti-Rengar", "userantirengar", true);
+                }
             }
             Config.AddSubMenu(antirengar);
 
             var ultmanager = new Menu("Important Spells Manager", "Important Spells Manager");
             {
-                AddBool(ultmanager, "Block Movemenet", "enviorment.blockmove", true);
+                AddBool(ultmanager, "Block Movement", "enviorment.blockmove", true);
                 AddBool(ultmanager, "Smart Block", "enviorment.smartblockmove", true);
             }
             Config.AddSubMenu(ultmanager);
@@ -27,11 +31,18 @@ namespace Slutty_Utility.MenuConfig
             var wardtrack = new Menu("Ward Tracker", "Ward Tracker");
             {
                 AddBool(wardtrack, "Track Wards", "enviorment.wards", true);
-                AddBool(wardtrack, "Ping On Ward Placement", "enviorment.wardsplace", true);
-                AddBool(wardtrack, "Ping On Ward Expire", "enviorment.wardsexpire", true);
-                AddBool(wardtrack, "Notify Teamates On Ward Placement", "enviorment.wardsteam", true);
+                AddBool(wardtrack, "Ping on Ward Placement", "enviorment.wardsplace", true);
+                AddBool(wardtrack, "Ping on Ward Expire", "enviorment.wardsexpire", true);
+                AddBool(wardtrack, "Notify Teamates on Ward Placement", "enviorment.wardsteam", true);
             }
             Config.AddSubMenu(wardtrack);
+
+            var spelltracker = new Menu("Spell Tracker", "Spell Tracker");
+            {
+                AddBool(spelltracker, "Track Spells", "spelltracker", true);
+            }
+            Config.AddSubMenu(spelltracker);
+
 
         }
     }

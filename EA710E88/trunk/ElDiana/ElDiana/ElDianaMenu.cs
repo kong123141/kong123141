@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LeagueSharp;
-using LeagueSharp.Common;
-using System.Drawing;
-
-
-namespace ElDiana
+﻿namespace ElDiana
 {
+    using System;
+    using System.Drawing;
+
+    using LeagueSharp.Common;
 
     public class ElDianaMenu
     {
+        #region Static Fields
+
         public static Menu _menu;
 
+        #endregion
 
+        #region Public Methods and Operators
 
         public static void Initialize()
         {
@@ -32,19 +30,35 @@ namespace ElDiana
             _menu.AddSubMenu(targetSelector);
 
             var cMenu = new Menu("Combo", "Combo");
-            cMenu.SubMenu("R").AddItem(new MenuItem("ElDiana.Combo.R.Mode", "Mode").SetValue(new StringList(new[] { "Normal (Q->R)", "Misaya Combo (R->Q)" })));
+            cMenu.SubMenu("R")
+                .AddItem(
+                    new MenuItem("ElDiana.Combo.R.Mode", "Mode").SetValue(
+                        new StringList(new[] { "Normal (Q->R)", "Misaya Combo (R->Q)" })));
             cMenu.SubMenu("R").AddItem(new MenuItem("ElDiana.Combo.R", "Use R").SetValue(true));
-            cMenu.SubMenu("R").AddItem(new MenuItem("ElDiana.Combo.R.MisayaMinRange", "R Minimum Range for Misaya ").SetValue(new Slider(Convert.ToInt32(Diana.spells[Spells.R].Range * 0.8), 0, Convert.ToInt32(Diana.spells[Spells.R].Range))));
-            cMenu.SubMenu("R").AddItem(new MenuItem("ElDiana.Combo.R.PreventUnderTower", "Don't use ult if HP% <  ").SetValue(new Slider(20)));
+            cMenu.SubMenu("R")
+                .AddItem(
+                    new MenuItem("ElDiana.Combo.R.MisayaMinRange", "R Minimum Range for Misaya ").SetValue(
+                        new Slider(
+                            Convert.ToInt32(Diana.spells[Spells.R].Range * 0.8),
+                            0,
+                            Convert.ToInt32(Diana.spells[Spells.R].Range))));
+            cMenu.SubMenu("R")
+                .AddItem(
+                    new MenuItem("ElDiana.Combo.R.PreventUnderTower", "Don't use ult if HP% <  ").SetValue(
+                        new Slider(20)));
 
             cMenu.AddItem(new MenuItem("ElDiana.Combo.Q", "Use Q").SetValue(true));
             cMenu.AddItem(new MenuItem("ElDiana.Combo.W", "Use W").SetValue(true));
             cMenu.AddItem(new MenuItem("ElDiana.Combo.E", "Use E").SetValue(true));
             cMenu.AddItem(new MenuItem("ElDiana.Combo.Secure", "Use R to secure kill").SetValue(true));
-            cMenu.AddItem(new MenuItem("ElDiana.Combo.UseSecondRLimitation", "Max close enemies for secure kill with R").SetValue(new Slider(5, 1, 5)));
+            cMenu.AddItem(
+                new MenuItem("ElDiana.Combo.UseSecondRLimitation", "Max close enemies for secure kill with R").SetValue(
+                    new Slider(5, 1, 5)));
             cMenu.AddItem(new MenuItem("ElDiana.Combo.Ignite", "Use Ignite").SetValue(true));
             cMenu.AddItem(new MenuItem("ElDiana.ssssssssssss", ""));
-            cMenu.AddItem(new MenuItem("ElDiana.hitChance", "Hitchance Q").SetValue(new StringList(new[] { "Low", "Medium", "High", "Very High" }, 3)));
+            cMenu.AddItem(
+                new MenuItem("ElDiana.hitChance", "Hitchance Q").SetValue(
+                    new StringList(new[] { "Low", "Medium", "High", "Very High" }, 3)));
             //cMenu.AddItem(new MenuItem("ElDiana.Combo.Leapcombo", "Leap Combo").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
             cMenu.AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
 
@@ -65,9 +79,15 @@ namespace ElDiana
             lMenu.AddItem(new MenuItem("ElDiana.LaneClear.R", "Use R").SetValue(false));
             lMenu.AddItem(new MenuItem("xxx", ""));
 
-            lMenu.AddItem(new MenuItem("ElDiana.LaneClear.Count.Minions.Q", "Minions in range for Q").SetValue(new Slider(2, 1, 5)));
-            lMenu.AddItem(new MenuItem("ElDiana.LaneClear.Count.Minions.W", "Minions in range for W").SetValue(new Slider(2, 1, 5)));
-            lMenu.AddItem(new MenuItem("ElDiana.LaneClear.Count.Minions.E", "Minions in range for E").SetValue(new Slider(2, 1, 5)));
+            lMenu.AddItem(
+                new MenuItem("ElDiana.LaneClear.Count.Minions.Q", "Minions in range for Q").SetValue(
+                    new Slider(2, 1, 5)));
+            lMenu.AddItem(
+                new MenuItem("ElDiana.LaneClear.Count.Minions.W", "Minions in range for W").SetValue(
+                    new Slider(2, 1, 5)));
+            lMenu.AddItem(
+                new MenuItem("ElDiana.LaneClear.Count.Minions.E", "Minions in range for E").SetValue(
+                    new Slider(2, 1, 5)));
 
             _menu.AddSubMenu(lMenu);
 
@@ -81,7 +101,8 @@ namespace ElDiana
 
             var interruptMenu = new Menu("Interrupt", "Interrupt");
             interruptMenu.AddItem(new MenuItem("ElDiana.Interrupt.UseEInterrupt", "Use E to interrupt").SetValue(true));
-            interruptMenu.AddItem(new MenuItem("ElDiana.Interrupt.UseEDashes", "Use E to interrupt dashes").SetValue(true));
+            interruptMenu.AddItem(
+                new MenuItem("ElDiana.Interrupt.UseEDashes", "Use E to interrupt dashes").SetValue(true));
 
             _menu.AddSubMenu(interruptMenu);
 
@@ -96,19 +117,26 @@ namespace ElDiana
             miscMenu.AddItem(new MenuItem("ElDiana.misc.Notifications", "Use Notifications").SetValue(true));
             miscMenu.AddItem(new MenuItem("ezeazeezaze", ""));
 
-            var switchComboMenu = new MenuItem("ElDiana.Hotkey.ToggleComboMode", "Toggle Combo Mode Hotkey").SetValue(new KeyBind(84, KeyBindType.Press));
+            var switchComboMenu =
+                new MenuItem("ElDiana.Hotkey.ToggleComboMode", "Toggle Combo Mode Hotkey").SetValue(
+                    new KeyBind(84, KeyBindType.Press));
             miscMenu.AddItem(switchComboMenu);
             switchComboMenu.ValueChanged += (sender, eventArgs) =>
-            {
-                if (eventArgs.GetNewValue<KeyBind>().Active)
-                    Diana.Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.Combo;
-                else
-                    Diana.Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.None;
-
-            };
+                {
+                    if (eventArgs.GetNewValue<KeyBind>().Active)
+                    {
+                        Diana.Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.Combo;
+                    }
+                    else
+                    {
+                        Diana.Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.None;
+                    }
+                };
 
             var dmgAfterE = new MenuItem("ElDiana.DrawComboDamage", "Draw combo damage").SetValue(true);
-            var drawFill = new MenuItem("ElDiana.DrawColour", "Fill colour", true).SetValue(new Circle(true, Color.FromArgb(204, 204, 0, 0)));
+            var drawFill =
+                new MenuItem("ElDiana.DrawColour", "Fill colour", true).SetValue(
+                    new Circle(true, Color.FromArgb(204, 204, 0, 0)));
             miscMenu.AddItem(drawFill);
             miscMenu.AddItem(dmgAfterE);
 
@@ -117,16 +145,17 @@ namespace ElDiana
             DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
             DrawDamage.FillColor = drawFill.GetValue<Circle>().Color;
 
-            dmgAfterE.ValueChanged += delegate (object sender, OnValueChangeEventArgs eventArgs)
-            {
-                DrawDamage.Enabled = eventArgs.GetNewValue<bool>();
-            };
+            dmgAfterE.ValueChanged +=
+                delegate(object sender, OnValueChangeEventArgs eventArgs)
+                    {
+                        DrawDamage.Enabled = eventArgs.GetNewValue<bool>();
+                    };
 
-            drawFill.ValueChanged += delegate (object sender, OnValueChangeEventArgs eventArgs)
-            {
-                DrawDamage.Fill = eventArgs.GetNewValue<Circle>().Active;
-                DrawDamage.FillColor = eventArgs.GetNewValue<Circle>().Color;
-            };
+            drawFill.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+                {
+                    DrawDamage.Fill = eventArgs.GetNewValue<Circle>().Active;
+                    DrawDamage.FillColor = eventArgs.GetNewValue<Circle>().Color;
+                };
 
             _menu.AddSubMenu(miscMenu);
 
@@ -137,12 +166,14 @@ namespace ElDiana
             _menu.AddSubMenu(credits);
 
             _menu.AddItem(new MenuItem("422442fsaafs4242f", ""));
-            _menu.AddItem(new MenuItem("422442fsaafsf", String.Format("Version: {0}",Diana.ScriptVersion)));
+            _menu.AddItem(new MenuItem("422442fsaafsf", string.Format("Version: {0}", Diana.ScriptVersion)));
             _menu.AddItem(new MenuItem("fsasfafsfsafsa", "Made By jQuery"));
 
             _menu.AddToMainMenu();
 
             Console.WriteLine("Menu Loaded");
         }
+
+        #endregion
     }
 }

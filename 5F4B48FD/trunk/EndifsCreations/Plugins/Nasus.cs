@@ -41,14 +41,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Nasus.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Nasus.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Nasus.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Nasus.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Nasus.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Nasus.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -57,26 +57,26 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Nasus.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Nasus.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Nasus.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Nasus.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Nasus.Jungle.E", "Use E").SetValue(true)); 
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Nasus.Misc.Q", "Q Turrets").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Nasus.Misc.W", "W Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Nasus.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nasus.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nasus.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -84,11 +84,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range + 400, TargetSelector.DamageType.Physical);
 
-            //var UseQ = config.Item("EC.Nasus.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Nasus.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Nasus.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Nasus.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Nasus.Combo.Items").GetValue<bool>();
+            //var UseQ = Root.Item("EC.Nasus.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Nasus.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Nasus.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Nasus.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Nasus.Combo.Items").GetValue<bool>();
             if (UseR && R.IsReady())
             {
                 if (Player.CountEnemiesInRange(300) > 1) R.Cast();
@@ -107,7 +107,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseE && E.IsReady())
                     {
-                        mySpellcast.CircularAoe(Target, E, HitChance.High);
+                        mySpellcast.CircularAoe(Target, E, HitChance.High, E.Range, 400);
                     }                    
                     if (CastItems)
                     {
@@ -127,8 +127,8 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseW = config.Item("EC.Nasus.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Nasus.Harass.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Nasus.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Nasus.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -140,24 +140,24 @@ namespace EndifsCreations.Plugins
                 if (UseE && E.IsReady())
                 {
                     if (Player.UnderTurret(true) && target.UnderTurret(true)) return;
-                    mySpellcast.CircularAoe(target, E, HitChance.High);
+                    mySpellcast.CircularAoe(target, E, HitChance.High, E.Range, 400);
                 }
             }
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Nasus.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Nasus.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && myOrbwalker.IsWaiting())
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Nasus.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Nasus.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && myOrbwalker.Waiting)
             {
                 Q.Cast();
             }
-            if (config.Item("EC.Nasus.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Nasus.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
             {
                 if (Player.UnderTurret(true)) return;
                 var minionE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 if (minionE == null) return;
                 var epred = E.GetCircularFarmLocation(minionE);
-                if (epred.MinionsHit > config.Item("EC.Nasus.Farm.E.Value").GetValue<Slider>().Value)
+                if (epred.MinionsHit > Root.Item("EC.Nasus.Farm.E.Value").GetValue<Slider>().Value)
                 {
                     E.Cast(epred.Position);
                 }
@@ -171,7 +171,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null && !Player.IsWindingUp)
             {
-                if (config.Item("EC.Nasus.Jungle.Q").GetValue<bool>() && Q.IsReady() && Orbwalking.InAutoAttackRange(mob))
+                if (Root.Item("EC.Nasus.Jungle.Q").GetValue<bool>() && Q.IsReady() && Orbwalking.InAutoAttackRange(mob))
                 {
                     if (largemobs != null && Q.IsKillable(largemobs))
                     {
@@ -181,21 +181,16 @@ namespace EndifsCreations.Plugins
                     {
                         Q.Cast();
                     }
-                }
-                if (config.Item("EC.Nasus.Jungle.E").GetValue<bool>() && E.IsReady())
-                {
-                    List<Obj_AI_Base> MobsE = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-                    MinionManager.FarmLocation ECircular = E.GetCircularFarmLocation(MobsE);
-                    if (ECircular.MinionsHit > 0)
-                    {
-                        E.Cast(ECircular.Position.To3D().Shorten(Player.ServerPosition, 50f));
-                    }
-                }
+                }               
+            }
+            if (Root.Item("EC.Nasus.Jungle.E").GetValue<bool>() && E.IsReady())
+            {
+                myFarmManager.JungleCircular(E, E.Range, 400);
             }
         }
         private void LastHit()
         {
-            if (myOrbwalker.IsWaiting() && !Player.IsWindingUp && config.Item("EC.Nasus.UseQLastHit").GetValue<bool>() && Q.IsReady())
+            if (myOrbwalker.Waiting && !Player.IsWindingUp && Root.Item("EC.Nasus.UseQLastHit").GetValue<bool>() && Q.IsReady())
             {
                 Q.Cast();
             }
@@ -223,7 +218,7 @@ namespace EndifsCreations.Plugins
                     {
                         if (E.IsReady())
                         {
-                            mySpellcast.LinearVector(Target.Position, E, Target.BoundingRadius);
+                            mySpellcast.PointVector(Target.Position, E, Target.BoundingRadius);
                         }
                     }
                     break;
@@ -244,7 +239,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Nasus.Farm.Q").GetValue<bool>() && Q.IsReady() && (myUtility.PlayerManaPercentage > config.Item("EC.Nasus.Farm.ManaPercent").GetValue<Slider>().Value))
+            if (Root.Item("EC.Nasus.Farm.Q").GetValue<bool>() && Q.IsReady() && (myUtility.PlayerManaPercentage > Root.Item("EC.Nasus.Farm.ManaPercent").GetValue<Slider>().Value))
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null &&
@@ -257,7 +252,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Nasus.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Nasus.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.Sender.ServerPosition) <= W.Range)
                 {
@@ -272,7 +267,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {                    
-                    if (config.Item("EC.Nasus.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Nasus.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
@@ -286,7 +281,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Nasus.Combo.Items").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.Nasus.Combo.Items").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
                     {
                         myItemManager.UseItems(2, null);
                     }
@@ -302,7 +297,7 @@ namespace EndifsCreations.Plugins
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear)
                 {
                     if (target is Obj_AI_Turret && target.Team != Player.Team &&
-                        config.Item("EC.Nasus.Misc.Q").GetValue<bool>() &&
+                        Root.Item("EC.Nasus.Misc.Q").GetValue<bool>() &&
                         Orbwalking.InAutoAttackRange(target))
                     {
                         Q.Cast();
@@ -313,15 +308,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Nasus.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Nasus.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Nasus.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Nasus.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Nasus.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Nasus.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

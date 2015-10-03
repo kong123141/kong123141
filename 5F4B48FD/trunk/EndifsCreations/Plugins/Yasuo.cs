@@ -49,19 +49,19 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Yasuo.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Yasuo.Combo.R", "Use R").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Yasuo.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
                 laneclearmenu.AddItem(new MenuItem("EC.Yasuo.Farm.Q", "Use Q").SetValue(true));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Yasuo.Misc.Q", "Q Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Yasuo.Misc.Q2", "Q Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Yasuo.Misc.W", "W Spell Block").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
 
             var drawmenu = new Menu("Draw", "Draw");
@@ -70,7 +70,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Yasuo.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Yasuo.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Yasuo.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
 
         }
@@ -79,10 +79,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q2.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Yasuo.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Yasuo.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Yasuo.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Yasuo.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Yasuo.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Yasuo.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Yasuo.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Yasuo.Combo.Items").GetValue<bool>();
             
             if (Target.IsValidTarget())
             {
@@ -93,7 +93,7 @@ namespace EndifsCreations.Plugins
                         if (Player.HasBuff("YasuoQ3W"))
                         {
                             //Q2 or Q3
-                            if (!Player.IsDashing() || myUtility.TickCount - Player.GetDashInfo().EndTick >= 1f)
+                            if (!Player.IsDashing() || myUtility.TickCount - Player.GetDashInfo().EndTick > 600)
                             {
                                 mySpellcast.Linear(Target, Q2, HitChance.Medium);
                             }
@@ -175,9 +175,9 @@ namespace EndifsCreations.Plugins
                     Combo();
                     break;
                 case myOrbwalker.OrbwalkingMode.LaneClear:
-                    if (config.Item("EC.Yasuo.Farm.Q").GetValue<bool>())
+                    if (Root.Item("EC.Yasuo.Farm.Q").GetValue<bool>())
                     {
-                        if (Q.IsReady() && (!Player.IsDashing() || myUtility.TickCount - Player.GetDashInfo().EndTick >= 0.5f))
+                        if (Q.IsReady() && (!Player.IsDashing() || myUtility.TickCount - Player.GetDashInfo().EndTick >= 500))
                         {
                             if (Player.HasBuff("YasuoQ3W"))
                             {
@@ -190,11 +190,25 @@ namespace EndifsCreations.Plugins
                         }
                     }
                     break;
+                case myOrbwalker.OrbwalkingMode.JungleClear:
+                    
+                    if (Q.IsReady())
+                    {
+                        if (Player.HasBuff("YasuoQ3W"))
+                        {
+                            myFarmManager.JungleLinear(Q2, Q2.Range);
+                        }
+                        else
+                        {
+                            myFarmManager.JungleLinear(Q, Q.Range);
+                        }
+                    }
+                    break;
             }
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R && config.Item("EC.Yasuo.Combo.Items").GetValue<bool>())
+            if (args.Slot == SpellSlot.R && Root.Item("EC.Yasuo.Combo.Items").GetValue<bool>())
             {
                 Utility.DelayAction.Add(myHumazier.ReactionDelay, () => myItemManager.UseGhostblade());
             }
@@ -210,12 +224,10 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Yasuo.Combo.W").GetValue<bool>()) || (config.Item("EC.Yasuo.Misc.W").GetValue<bool>()))
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Yasuo.Combo.W").GetValue<bool>()) || (Root.Item("EC.Yasuo.Misc.W").GetValue<bool>()))
                 {
-                    if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || 
-                        spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || 
-                        spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || 
-                        spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
+                    if ((spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone)) &&
+                        spell.SData.MissileSpeed > 20)
                     {
                         var box = new Geometry.Polygon.Rectangle(spell.Start, spell.End, spell.SData.LineWidth);
                         if (box.Points.Any(point => point.Distance(Player.ServerPosition.To2D()) <= 150))
@@ -236,14 +248,14 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Yasuo.Combo.Items").GetValue<bool>()) && Orbwalking.InAutoAttackRange(target))
+            if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Yasuo.Combo.Items").GetValue<bool>()) && Orbwalking.InAutoAttackRange(target))
             {
                 myItemManager.UseItems(2, null);
             }
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Yasuo.Misc.Q2").GetValue<bool>() && Q.IsReady() && Player.HasBuff("YasuoQ3W"))
+            if (Root.Item("EC.Yasuo.Misc.Q2").GetValue<bool>() && Q.IsReady() && Player.HasBuff("YasuoQ3W"))
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= Q2.Range)
                 {
@@ -254,19 +266,19 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Yasuo.Misc.Q2").GetValue<bool>() && Q.IsReady() && Player.HasBuff("YasuoQ3W"))
+            if (Root.Item("EC.Yasuo.Misc.Q2").GetValue<bool>() && Q.IsReady() && Player.HasBuff("YasuoQ3W"))
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q2.Range)
                 {
                     if (myUtility.ImmuneToCC(gapcloser.Sender)) return;
-                    Utility.DelayAction.Add(myHumazier.ReactionDelay, () =>  mySpellcast.LinearVector(gapcloser.End, Q2, Target.BoundingRadius));
+                    Utility.DelayAction.Add(myHumazier.ReactionDelay, () =>  mySpellcast.PointVector(gapcloser.End, Q2, Target.BoundingRadius));
                 }
             }
         }
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Yasuo.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Yasuo.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 if (Player.HasBuff("YasuoQ3W"))
                 {
@@ -278,15 +290,15 @@ namespace EndifsCreations.Plugins
                     Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
                 }
             }
-            if (config.Item("EC.Yasuo.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Yasuo.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Yasuo.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Yasuo.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Yasuo.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Yasuo.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

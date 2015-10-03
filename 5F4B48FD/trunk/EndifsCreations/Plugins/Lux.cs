@@ -42,20 +42,20 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Lux.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Lux.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Lux.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Lux.Misc.Q", "Q Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Lux.Misc.W", "W Shields").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Lux.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Lux.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Lux.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -63,9 +63,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Lux.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Lux.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Lux.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Lux.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Lux.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Lux.Combo.R").GetValue<bool>();
             if (UseR && R.IsReady())
             {
                 if (Target.IsValidTarget() && myUtility.MovementDisabled(Target))
@@ -170,7 +170,7 @@ namespace EndifsCreations.Plugins
                 case myOrbwalker.OrbwalkingMode.LaneClear:
                     if (Q.IsReady())
                     {
-                        myFarmManager.LaneLinear(Q, Q.Range, true, false, 1);
+                        myFarmManager.LaneLinear(Q, Q.Range, false, true, 1);
                     }
                     break;
             }
@@ -204,7 +204,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if (config.Item("EC.Lux.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Lux.Combo.W").GetValue<bool>()) && W.IsReady())
+                if (Root.Item("EC.Lux.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Lux.Combo.W").GetValue<bool>()) && W.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -227,7 +227,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Lux.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Lux.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.Sender.ServerPosition) <= Q.Range)
                 {
@@ -239,11 +239,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Lux.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Lux.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Lux.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Lux.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var wtc = Drawing.WorldToScreen(Game.CursorPos);
                 var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Game.CursorPos, R.Range), R.Width);

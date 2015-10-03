@@ -41,6 +41,7 @@ namespace LeeSin
         private static Vector3 firstpos;
         private static int canmove=1;
         private static int instypecheck;
+        private static float wardtime;
         private static float inscount;
         private static float counttime;
         private static float qcasttime;
@@ -195,6 +196,7 @@ namespace LeeSin
                 _config.AddSubMenu(new Menu("Misc", "Misc"));
                 _config.SubMenu("Misc").AddItem(new MenuItem("UseIgnitekill", "Use Ignite KillSteal")).SetValue(true);
                 _config.SubMenu("Misc").AddItem(new MenuItem("UseEM", "Use E KillSteal")).SetValue(true);
+                _config.SubMenu("Misc").AddItem(new MenuItem("UseRM", "Use R KillSteal")).SetValue(true);
                 _config.SubMenu("Misc").AddItem(new MenuItem("wjump", "ward jump")).SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press));
                 _config.SubMenu("Misc").AddItem(new MenuItem("wjmax", "ward jump max range?")).SetValue(false);
 
@@ -379,20 +381,15 @@ namespace LeeSin
                     _player.Spellbook.CastSpell(_smitedmgSlot, t);
                 }
             }
-            if (ComboDamage(t) > t.Health && t.Distance(_player.Position) < 950 && _r.IsReady())
-            {
-                if (t.Distance(_player.Position) > 500)
-                    WardJump(t.Position, true, true, true);
-                if (t.Distance(_player.Position) <= 375 && (t.HasBuff("BlindMonkQOne") || t.HasBuff("blindmonkqonechaos") || _player.GetSpellDamage(t, SpellSlot.R) > t.Health))
-                    _r.CastOnUnit(t);
-            }
 
-            if (t.IsValidTarget() && _q.IsReady())
+            if (t.IsValidTarget() && _q.IsReady() && t.Distance(_player.Position) < 1100)
             {
                 CastQ1(t);
-                if (t.HasBuff("BlindMonkQOne") || t.HasBuff("blindmonkqonechaos") && (ComboDamage(t) > t.Health || t.Distance(_player.Position) > 350 || Environment.TickCount > qcasttime + 2500))
-                    _q.Cast();
             }
+
+            if (t.HasBuff("BlindMonkQOne") || t.HasBuff("blindmonkqonechaos") && (ComboDamage(t) > t.Health || t.Distance(_player.Position) > 350 || Environment.TickCount > qcasttime + 2500))
+                _q.Cast();
+            
 
             CastECombo();
             UseItemes(t);
@@ -470,12 +467,14 @@ namespace LeeSin
         }
          private static void placeward(Vector3 castpos)
         {
-            if (WStage != WCastStage.First)
+            if (WStage != WCastStage.First||Environment.TickCount<wardtime + 2000)
             {
                 return;
             }
             var ward = Items.GetWardSlot();
             _player.Spellbook.CastSpell(ward.SpellSlot, castpos);
+            wardtime = Environment.TickCount;
+
           
             
         }
@@ -598,6 +597,15 @@ namespace LeeSin
          {
              if (insobj != null&& instypecheck==2)
                  insdirec = insobj.Position;
+             if (t.ServerPosition.Distance(insdirec) + 100 < _player.Position.Distance(insdirec) && _r.IsReady())
+             {
+                 _r.CastOnUnit(t);
+                 if (LastCastedSpell.LastCastPacketSent.Slot == SpellSlot.R)
+                 {
+                     inscount = Environment.TickCount;
+                     canmove = 1;
+                 }
+             }
              if (canmove==1)
              {
                  _player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
@@ -608,6 +616,7 @@ namespace LeeSin
                  canmove = 1;
                  return;
              }
+
 
 
             insecpos = t.ServerPosition.Extend(insdirec, -300);
@@ -652,12 +661,7 @@ namespace LeeSin
                 counttime = Environment.TickCount;
                 canmove = 0;
             }
-            if (t.ServerPosition.Distance(insdirec)+100 < _player.Position.Distance(insdirec) && WStage != WCastStage.First)
-            {
-                _r.CastOnUnit(t);
-                inscount = Environment.TickCount;
-                canmove = 1;
-            }
+
 
         }
        
@@ -998,6 +1002,12 @@ namespace LeeSin
                 {
                     _player.Spellbook.CastSpell(_igniteSlot, enemyVisible);
                 }
+            }
+            if (_r.IsReady() && _config.Item("UseRM").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(_r.Range, TargetSelector.DamageType.Physical);
+                if (_player.GetSpellDamage(t, SpellSlot.R) > t.Health && _player.Distance(t.ServerPosition) <= _r.Range)
+                    _r.CastOnUnit(t);
             }
 
 

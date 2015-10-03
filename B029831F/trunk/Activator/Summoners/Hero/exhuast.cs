@@ -55,19 +55,21 @@ namespace Activator.Summoners
                     UseSpellOn(enemy);
                 }
 
-                if (!Parent.Item(Parent.Name + "useon" + enemy.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + enemy.NetworkId).GetValue<bool>())
                     continue;
  
                 if (Menu.Item("use" + Name + "ulti").GetValue<bool>())
                 {
                     if (hero.IncomeDamage > 0 && hero.HitTypes.Contains(HitType.Ultimate))
                     {
-                        if (hero.IncomeDamage / hero.Player.MaxHealth * 100 >= 45 ||
-                            hero.Player.Health / hero.Player.MaxHealth * 100 <= 35 ||
-                            hero.IncomeDamage >= hero.Player.Health)
-                        {
-                            UseSpellOn(enemy);            
-                        }
+                        if (hero.IncomeDamage / hero.Player.MaxHealth * 100 >= 45)
+                            UseSpellOn(enemy, Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
+
+                        else if (hero.Player.Health / hero.Player.MaxHealth * 100 <= 50)
+                            UseSpellOn(enemy, Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
+
+                        else if (hero.IncomeDamage >= hero.Player.Health)
+                            UseSpellOn(enemy, Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                     }
                 }
 
@@ -77,7 +79,7 @@ namespace Activator.Summoners
                     {
                         if (enemy.NetworkId == hid.Player.NetworkId)
                         {
-                            UseSpellOn(enemy);
+                            UseSpellOn(enemy, Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                         }
                     }
                 }
@@ -86,7 +88,7 @@ namespace Activator.Summoners
                 {
                     if (!enemy.IsFacing(hero.Player))
                     {
-                        UseSpellOn(enemy);
+                        UseSpellOn(enemy, Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                     }       
                 }
             }

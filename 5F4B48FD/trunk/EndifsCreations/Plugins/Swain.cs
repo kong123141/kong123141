@@ -41,13 +41,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Swain.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Swain.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Swain.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Swain.Misc.W", "W Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Swain.Misc.W2", "W Interrupts").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -55,7 +55,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Swain.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Swain.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Swain.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -63,10 +63,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Swain.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Swain.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Swain.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Swain.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Swain.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Swain.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Swain.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Swain.Combo.R").GetValue<bool>();
 
             if (UseR)
             {
@@ -95,7 +95,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseW && W.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, W, HitChance.High);
+                        mySpellcast.CircularAoe(Target, W, HitChance.High, W.Range, 275);
                     }
                     if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
@@ -135,7 +135,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Swain.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Swain.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= W.Range + (W.Width/2))
                 {
@@ -147,7 +147,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Swain.Misc.W2").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Swain.Misc.W2").GetValue<bool>() && W.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= W.Range + (W.Width / 2))
                 {
@@ -167,19 +167,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Swain.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Swain.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Swain.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Swain.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Swain.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Swain.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Swain.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Swain.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Drawing.DrawText(Player.HPBarPosition.X + 10, Player.HPBarPosition.Y - 15, Color.Yellow, "Hits: " + Player.CountEnemiesInRange(R.Range));
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);

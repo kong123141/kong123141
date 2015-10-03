@@ -67,26 +67,30 @@ namespace Activator.Items.Cleansers
             {
                 if (hero.Player.NetworkId == Player.NetworkId)
                 {
-                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                         continue;
 
-                    if (hero.Player.Distance(Player.ServerPosition) > Range)
-                        continue;
+                    if (hero.ForceQSS)
+                    {
+                        UseItem();
+                        hero.QSSBuffCount = 0;
+                        hero.QSSHighestBuffTime = 0;
+                    }
 
-                    Auras.CheckDervish(hero.Player);
+                    Buffs.CheckDervish(hero.Player);
 
                     if (hero.DervishBuffCount >= Menu.Item("use" + Name + "number").GetValue<Slider>().Value &&
                         hero.DervishHighestBuffTime >= Menu.Item("use" + Name + "time").GetValue<Slider>().Value)
                     {
-                        //if (!Menu.Item("use" + Name + "od").GetValue<bool>())
-                        //{
+                        if (!Menu.Item("use" + Name + "od").GetValue<bool>())
+                        {
                             Utility.DelayAction.Add(Game.Ping + Menu.Item("use" + Name + "delay").GetValue<Slider>().Value, delegate
                             {
                                 UseItem(Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                                 hero.DervishBuffCount = 0;
                                 hero.DervishHighestBuffTime = 0;
                             });
-                        //}
+                        }
                     }
                 }
             }

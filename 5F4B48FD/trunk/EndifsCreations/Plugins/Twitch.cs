@@ -40,14 +40,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Twitch.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Twitch.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Twitch.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Twitch.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Twitch.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Twitch.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -55,9 +55,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
-            var UseW = config.Item("EC.Twitch.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Twitch.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Twitch.Combo.R").GetValue<bool>();
+            var UseW = Root.Item("EC.Twitch.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Twitch.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Twitch.Combo.R").GetValue<bool>();
             if (UseE && E.IsReady())
             {
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && x.HasBuff("twitchdeadlyvenom"));                
@@ -72,7 +72,7 @@ namespace EndifsCreations.Plugins
                 {
                     if (UseW && W.IsReady())
                     {
-                        mySpellcast.CircularAoe(Target,W,HitChance.High);
+                        mySpellcast.CircularAoe(Target,W,HitChance.High, W.Range, 120);
                     }
                     if (UseR && R.IsReady())
                     {
@@ -111,7 +111,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Twitch.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Twitch.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
@@ -122,7 +122,7 @@ namespace EndifsCreations.Plugins
         {
             if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
             {
-                if (args.Slot == SpellSlot.R && config.Item("EC.Twitch.Combo.Items").GetValue<bool>())
+                if (args.Slot == SpellSlot.R && Root.Item("EC.Twitch.Combo.Items").GetValue<bool>())
                 {
                     myItemManager.UseGhostblade();
                 }
@@ -132,15 +132,15 @@ namespace EndifsCreations.Plugins
         {
             if (Player.IsDead) return;
    
-            if (config.Item("EC.Twitch.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Twitch.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Twitch.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Twitch.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Twitch.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Twitch.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

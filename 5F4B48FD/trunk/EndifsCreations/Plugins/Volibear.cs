@@ -37,14 +37,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Volibear.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Volibear.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Volibear.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Volibear.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Volibear.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Volibear.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -52,19 +52,19 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Volibear.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Volibear.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Volibear.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Volibear.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Volibear.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Volibear.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Volibear.Misc.E", "E Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
         }
         
@@ -72,11 +72,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(W.Range * 2, TargetSelector.DamageType.Physical);      
 
-            var UseQ = config.Item("EC.Volibear.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Volibear.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Volibear.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Volibear.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Volibear.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Volibear.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Volibear.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Volibear.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Volibear.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Volibear.Combo.Items").GetValue<bool>();
             if (UseE && E.IsReady())
             {
                 if (Player.CountEnemiesInRange(400) > 0)
@@ -131,10 +131,10 @@ namespace EndifsCreations.Plugins
         private void Harass()
         {
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, false);
-            var UseQ = config.Item("EC.Volibear.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Volibear.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Volibear.Harass.E").GetValue<bool>();
-            if (target.IsValidTarget() && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            var UseQ = Root.Item("EC.Volibear.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Volibear.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Volibear.Harass.E").GetValue<bool>();
+            if (target.IsValidTarget() && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 if (UseQ && Q.IsReady() && !target.UnderTurret(true))
                 {
@@ -165,8 +165,8 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Volibear.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Volibear.Farm.W").GetValue<bool>() && !Player.IsWindingUp && Player.HasBuff("volibearwparticle"))
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Volibear.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Volibear.Farm.W").GetValue<bool>() && !Player.IsWindingUp && Player.HasBuff("volibearwparticle"))
             {
                 var minionW = MinionManager.GetMinions(Player.ServerPosition, W.Range);
                 if (minionW == null) return;
@@ -190,10 +190,10 @@ namespace EndifsCreations.Plugins
                     }
                 }
             }
-            if (config.Item("EC.Volibear.Farm.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Volibear.Farm.E").GetValue<bool>() && E.IsReady())
             {
                 var minionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None);
-                if (minionsE.Count > config.Item("EC.Volibear.Farm.E.Value").GetValue<Slider>().Value && myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+                if (minionsE.Count > Root.Item("EC.Volibear.Farm.E.Value").GetValue<Slider>().Value && myOrbwalker.Waiting && !Player.IsWindingUp)
                 {
                     E.Cast();
                 }
@@ -207,14 +207,14 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null && !Player.IsWindingUp)
             {
-                if (config.Item("EC.Volibear.Jungle.Q").GetValue<bool>() && Q.IsReady())
+                if (Root.Item("EC.Volibear.Jungle.Q").GetValue<bool>() && Q.IsReady())
                 {
                     if (largemobs != null && Orbwalking.InAutoAttackRange(largemobs))
                     {
                         Q.Cast();
                     }
                 }
-                if (config.Item("EC.Volibear.Jungle.W").GetValue<bool>() && W.IsReady())
+                if (Root.Item("EC.Volibear.Jungle.W").GetValue<bool>() && W.IsReady())
                 {
                     if (largemobs != null && W.IsKillable(largemobs) && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < W.Range)
                     {
@@ -225,7 +225,7 @@ namespace EndifsCreations.Plugins
                         W.Cast(mob);
                     }
                 }
-                if (config.Item("EC.Volibear.Jungle.E").GetValue<bool>() && E.IsReady())
+                if (Root.Item("EC.Volibear.Jungle.E").GetValue<bool>() && E.IsReady())
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < E.Range)
                     {
@@ -267,7 +267,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Volibear.Farm.W").GetValue<bool>() && W.IsReady() && (myUtility.PlayerManaPercentage > config.Item("EC.Volibear.Farm.ManaPercent").GetValue<Slider>().Value))
+            if (Root.Item("EC.Volibear.Farm.W").GetValue<bool>() && W.IsReady() && (myUtility.PlayerManaPercentage > Root.Item("EC.Volibear.Farm.ManaPercent").GetValue<Slider>().Value))
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null &&
@@ -280,7 +280,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Volibear.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Volibear.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -292,15 +292,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Volibear.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Volibear.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Volibear.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Volibear.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Volibear.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Volibear.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

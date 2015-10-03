@@ -35,11 +35,11 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Solar Flare", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Leona.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Leona.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Leona.UseRHitChecks", "Only if hits").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Leona.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Leona.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -48,14 +48,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Leona.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Leona.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Leona.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Leona.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Leona.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Leona.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -65,14 +65,14 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Leona.Farm.W.Value", "W More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Leona.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Leona.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Leona.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Leona.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Leona.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
@@ -80,13 +80,13 @@ namespace EndifsCreations.Plugins
                 miscmenu.AddItem(new MenuItem("EC.Leona.Misc.Q", "Q Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Leona.Misc.E", "E Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Leona.Misc.W", "W Shields").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Leona.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Leona.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -94,9 +94,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
-            var UseW = config.Item("EC.Leona.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Leona.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Leona.Combo.Items").GetValue<bool>();
+            var UseW = Root.Item("EC.Leona.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Leona.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Leona.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -114,7 +114,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseE && E.IsReady())
                     {
-                        if (Target.UnderTurret(true) && !config.Item("EC.Leona.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.UnderTurret(true) && !Root.Item("EC.Leona.Combo.Dive").GetValue<bool>()) return;
                         if (myUtility.ImmuneToCC(Target) || myUtility.ImmuneToMagic(Target)) return;
                         mySpellcast.Linear(Target, E, ERHitChance);
                     } 
@@ -132,8 +132,8 @@ namespace EndifsCreations.Plugins
         private void Harass()
         {
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, false);            
-            var UseW = config.Item("EC.Leona.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Leona.Harass.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Leona.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Leona.Harass.E").GetValue<bool>();
             if (target.IsValidTarget())
             {
                 if (UseW && W.IsReady())
@@ -153,17 +153,17 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Leona.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Leona.Farm.W").GetValue<bool>())
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Leona.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Leona.Farm.W").GetValue<bool>())
             {
                 var minionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range).Count();
-                if (minionsW > config.Item("EC.Leona.Farm.W.Value").GetValue<Slider>().Value) W.Cast();
+                if (minionsW > Root.Item("EC.Leona.Farm.W.Value").GetValue<Slider>().Value) W.Cast();
             }
-            if (config.Item("EC.Leona.Farm.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Leona.Farm.E").GetValue<bool>() && E.IsReady())
             {
                 var minionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 var ELine = E.GetLineFarmLocation(minionsE);
-                if (ELine.MinionsHit > config.Item("EC.Leona.Farm.E.Value").GetValue<Slider>().Value && !Player.IsWindingUp && !myOrbwalker.IsWaiting())
+                if (ELine.MinionsHit > Root.Item("EC.Leona.Farm.E.Value").GetValue<Slider>().Value && !Player.IsWindingUp && !myOrbwalker.Waiting)
                 {
                     if (Player.UnderTurret(true)) return;
                     var target = TargetSelector.GetTarget(Vector3.Distance(ELine.Position.To3D(), Player.ServerPosition) + E.Width, TargetSelector.DamageType.Magical);
@@ -182,14 +182,14 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null && !Player.IsWindingUp)
             {
-                if (config.Item("EC.Leona.Jungle.Q").GetValue<bool>() && Q.IsReady())
+                if (Root.Item("EC.Leona.Jungle.Q").GetValue<bool>() && Q.IsReady())
                 {
                     if (largemobs != null && Orbwalking.InAutoAttackRange(largemobs))
                     {
                         Q.Cast();
                     }
                 }
-                if (config.Item("EC.Leona.Jungle.W").GetValue<bool>() && W.IsReady())
+                if (Root.Item("EC.Leona.Jungle.W").GetValue<bool>() && W.IsReady())
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < W.Width)
                     {
@@ -200,7 +200,7 @@ namespace EndifsCreations.Plugins
                         W.Cast(mob);
                     }
                 }
-                if (config.Item("EC.Leona.Jungle.E").GetValue<bool>() && E.IsReady())
+                if (Root.Item("EC.Leona.Jungle.E").GetValue<bool>() && E.IsReady())
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < E.Range)
                     {
@@ -246,7 +246,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetERHitChance()
         {
-            switch (config.Item("EC.Leona.ERPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Leona.ERPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -311,7 +311,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && (config.Item("EC.Leona.UseRHitChecks").GetValue<bool>()))
+            if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && (Root.Item("EC.Leona.UseRHitChecks").GetValue<bool>()))
             {
                 if (args.Slot == SpellSlot.R && myUtility.SpellHits(R).Item1 == 0)
                 {
@@ -330,7 +330,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if (config.Item("EC.Leona.Misc.W").GetValue<bool>() || config.Item("EC.Leona.Combo.W").GetValue<bool>() && myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)                    
+                if (Root.Item("EC.Leona.Misc.W").GetValue<bool>() || Root.Item("EC.Leona.Combo.W").GetValue<bool>() && myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)                    
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -363,9 +363,9 @@ namespace EndifsCreations.Plugins
                 }                
                 if (target is Obj_AI_Minion && target.IsValidTarget())
                 {
-                    if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear && config.Item("EC.Leona.Farm.Q").GetValue<bool>())
+                    if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear && Root.Item("EC.Leona.Farm.Q").GetValue<bool>())
                     {
-                        if (myUtility.PlayerManaPercentage < config.Item("EC.Leona.Farm.ManaPercent").GetValue<Slider>().Value) return;
+                        if (myUtility.PlayerManaPercentage < Root.Item("EC.Leona.Farm.ManaPercent").GetValue<Slider>().Value) return;
                         if (Q.IsKillable((Obj_AI_Minion)target) ||
                             (Player.GetAutoAttackDamage((Obj_AI_Minion)target) + Player.GetSpellDamage((Obj_AI_Minion)target, SpellSlot.Q)) >= target.Health)
                         {
@@ -376,13 +376,13 @@ namespace EndifsCreations.Plugins
                 }
                 if (target is Obj_AI_Hero && target.IsValidTarget())
                 {
-                    if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Leona.Combo.Q").GetValue<bool>() )
+                    if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Leona.Combo.Q").GetValue<bool>() )
                     {
                         if (myUtility.ImmuneToCC((Obj_AI_Hero)target) || myUtility.ImmuneToMagic((Obj_AI_Hero)target)) return;
                         Q.Cast();
                         Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                     }
-                    if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && config.Item("EC.Leona.Harass.Q").GetValue<bool>())
+                    if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && Root.Item("EC.Leona.Harass.Q").GetValue<bool>())
                     {
                         Q.Cast();
                         Player.IssueOrder(GameObjectOrder.AttackUnit, target);
@@ -392,7 +392,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Leona.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Leona.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -400,7 +400,7 @@ namespace EndifsCreations.Plugins
                     Utility.DelayAction.Add(myHumazier.ReactionDelay, () => Q.Cast());
                 }
             }
-            if (config.Item("EC.Leona.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Leona.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -412,21 +412,21 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Leona.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Leona.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Leona.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Leona.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
             if (R.Level > 0 && R.IsReady())
             {
-                if (config.Item("EC.Leona.UseRDrawDistance").GetValue<bool>())
+                if (Root.Item("EC.Leona.UseRDrawDistance").GetValue<bool>())
                 {
                     Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                 }
-                if (config.Item("EC.Leona.UseRDrawTarget").GetValue<bool>())
+                if (Root.Item("EC.Leona.UseRDrawTarget").GetValue<bool>())
                 {
                     var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
                     var target = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&

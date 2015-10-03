@@ -38,18 +38,18 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Taric.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Taric.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Taric.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Taric.Misc.E", "E Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Taric.Misc.E2", "E Interrupts").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Taric.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -57,45 +57,39 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Taric.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Taric.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Taric.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Taric.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Taric.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Taric.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Taric.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Taric.Combo.R").GetValue<bool>();
             if (UseQ && Q.IsReady())
             {
                 if (myUtility.PlayerHealthPercentage < 75 && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                 {
-                    Q.Cast(Player);
+                    mySpellcast.Unit(null, Q);
                 }
                 else
                 {
                     var Allies = HeroManager.Allies.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range).OrderBy(i => i.Health);
                     foreach (var heal in Allies.Where(x => x.Health < x.MaxHealth && x.HealthPercent < 75))
                     {
-                        Q.Cast(heal);
+                        mySpellcast.Unit(heal, Q);
                     }
                 }
             }
             if (UseW && W.IsReady())
             {
-                if (Player.CountEnemiesInRange(W.Range) > 0)
-                {
-                    W.Cast();
-                }
+                mySpellcast.PointBlank(null, W, W.Range);
             }
             if (UseR && R.IsReady())
             {
-                if (Player.CountEnemiesInRange(R.Range) > 1)
-                {
-                    R.Cast();
-                }
+                mySpellcast.PointBlank(null, R, R.Range, 1);
             }
             if (Target.IsValidTarget())
             {
-                if (UseE && E.IsReady() && E.IsInRange(Target) && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
+                if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                 {
                     if (myUtility.ImmuneToCC(Target) || myUtility.ImmuneToMagic(Target)) return;
-                    E.CastOnUnit(Target);
+                    mySpellcast.Unit(Target, E);
                 }
             }
         }
@@ -129,7 +123,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Taric.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Taric.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -140,7 +134,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Taric.Misc.E2").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Taric.Misc.E2").GetValue<bool>() && E.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range)
                 {
@@ -152,7 +146,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Taric.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Taric.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

@@ -3,7 +3,7 @@ using LeagueSharp.Common;
 
 namespace CheerleaderLux
 {
-    class Loader : Addons.Lux
+    class Loader : Lux
     {
         static void Main(string[] args)
         {          

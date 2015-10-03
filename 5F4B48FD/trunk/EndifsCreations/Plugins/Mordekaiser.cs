@@ -37,7 +37,7 @@ namespace EndifsCreations.Plugins
             var custommenu = new Menu("Children of the Grave", "Custom");
             {
                 custommenu.AddItem(new MenuItem("EC.Mordekaiser.UseAutoR", "Auto").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -46,13 +46,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Mordekaiser.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Mordekaiser.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Mordekaiser.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Mordekaiser.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Mordekaiser.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -60,9 +60,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(R.Range, TargetSelector.DamageType.Magical);
 
-            var UseW = config.Item("EC.Mordekaiser.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Mordekaiser.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Mordekaiser.Combo.R").GetValue<bool>();
+            var UseW = Root.Item("EC.Mordekaiser.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Mordekaiser.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Mordekaiser.Combo.R").GetValue<bool>();
 
             if (UseW && W.IsReady() && !Player.HasBuff("mordekaisercreepingdeath"))
             {
@@ -165,7 +165,7 @@ namespace EndifsCreations.Plugins
                 myUtility.Reset();
                 return;
             }
-            if (config.Item("EC.Mordekaiser.UseAutoR").GetValue<bool>())
+            if (Root.Item("EC.Mordekaiser.UseAutoR").GetValue<bool>())
             {
                 Custom();
             }
@@ -186,7 +186,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Mordekaiser.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Mordekaiser.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
@@ -199,7 +199,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Mordekaiser.Combo.Q").GetValue<bool>() && Q.IsReady() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.Mordekaiser.Combo.Q").GetValue<bool>() && Q.IsReady() && Orbwalking.InAutoAttackRange(target))
                     {
                         Q.Cast();
                     }
@@ -209,11 +209,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Mordekaiser.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Mordekaiser.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Mordekaiser.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Mordekaiser.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

@@ -41,19 +41,19 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Gragas.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Gragas.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Gragas.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Gragas.Misc.W", "W Misc").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Gragas.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Gragas.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Gragas.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -61,8 +61,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range + 150, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Gragas.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Gragas.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Gragas.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Gragas.Combo.E").GetValue<bool>();
             if (UseQ && Q.IsReady() && Barrel != null && Q.Instance.SData.Name.Equals("gragasqtoggle"))
             {
                 if (Target.IsValidTarget() && Vector3.Distance(Target.Position, Barrel.Position) <= 300)
@@ -195,7 +195,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if (config.Item("EC.Gragas.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Gragas.Combo.W").GetValue<bool>()) && E.IsReady())
+                if (Root.Item("EC.Gragas.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Gragas.Combo.W").GetValue<bool>()) && E.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -219,7 +219,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Gragas.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Gragas.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
                 if (Barrel != null)

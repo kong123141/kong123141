@@ -47,12 +47,12 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Assault and Battery", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Vi.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Vi.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Vi.UseRType", "R").SetValue(new StringList(new[] { "Less Hit", "R Killable", "YOLO", "Furthest", "Lowest HP" })));
                 custommenu.AddItem(new MenuItem("EC.Vi.UseRTypeLessHit", "Hit <").SetValue(new Slider(4, 1, 10)));
                 custommenu.AddItem(new MenuItem("EC.Vi.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Vi.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -61,13 +61,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Vi.Combo.QMax", "Q Max charge").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Vi.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Vi.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Vi.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Vi.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -76,13 +76,13 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Vi.QFarmType", "Q").SetValue(new StringList(new[] { "Any (Slider Value)", "Furthest" })));
                 laneclearmenu.AddItem(new MenuItem("EC.Vi.Farm.Q.Value", "(Any) Q More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Vi.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Vi.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Vi.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
@@ -90,13 +90,13 @@ namespace EndifsCreations.Plugins
                 miscmenu.AddItem(new MenuItem("EC.Vi.Misc.Q", "Q Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Vi.Misc.Q2", "Q Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Vi.Misc.E", "E Turrets").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Vi.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Vi.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -104,8 +104,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range + 425, TargetSelector.DamageType.Physical);       
    
-            var UseQ = config.Item("EC.Vi.Combo.Q").GetValue<bool>();
-            var CastItems = config.Item("EC.Vi.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Vi.Combo.Q").GetValue<bool>();
+            var CastItems = Root.Item("EC.Vi.Combo.Items").GetValue<bool>();
             if (UseQ && Q.IsReady() && Q.IsCharging)
             {
                 if (Target.IsValidTarget() && Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= Q.ChargedMaxRange - Target.BoundingRadius)
@@ -117,7 +117,7 @@ namespace EndifsCreations.Plugins
                         {
                             Q.Cast(Player.ServerPosition.Extend(pred.CastPosition, Vector3.Distance(Player.ServerPosition,Target.ServerPosition) + Target.BoundingRadius));
                         }
-                        else if (config.Item("EC.Vi.Combo.QMax").GetValue<bool>())
+                        else if (Root.Item("EC.Vi.Combo.QMax").GetValue<bool>())
                         {
                             if (Vector3.Distance(Player.ServerPosition, pred.CastPosition) + Target.BoundingRadius <= Q.ChargedMaxRange)
                             {
@@ -147,7 +147,7 @@ namespace EndifsCreations.Plugins
                 {
                     if (UseQ)
                     {
-                        if (Target.ServerPosition.UnderTurret(true) && !config.Item("EC.Vi.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.ServerPosition.UnderTurret(true) && !Root.Item("EC.Vi.Combo.Dive").GetValue<bool>()) return;
                         if (!Orbwalking.InAutoAttackRange(Target) && Q.IsReady() && !Q.IsCharging)
                         {                            
                             Q.StartCharging();
@@ -172,12 +172,12 @@ namespace EndifsCreations.Plugins
         private void Harass()
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, false);
-            var UseQ = config.Item("EC.Vi.Harass.Q").GetValue<bool>();
+            var UseQ = Root.Item("EC.Vi.Harass.Q").GetValue<bool>();
             if (target.IsValidTarget())
             {
                 if (UseQ)
                 {
-                    if (target.ServerPosition.UnderTurret(true) && !config.Item("EC.Vi.Combo.Dive").GetValue<bool>()) return;
+                    if (target.ServerPosition.UnderTurret(true) && !Root.Item("EC.Vi.Combo.Dive").GetValue<bool>()) return;
                     if (Q.IsReady())
                     {
                         Q.StartCharging();
@@ -210,11 +210,11 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Vi.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Vi.Farm.Q").GetValue<bool>()  && !Player.IsWindingUp && !Player.IsDashing())
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Vi.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Vi.Farm.Q").GetValue<bool>()  && !Player.IsWindingUp && !Player.IsDashing())
             {
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range).ToList();
-                switch (config.Item("EC.Vi.QFarmType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Vi.QFarmType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         var QLine = Q2.GetLineFarmLocation(minionQ);
@@ -224,7 +224,7 @@ namespace EndifsCreations.Plugins
                             {
                                 Q.StartCharging();
                             }
-                            if (Q.IsCharging && QLine.MinionsHit > config.Item("EC.Vi.Farm.Q.Value").GetValue<Slider>().Value)
+                            if (Q.IsCharging && QLine.MinionsHit > Root.Item("EC.Vi.Farm.Q.Value").GetValue<Slider>().Value)
                             {
                                 if (Q.Range >= Q.ChargedMaxRange || Q.Range >= Vector3.Distance(Player.ServerPosition,QLine.Position.To3D()) + (Player.AttackRange * 2/3))
                                 {
@@ -259,7 +259,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Vi.Jungle.Q").GetValue<bool>())
+                if (Root.Item("EC.Vi.Jungle.Q").GetValue<bool>())
                 {
                     if (Q.IsReady())
                     {
@@ -283,7 +283,7 @@ namespace EndifsCreations.Plugins
                         }
                     }
                 }
-                if (config.Item("EC.Vi.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Vi.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Orbwalking.InAutoAttackRange(largemobs))
                     {
@@ -299,7 +299,7 @@ namespace EndifsCreations.Plugins
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && x.IsTargetable && !myUtility.ImmuneToDeath(x) && !myUtility.ImmuneToCC(x));
                 var targets = EnemyList.Where(x => !x.InFountain() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < R.Range);
                 Obj_AI_Hero punchthis = null;
-                switch (config.Item("EC.Vi.UseRType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Vi.UseRType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         punchthis = targets.OrderBy(i => (i.Health / Player.GetAutoAttackDamage(i))).FirstOrDefault();
@@ -333,7 +333,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQHitChance()
         {
-            switch (config.Item("EC.Vi.QPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Vi.QPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -381,7 +381,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Vi.Farm.E").GetValue<bool>() && E.IsReady() && (myUtility.PlayerManaPercentage > config.Item("EC.Vi.Farm.ManaPercent").GetValue<Slider>().Value))
+            if (Root.Item("EC.Vi.Farm.E").GetValue<bool>() && E.IsReady() && (myUtility.PlayerManaPercentage > Root.Item("EC.Vi.Farm.ManaPercent").GetValue<Slider>().Value))
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null &&
@@ -404,7 +404,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Vi.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Vi.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -422,7 +422,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Vi.Misc.Q2").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Vi.Misc.Q2").GetValue<bool>() && Q.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) < Q.Range && args.DangerLevel == Interrupter2.DangerLevel.High)
                 {
@@ -444,20 +444,20 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && target is Obj_AI_Hero)
                 {
-                    if (config.Item("EC.Vi.Combo.E").GetValue<bool>()) E.Cast();
+                    if (Root.Item("EC.Vi.Combo.E").GetValue<bool>()) E.Cast();
                 }
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && target is Obj_AI_Hero)
                 {
-                    if (config.Item("EC.Vi.Harass.E").GetValue<bool>()) E.Cast();
+                    if (Root.Item("EC.Vi.Harass.E").GetValue<bool>()) E.Cast();
                 }
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear && target is Obj_AI_Minion)
                 {
-                    if (config.Item("EC.Vi.Farm.E").GetValue<bool>() && (myUtility.PlayerManaPercentage > config.Item("EC.Vi.Farm.ManaPercent").GetValue<Slider>().Value)) E.Cast();
+                    if (Root.Item("EC.Vi.Farm.E").GetValue<bool>() && (myUtility.PlayerManaPercentage > Root.Item("EC.Vi.Farm.ManaPercent").GetValue<Slider>().Value)) E.Cast();
                 }
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear)
                 {
                     if (target is Obj_AI_Turret && target.Team != Player.Team &&
-                        config.Item("EC.Vi.Misc.E").GetValue<bool>() &&
+                        Root.Item("EC.Vi.Misc.E").GetValue<bool>() &&
                         !Player.IsWindingUp && Orbwalking.InAutoAttackRange(target))
                     {
                         E.Cast();
@@ -468,29 +468,29 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Vi.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Vi.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.ChargedMaxRange, Color.White);
             }
-            if (config.Item("EC.Vi.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Vi.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
             if (R.Level > 0 && R.IsReady())
             {
-                if (config.Item("EC.Vi.UseRDrawDistance").GetValue<bool>())
+                if (Root.Item("EC.Vi.UseRDrawDistance").GetValue<bool>())
                 {
                     Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                 }
-                if (config.Item("EC.Vi.UseRDrawTarget").GetValue<bool>())
+                if (Root.Item("EC.Vi.UseRDrawTarget").GetValue<bool>())
                 {
                     var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && x.IsTargetable && !myUtility.ImmuneToDeath(x) && !myUtility.ImmuneToCC(x));
                     var targets = EnemyList.Where(x => !x.InFountain() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < R.Range);
                     Obj_AI_Hero drawthis = null;
-                    switch (config.Item("EC.Vi.UseRType").GetValue<StringList>().SelectedIndex)
+                    switch (Root.Item("EC.Vi.UseRType").GetValue<StringList>().SelectedIndex)
                     {
                         case 0:
-                            drawthis = targets.OrderBy(i => (i.Health / Player.GetAutoAttackDamage(i))).FirstOrDefault(x => x.Health / Player.GetAutoAttackDamage(x) <= config.Item("EC.Vi.UseRTypeLessHit").GetValue<Slider>().Value);
+                            drawthis = targets.OrderBy(i => (i.Health / Player.GetAutoAttackDamage(i))).FirstOrDefault(x => x.Health / Player.GetAutoAttackDamage(x) <= Root.Item("EC.Vi.UseRTypeLessHit").GetValue<Slider>().Value);
                             break;
                         case 1:
                             drawthis = targets.FirstOrDefault(x => R.IsKillable(x));

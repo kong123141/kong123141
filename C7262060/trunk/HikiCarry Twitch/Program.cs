@@ -12,9 +12,8 @@ namespace HikiCarry_Twitch
 {
     class Program
     {
-        public static string cName = "Twitch";
+        public static string CName = "Twitch";
         public static Orbwalking.Orbwalker Orbwalker;
-        public static List<Spell> SpellList = new List<Spell>();
         public static Menu Config;
         private static Obj_AI_Hero Player = ObjectManager.Player;
 
@@ -34,7 +33,7 @@ namespace HikiCarry_Twitch
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.CharData.BaseSkinName != cName)
+            if (Player.CharData.BaseSkinName != CName)
             {
                 return;
             }
@@ -45,11 +44,6 @@ namespace HikiCarry_Twitch
             R = new Spell(SpellSlot.R);
 
             W.SetSkillshot(0.25f, 120f, 1400f, false, SkillshotType.SkillshotCircle);
-
-            SpellList.Add(Q);
-            SpellList.Add(W);
-            SpellList.Add(E);
-            SpellList.Add(R);
 
             Config = new Menu("HikiCarry - Twitch", "HikiCarry - Twitch", true);
             TargetSelector.AddToMenu(Config.SubMenu("Target Selector Settings"));
@@ -162,6 +156,103 @@ namespace HikiCarry_Twitch
             KillSteal();
             stealJungle();
         }
+        private static void Combo()
+        {
+            var useW = Config.Item("wCombo").GetValue<bool>();
+            var useE = Config.Item("eCombo").GetValue<bool>();
+            var useR = Config.Item("rCombo").GetValue<bool>();
+            float rEnemyCount = Player.CountEnemiesInRange(1337);
+
+            if (useW && W.IsReady())
+            {
+                foreach (var enemy in HeroManager.Enemies.Where(o => o.IsValidTarget(W.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead))
+                {
+
+                    if (W.GetPrediction(enemy).Hitchance >= HitChance.High)
+                    {
+                        W.Cast(enemy);
+                    }
+                }
+            }
+            if (useE && E.IsReady())
+            {
+
+                foreach (var enemy in HeroManager.Enemies.Where(o => o.IsValidTarget(E.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead
+                    && o.HasBuff("twitchdeadlyvenom")))
+                {
+                    if (E.GetDamage(enemy) > enemy.Health)
+                    {
+                        E.Cast();
+                    }
+                }
+            }
+            if (useR && R.IsReady())
+            {
+                foreach (var enemy in HeroManager.Enemies.Where(o => o.IsValidTarget(W.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead))
+                {
+                    if (rEnemyCount == 1 && ObjectManager.Player.Distance(enemy.Position) < W.Range
+                        && enemy.TotalAttackDamage < ObjectManager.Player.TotalAttackDamage &&
+                        Marksman.Contains(enemy.ChampionName))
+                    {
+                        R.Cast();
+                    }
+                }
+            }
+
+
+        }
+        private static void Harass()
+        {
+            var useW = Config.Item("qHarass").GetValue<bool>();
+            var useE = Config.Item("eHarass").GetValue<bool>();
+            var eSpearCount = Config.Item("eSpearCount").GetValue<Slider>().Value;
+            var manaSlider = Config.Item("manaHarass").GetValue<Slider>().Value;
+
+            if (Player.ManaPercent >= manaSlider)
+            {
+                if (useW && W.IsReady())
+                {
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsValidTarget(W.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead))
+                    {
+                        if (W.GetPrediction(enemy).Hitchance >= HitChance.High)
+                        {
+                            W.Cast(enemy);
+                        }
+                    }
+
+                }
+                if (useE && E.IsReady())
+                {
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsValidTarget(E.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead
+                    && o.HasBuff("twitchdeadlyvenom")))
+                    {
+                        if (enemy.GetBuffCount("twitchdeadlyvenom") >= eSpearCount)
+                        {
+                            E.Cast();
+                        }
+                    }
+                }
+            }
+        }
+        private static void Clear()
+        {
+            var manaSlider = Config.Item("manaHarass").GetValue<Slider>().Value;
+            var eClearCount = Config.Item("eClearCount").GetValue<Slider>().Value;
+            var allMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range, MinionTypes.All);
+            var useW = Config.Item("wClear").GetValue<bool>();
+            if (Player.ManaPercent >= manaSlider)
+            {
+                if (W.IsReady() && useW)
+                {
+                    var wfarm = W.GetCircularFarmLocation(allMinionsW, 200);
+
+                    if (wfarm.MinionsHit >= 3 && W.IsReady())
+                    {
+                        W.Cast(wfarm.Position);
+                    }
+                }
+            }
+        }
         private static void stealJungle()
         {
 
@@ -199,130 +290,7 @@ namespace HikiCarry_Twitch
             }
 
 
-        } // RDY
-        private static void Combo()
-        {
-            var useW = Config.Item("wCombo").GetValue<bool>();
-            var useE = Config.Item("eCombo").GetValue<bool>();
-            var useR = Config.Item("rCombo").GetValue<bool>();
-            float rEnemyCount = Player.CountEnemiesInRange(1337);
-
-            if (useW && W.IsReady())
-            {
-                foreach (var enemy in HeroManager.Enemies.Where(o => o.IsValidTarget(W.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead))
-                {
-                   
-                    if (W.GetPrediction(enemy).Hitchance >= HitChance.High)
-                    {
-                        W.Cast(enemy);
-                    }
-                }
-            }
-            if (useE && E.IsReady())
-            {
-
-                foreach (var enemy in HeroManager.Enemies.Where(o => o.IsValidTarget(E.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead
-                    && o.HasBuff("twitchdeadlyvenom")))
-                {
-                    if (E.GetDamage(enemy) > enemy.Health)
-                    {
-                        E.Cast();
-                    }
-                }
-            }
-            if (useR && R.IsReady())
-            {
-                foreach (var enemy in HeroManager.Enemies.Where(o => o.IsValidTarget(W.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead))
-                {
-                    if (rEnemyCount == 1 && ObjectManager.Player.Distance(enemy.Position) < W.Range 
-                        && enemy.TotalAttackDamage < ObjectManager.Player.TotalAttackDamage &&
-                        Marksman.Contains(enemy.ChampionName))
-                    {
-                        R.Cast();
-                    }
-                }
-            }
-
-
-        } // RDY
-        private static void Harass()
-        {
-            var useW = Config.Item("qHarass").GetValue<bool>();
-            var useE = Config.Item("eHarass").GetValue<bool>();
-            var eSpearCount = Config.Item("eSpearCount").GetValue<Slider>().Value;
-            var manaSlider = Config.Item("manaHarass").GetValue<Slider>().Value;
-
-            if (Player.ManaPercent >= manaSlider)
-            {
-                if (useW && W.IsReady())
-                {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsValidTarget(W.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead))
-                    {
-                        if (W.GetPrediction(enemy).Hitchance >= HitChance.High)
-                        {
-                            W.Cast(enemy);
-                        }
-                    }
-                    
-                }
-                if (useE && E.IsReady())
-                {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsValidTarget(E.Range) && o.IsEnemy && o.IsVisible && !o.IsZombie && !o.IsDead
-                    && o.HasBuff("twitchdeadlyvenom")))
-                    {
-                        if (enemy.GetBuffCount("twitchdeadlyvenom") >= eSpearCount)
-                        {
-                            E.Cast();
-                        }
-                    }
-                }
-            }
-        } // RDY
-        private static void Clear()
-        {
-            var manaSlider = Config.Item("manaHarass").GetValue<Slider>().Value;
-            var eClearCount = Config.Item("eClearCount").GetValue<Slider>().Value;
-            var allMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range, MinionTypes.All);
-            var useW = Config.Item("wClear").GetValue<bool>();
-            if (Player.ManaPercent >= manaSlider)
-            {
-                if (W.IsReady() && useW)
-                {
-                    var wfarm = W.GetCircularFarmLocation(allMinionsW, 200);
-
-                    if (wfarm.MinionsHit >= 3 && W.IsReady())
-                    {
-                        W.Cast(wfarm.Position);
-                    }
-                }
-            }
-        } // RDY
-        /*private static float eDamageCalculator (Obj_AI_Hero hero) // SOON TM
-        {
-            var x1 = new[] { 14, 19, 24, 29, 35 };
-            var x2 = new[] { 20, 35, 50, 65, 80 };
-            var stacks = hero.GetBuffCount("twitchdeadlyvenom");
-
-            var total = stacks * x1[E.Level] + 0.2 * Player.FlatMagicDamageMod + 0.25 * Player.FlatPhysicalDamageMod + x2[E.Level];
-
-            return (float) total;
-
-        }*/
-        private static void KillSteal()
-        {
-            var eKS = Config.Item("eKS").GetValue<bool>();
-            if (E.IsReady() && eKS)
-            {
-                foreach (var target in HeroManager.Enemies.Where(hero => hero.IsValidTarget(E.Range)))
-                {
-                    if (target.Health < E.GetDamage(target))
-                    {
-                        E.Cast();
-                    }
-
-                }
-            }
-        } // RDY
+        }
         private static void JungleClear()
         {
             var useW = Config.Item("wJungle").GetValue<bool>();
@@ -349,7 +317,34 @@ namespace HikiCarry_Twitch
                     }
                 }
             }
-        } // RDY
+        }
+        /*private static float eDamageCalculator (Obj_AI_Hero hero) // SOON TM
+        {
+            var x1 = new[] { 14, 19, 24, 29, 35 };
+            var x2 = new[] { 20, 35, 50, 65, 80 };
+            var stacks = hero.GetBuffCount("twitchdeadlyvenom");
+
+            var total = stacks * x1[E.Level] + 0.2 * Player.FlatMagicDamageMod + 0.25 * Player.FlatPhysicalDamageMod + x2[E.Level];
+
+            return (float) total;
+
+        }*/
+        private static void KillSteal()
+        {
+            var eKS = Config.Item("eKS").GetValue<bool>();
+            if (E.IsReady() && eKS)
+            {
+                foreach (var target in HeroManager.Enemies.Where(hero => hero.IsValidTarget(E.Range)))
+                {
+                    if (target.Health < E.GetDamage(target))
+                    {
+                        E.Cast();
+                    }
+
+                }
+            }
+        }
+         
         private static float GetComboDamage(Obj_AI_Hero hero)
         {
             float damage = 0;

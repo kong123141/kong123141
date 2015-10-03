@@ -39,14 +39,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Vladimir.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Vladimir.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Vladimir.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Vladimir.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Vladimir.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Vladimir.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -55,21 +55,21 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Vladimir.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Vladimir.Farm.W.Value", "W More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Vladimir.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Vladimir.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Vladimir.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Vladimir.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Vladimir.RPredHitchance", "R Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
                 miscmenu.AddItem(new MenuItem("EC.Vladimir.Misc.W", "W Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Vladimir.Misc.W2", "W Spelldodge").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -77,7 +77,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Vladimir.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Vladimir.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Vladimir.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -85,15 +85,12 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(R.Range, TargetSelector.DamageType.Magical);       
      
-            var UseQ = config.Item("EC.Vladimir.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Vladimir.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Vladimir.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Vladimir.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Vladimir.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Vladimir.Combo.E").GetValue<bool>();
             if (UseE && E.IsReady())
-            {
-                if (Player.CountEnemiesInRange(600) > 0)
-                {
-                    E.Cast();
-                }
+            {                
+                mySpellcast.PointBlank(null, E, 550);
             }
             if (Target.IsValidTarget())
             {
@@ -133,11 +130,11 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Vladimir.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Vladimir.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Vladimir.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Vladimir.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Vladimir.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Vladimir.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            if (target.IsValidTarget() && !myOrbwalker.IsWaiting())
+            if (target.IsValidTarget() && !myOrbwalker.Waiting)
             {
                 if (UseQ && Q.IsReady() && Q.IsInRange(target))
                 {
@@ -164,7 +161,7 @@ namespace EndifsCreations.Plugins
         private void LaneClear()
         {
             if (WActive) return;
-            if (config.Item("EC.Vladimir.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Vladimir.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 if (allMinionsQ == null) return;
@@ -188,21 +185,21 @@ namespace EndifsCreations.Plugins
                     }*/
                 }
             }
-            if (config.Item("EC.Vladimir.Farm.W").GetValue<bool>() && W.IsReady() && EBuffStacks >= 4)
+            if (Root.Item("EC.Vladimir.Farm.W").GetValue<bool>() && W.IsReady() && EBuffStacks >= 4)
             {
                 var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range);
                 if (allMinionsW == null) return;
-                if (allMinionsW.Count > config.Item("EC.Vladimir.Farm.W.Value").GetValue<Slider>().Value)
+                if (allMinionsW.Count > Root.Item("EC.Vladimir.Farm.W.Value").GetValue<Slider>().Value)
                 {
                     if (Player.UnderTurret(true)) return;
                     W.Cast();
                 }
             }
-            if (config.Item("EC.Vladimir.Farm.E").GetValue<bool>() && E.IsReady() && (EBuffStacks < 4 && myUtility.TickCount - LastE > 8000 || EBuffStacks >= 4))
+            if (Root.Item("EC.Vladimir.Farm.E").GetValue<bool>() && E.IsReady() && (EBuffStacks < 4 && myUtility.TickCount - LastE > 8000 || EBuffStacks >= 4))
             {
                 var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 if (allMinionsE == null) return;
-                if (allMinionsE.Count > config.Item("EC.Vladimir.Farm.E.Value").GetValue<Slider>().Value)
+                if (allMinionsE.Count > Root.Item("EC.Vladimir.Farm.E.Value").GetValue<Slider>().Value)
                 {
                     if (Player.UnderTurret(true)) return;
                     E.Cast();
@@ -217,7 +214,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Vladimir.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && Q.IsInRange(mob))
+                if (Root.Item("EC.Vladimir.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && Q.IsInRange(mob))
                 {
                     if (largemobs != null)
                     {
@@ -225,7 +222,7 @@ namespace EndifsCreations.Plugins
                     }
                     Q.CastOnUnit(mob);
                 }
-                if (config.Item("EC.Vladimir.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Vladimir.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < W.Range)
                     {
@@ -233,7 +230,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (Vector3.Distance(Player.ServerPosition, mob.ServerPosition) < W.Range) W.Cast();
                 }
-                if (config.Item("EC.Vladimir.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Vladimir.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < E.Range)
                     {
@@ -264,7 +261,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetRHitChance()
         {
-            switch (config.Item("EC.Vladimir.RPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Vladimir.RPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -309,7 +306,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Vladimir.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Vladimir.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null && Q.IsKillable(target) && Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= Q.Range)
@@ -329,7 +326,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if (config.Item("EC.Vladimir.Misc.W2").GetValue<bool>())
+                if (Root.Item("EC.Vladimir.Misc.W2").GetValue<bool>())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -352,7 +349,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Vladimir.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Vladimir.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= 125 + Player.BoundingRadius)
                 {
@@ -363,19 +360,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Vladimir.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Vladimir.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Vladimir.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Vladimir.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Vladimir.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Vladimir.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Vladimir.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Vladimir.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
                 var tomouse = Player.ServerPosition.Extend(Game.CursorPos, Vector3.Distance(Player.ServerPosition, Game.CursorPos));

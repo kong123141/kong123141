@@ -11,23 +11,22 @@ using System.Drawing;
 
 namespace OneKeyToWin_AIO_Sebby
 {
-    class champions { public Obj_AI_Hero Player; }
-
     internal class Program
     {
         public static Menu Config;
         public static Orbwalking.Orbwalker Orbwalker;
         public static Spell Q, W, E, R, DrawSpell;
-        public static string championMsg;
         public static float JungleTime, DrawSpellTime=0;
         public static Obj_AI_Hero jungler = ObjectManager.Player;
         public static int timer, HitChanceNum = 4, tickNum = 4, tickIndex = 0;
         public static Obj_SpawnPoint enemySpawn;
         public static Core.PredictionOutput DrawSpellPos;
-        public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>();
-        public static List<Obj_AI_Hero> Allies = new List<Obj_AI_Hero>();
-
+        public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>() , Allies = new List<Obj_AI_Hero>();
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+
+
+        private static float dodgeRange = 400;
+        private static float dodgeTime = Game.Time;
 
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
 
@@ -50,14 +49,12 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
                 Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-                Config.SubMenu("Orbwalking").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
             }
-
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.ChampionName, enemy.ChampionName).SetValue(false));
 
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
@@ -65,8 +62,18 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("PredictionMODE", "Prediction MODE", true).SetValue(new StringList(new[] { "Common prediction", "OKTW© PREDICTION" }, 1)));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("HitChance", "Hit Chance", true).SetValue(new StringList(new[] { "Very High", "High", "Medium" }, 0)));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true));
-            
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true).DontSave());
+
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("comboDisableMode", "Disable auto-attack in combo mode", true).SetValue(false));
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("manaDisable", "Disable mana manager in combo", true).SetValue(false));
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("positioningAssistant", "Anti-Melee Positioning Assistant OKTW©", true).SetValue(false));
+            Config.Item("manaDisable", true).SetValue(false);
+            Config.Item("comboDisableMode", true).SetValue(false);
+            Config.Item("supportMode", true).SetValue(false);
+
+            #region LOAD CHAMPIONS
+
             if (!Config.Item("onlyUtility", true).GetValue<bool>())
             {
                 switch (Player.ChampionName)
@@ -143,8 +150,8 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Xerath":
                         new Champions.Xerath().LoadOKTW();
                         break;
-                    case "Syndra":
-                        new Champions.Syndra().LoadOKTW();
+                    case "Jayce":
+                        new Champions.Jayce().LoadOKTW();
                         break;
                     case "Kayle":
                         new Champions.Kayle().LoadOKTW();
@@ -172,36 +179,14 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                 }
             }
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if ( hero.IsEnemy)
-                {
-                    Enemies.Add(hero);
-                    if (IsJungler(hero))
-                        jungler = hero;
-                } 
-                if (hero.IsAlly)
-                    Allies.Add(hero);
-            }
 
-            new Summoners().LoadOKTW();
-            new Activator().LoadOKTW();
-            new Core.OKTWward().LoadOKTW();
-            new Core.AutoLvlUp().LoadOKTW();
-            new OktwCommon().LoadOKTW();
-            new Core.OKTWtracker().LoadOKTW();
-            new Core.OKTWdraws().LoadOKTW();
+            #endregion
 
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
+            #region MENU ABOUT OKTW
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
-            //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
-            //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
-            //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
-            // Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "visit joduska.me"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "DONATE: kaczor.sebastian@gmail.com"));
-
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("3", "Annie "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("4", "Jinx "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("5", "Ezreal "));
@@ -227,11 +212,31 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("25", "Thresh "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("26", "Ahri "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("27", "Draven "));
+            #endregion
+
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (hero.IsEnemy)
+                {
+                    Enemies.Add(hero);
+                    if (IsJungler(hero))
+                        jungler = hero;
+                }
+                if (hero.IsAlly)
+                    Allies.Add(hero);
+            }
 
             if (Config.Item("debug").GetValue<bool>())
             {
                 new Core.OKTWlab().LoadOKTW();
             }
+
+            new Activator().LoadOKTW();
+            new Core.OKTWward().LoadOKTW();
+            new Core.AutoLvlUp().LoadOKTW();
+            new OktwCommon().LoadOKTW();
+            new Core.OKTWtracker().LoadOKTW();
+            new Core.OKTWdraws().LoadOKTW();
 
             //new AfkMode().LoadOKTW();
             Config.AddToMainMenu();
@@ -241,23 +246,44 @@ namespace OneKeyToWin_AIO_Sebby
             Drawing.OnDraw += OnDraw;
         }
 
-        private static void Game_OnWndProc(WndEventArgs args)
+        private static void PositionHelper()
         {
-            debug("" + args.Msg);
-            
-            if (args.Msg == 522)
-            {
-                debug("DUPA " + args.Msg);
-            }
+            if (!Config.Item("positioningAssistant", true).GetValue<bool>() || Player.ChampionName == "Draven" || Player.IsMelee)
+                return;
 
-            if (args.Msg == 520)
+            
+            foreach (var enemy in Enemies.Where(enemy => enemy.IsMelee && enemy.IsValidTarget(dodgeRange) && enemy.IsFacing(Player)))
             {
-                debug("DUPA5 " + args.Msg);
+                if (Player.Distance(enemy.ServerPosition) < dodgeRange)
+                {
+                    var points = OktwCommon.CirclePoints(20, dodgeRange - 200, Player.Position);
+                    Vector3 bestPoint = Vector3.Zero;
+                    foreach (var point in points)
+                    {
+                        if (enemy.Distance(point) > dodgeRange && (bestPoint == Vector3.Zero || Game.CursorPos.Distance(point) < Game.CursorPos.Distance(bestPoint)))
+                        {
+                            bestPoint = point;
+                        }
+                    }
+                    if (enemy.Distance(bestPoint) > dodgeRange)
+                    {
+                        Orbwalker.SetOrbwalkingPoint(bestPoint);
+                        dodgeTime = Game.Time;
+                        return;
+                    }
+                }
             }
+            Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
         }
 
         private static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
+
+            if (Config.Item("comboDisableMode", true).GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && 2 * Player.GetAutoAttackDamage((Obj_AI_Base)args.Target) < args.Target.Health)
+            {
+                args.Process = false;
+            }
+
             if (Config.Item("supportMode",true).GetValue<bool>() && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit))
             {
                 if (((Obj_AI_Base)Orbwalker.GetTarget()).IsMinion) args.Process = false;
@@ -266,7 +292,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
-            
+            PositionHelper();
             tickIndex++;
 
             if (tickIndex > 4)
@@ -315,8 +341,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static bool LagFree(int offset)
         {
-            //if (!tickSkip)
-               // return true;
             if (tickIndex == offset)
                 return true;
             else
@@ -327,20 +351,22 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static bool None { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None); } }
 
-        public static bool Combo { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); } }
+        public static bool Combo { get {
+                if (Config.Item("onlyUtility", true).GetValue<bool>())
+                {
+                    if (Player.IsMoving)
+                        return true;
+                    else
+                        return false;
+                }
+                else
+                    return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo);
+
+            } }
 
         public static bool LaneClear { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear); } }
 
         private static bool IsJungler(Obj_AI_Hero hero) { return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite")); }
-
-        public static bool ValidUlt(Obj_AI_Hero target)
-        {
-            if (target.HasBuffOfType(BuffType.PhysicalImmunity) || target.HasBuffOfType(BuffType.SpellImmunity)
-            || target.IsZombie || target.HasBuffOfType(BuffType.Invulnerability) || target.HasBuffOfType(BuffType.SpellShield))
-                return false;
-            else
-                return true;
-        }
 
         public static float GetRealDmg(Spell QWER, Obj_AI_Hero target)
         {
@@ -431,14 +457,6 @@ namespace OneKeyToWin_AIO_Sebby
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] + weight, color, msg);
         }
 
-        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
-        {
-            var wts1 = Drawing.WorldToScreen(pos1);
-            var wts2 = Drawing.WorldToScreen(pos2);
-
-            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
-        }
-
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
@@ -452,7 +470,15 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
-            
+
+            if (Config.Item("positioningAssistant", true).GetValue<bool>() && Game.Time - dodgeTime < 1 && !Player.IsMelee)
+            {
+                Render.Circle.DrawCircle(Player.Position, dodgeRange, System.Drawing.Color.DimGray, 1);
+                if((int)(Game.Time * 10) % 2 == 0)
+                    drawText("Anti-Melle Positioning Assistant" , Player.Position, System.Drawing.Color.Gray);
+            }
+
+
             if (Config.Item("debugPred").GetValue<bool>() && Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1 && Game.Time - DrawSpellTime < 0.5)
             {
                 if (DrawSpell.Type == SkillshotType.SkillshotLine)

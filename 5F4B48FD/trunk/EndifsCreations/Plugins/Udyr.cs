@@ -36,7 +36,7 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Udyr.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Udyr.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Udyr.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
@@ -44,7 +44,7 @@ namespace EndifsCreations.Plugins
                 harassmenu.AddItem(new MenuItem("EC.Udyr.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Udyr.Harass.E", "Use E").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Udyr.UseRHarass", "Use R").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -52,7 +52,7 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Udyr.UseRFarm", "Use R").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Udyr.RFarmValue", "R More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Udyr.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
@@ -60,12 +60,12 @@ namespace EndifsCreations.Plugins
                 junglemenu.AddItem(new MenuItem("EC.Udyr.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Udyr.Jungle.E", "Use E").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Udyr.UseRJFarm", "Use R").SetValue(true)); 
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Udyr.Misc.W", "W Shields").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -73,7 +73,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Udyr.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Udyr.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Udyr.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
                     
         }
@@ -82,10 +82,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(300, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Udyr.Combo.E").GetValue<bool>();
-            var UseE = config.Item("EC.Udyr.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Udyr.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Udyr.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Udyr.Combo.E").GetValue<bool>();
+            var UseE = Root.Item("EC.Udyr.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Udyr.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Udyr.Combo.Items").GetValue<bool>();
             if (UseR && R.IsReady())
             {
                 if (Target.IsValidTarget() && Orbwalking.InAutoAttackRange(Target) && (Target.HasBuff("udyrbearstuncheck") || Target.HasBuff("udyrtigerstancebleed")) && CurrentStance != "Phoenix")
@@ -154,10 +154,10 @@ namespace EndifsCreations.Plugins
 
         private void Harass()
         {
-            var UseQ = config.Item("EC.Udyr.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Udyr.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Udyr.Harass.E").GetValue<bool>();
-            var UseR = config.Item("EC.Udyr.UseRHarass").GetValue<bool>();
+            var UseQ = Root.Item("EC.Udyr.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Udyr.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Udyr.Harass.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Udyr.UseRHarass").GetValue<bool>();
             var target = TargetSelector.GetTarget(200, TargetSelector.DamageType.Physical);      
             if (UseE && E.IsReady() && Stunnable(target))
             {
@@ -173,16 +173,16 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Udyr.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Udyr.Farm.ManaPercent").GetValue<Slider>().Value) return;
             if (!Player.IsWindingUp && myUtility.TickCount - LastSpell > 5000)
             {
                 var allMinions = MinionManager.GetMinions(Player.ServerPosition, 250);
                 if (allMinions == null) return;
-                if (config.Item("EC.Udyr.UseRFarm").GetValue<bool>() && CurrentStance != "Phoenix" && R.IsReady() && allMinions.Count > config.Item("EC.Udyr.RFarmValue").GetValue<Slider>().Value && !Player.UnderTurret(true))
+                if (Root.Item("EC.Udyr.UseRFarm").GetValue<bool>() && CurrentStance != "Phoenix" && R.IsReady() && allMinions.Count > Root.Item("EC.Udyr.RFarmValue").GetValue<Slider>().Value && !Player.UnderTurret(true))
                 {
                     R.Cast();
                 }
-                else if (config.Item("EC.Udyr.Farm.W").GetValue<bool>() && CurrentStance != "Turtle" && myUtility.PlayerHealthPercentage < 100 && W.IsReady())
+                else if (Root.Item("EC.Udyr.Farm.W").GetValue<bool>() && CurrentStance != "Turtle" && myUtility.PlayerHealthPercentage < 100 && W.IsReady())
                 {
                     W.Cast();
                 }
@@ -197,7 +197,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null && (Orbwalking.InAutoAttackRange(mob) || Orbwalking.InAutoAttackRange(largemobs)))
             {
-                if (config.Item("EC.Udyr.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && CurrentStance != "Bear")
+                if (Root.Item("EC.Udyr.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && CurrentStance != "Bear")
                 {
                     if (largemobs != null && !largemobs.HasBuff("udyrbearstuncheck"))
                     {
@@ -208,7 +208,7 @@ namespace EndifsCreations.Plugins
                         if (!mob.HasBuff("udyrbearstuncheck")) E.Cast();
                     }
                 }
-                if (config.Item("EC.Udyr.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Udyr.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && !largemobs.HasBuff("udyrtigerbleed"))
                     {
@@ -219,7 +219,7 @@ namespace EndifsCreations.Plugins
                         if (!mob.HasBuff("udyrtigerbleed")) Q.Cast();
                     }
                 }
-                if (config.Item("EC.Udyr.UseRJFarm").GetValue<bool>() && R.IsReady() && !Player.IsWindingUp && CurrentStance != "Phoenix")
+                if (Root.Item("EC.Udyr.UseRJFarm").GetValue<bool>() && R.IsReady() && !Player.IsWindingUp && CurrentStance != "Phoenix")
                 {
                     if (largemobs != null && myUtility.TickCount - LastSpell > 2000 && mobs.Count() > 1)
                     {
@@ -316,8 +316,8 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Udyr.Combo.W").GetValue<bool>()) ||
-                    (config.Item("EC.Udyr.Misc.W").GetValue<bool>())
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Udyr.Combo.W").GetValue<bool>()) ||
+                    (Root.Item("EC.Udyr.Misc.W").GetValue<bool>())
                     )
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
@@ -345,7 +345,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Udyr.Combo.Items").GetValue<bool>())
+                    if (Root.Item("EC.Udyr.Combo.Items").GetValue<bool>())
                     {
                         myItemManager.UseItems(0, null);
                         myItemManager.UseItems(2, null);

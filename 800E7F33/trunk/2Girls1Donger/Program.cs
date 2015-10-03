@@ -59,7 +59,7 @@ namespace Two_Girls_One_Donger
         {
             Game.PrintChat(
              "<font color=\"#e61515\">2Girls1Donger -<font color=\"#FFFFFF\"> by spawny Successfully Loaded.</font>");
-            if (Player.BaseSkinName != Champion) return;
+            if (Player.CharData.BaseSkinName != Champion) return;
 
             #region spells            
             ZHO = new Items.Item(3157, 1f);

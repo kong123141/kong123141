@@ -41,7 +41,7 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Ahri.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Ahri.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Ahri.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -49,19 +49,19 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Ahri.Farm.Q", "Use Q").SetValue(true));
                 //laneclearmenu.AddItem(new MenuItem("EC.Ahri.Farm.W", "Use W").SetValue(true));
                 //laneclearmenu.AddItem(new MenuItem("EC.Ahri.Farm.E", "Use E").SetValue(true));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Ahri.Jungle.Q", "Use Q").SetValue(true));
                 //junglemenu.AddItem(new MenuItem("EC.Ahri.Jungle.W", "Use W").SetValue(true));
                 //junglemenu.AddItem(new MenuItem("EC.Ahri.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             } 
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Ahri.Misc.E", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -69,7 +69,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Ahri.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Ahri.Draw.E", "E").SetValue(true));                
                 drawmenu.AddItem(new MenuItem("EC.Ahri.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -77,18 +77,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical, true);
 
-            var UseQ = config.Item("EC.Ahri.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Ahri.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Ahri.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Ahri.Combo.R").GetValue<bool>();
-            if (UseW && W.IsReady())
-            {
-                if (Player.CountEnemiesInRange(W.Range) > 0)
-                {
-                    W.Cast();
-                }
-            }
-           
+            var UseQ = Root.Item("EC.Ahri.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Ahri.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Ahri.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Ahri.Combo.R").GetValue<bool>();
+                    
             if (Target.IsValidTarget())
             {
                 if (UseR && R.Instance.Ammo > 0 && myUtility.TickCount - LastR > myHumazier.SpellDelay)
@@ -98,6 +91,7 @@ namespace EndifsCreations.Plugins
                     {
                         Q.UpdateSourcePosition(vec);
                     }
+                     
                     if (UseE && E.IsReady())
                     {
                         E.UpdateSourcePosition(vec);
@@ -108,6 +102,10 @@ namespace EndifsCreations.Plugins
                 {
                     mySpellcast.Linear(Target, Q, HitChance.High);
                 }
+                if (UseW && W.IsReady())
+                {
+                    mySpellcast.PointBlank(Target, W, W.Range);
+                } 
                 if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                 {
                     mySpellcast.Linear(Target, E, HitChance.High, true);
@@ -116,9 +114,9 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.EnoughMana(config.Item("EC.Ahri.Farm.ManaPercent").GetValue<Slider>().Value))
+            if (myUtility.EnoughMana(Root.Item("EC.Ahri.Farm.ManaPercent").GetValue<Slider>().Value))
             {
-                if (config.Item("EC.Ahri.Farm.Q").GetValue<bool>() && Q.IsReady())
+                if (Root.Item("EC.Ahri.Farm.Q").GetValue<bool>() && Q.IsReady())
                 {
                     myFarmManager.LaneLinear(Q, Q.Range, Player.HasBuff("ahrisoulcrusher"));
                 }
@@ -126,11 +124,11 @@ namespace EndifsCreations.Plugins
         }
         private void JungleClear()
         {
-            if (config.Item("EC.Ahri.Jungle.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Ahri.Jungle.Q").GetValue<bool>() && Q.IsReady())
             {
                 myFarmManager.JungleLinear(Q, Q.Range);
             }
-            if (config.Item("EC.Ahri.Jungle.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Ahri.Jungle.E").GetValue<bool>() && E.IsReady())
             {
                 
             }
@@ -197,7 +195,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Ahri.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Ahri.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -209,19 +207,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Ahri.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Ahri.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Ahri.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Ahri.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Ahri.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Ahri.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Ahri.Draw.R").GetValue<bool>())
+            if (Root.Item("EC.Ahri.Draw.R").GetValue<bool>())
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

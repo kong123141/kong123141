@@ -42,17 +42,17 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Fiora.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Fiora.Combo.R", "Use R").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Fiora.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Fiora.Misc.W", "W Spell Block").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Fiora.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -60,9 +60,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Fiora.Combo.Q").GetValue<bool>();
-            var UseR = config.Item("EC.Fiora.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Fiora.Combo.Items").GetValue<bool>(); 
+            var UseQ = Root.Item("EC.Fiora.Combo.Q").GetValue<bool>();
+            var UseR = Root.Item("EC.Fiora.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Fiora.Combo.Items").GetValue<bool>(); 
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -124,7 +124,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R && config.Item("EC.Fiora.Combo.Items").GetValue<bool>())
+            if (args.Slot == SpellSlot.R && Root.Item("EC.Fiora.Combo.Items").GetValue<bool>())
             {
                 Utility.DelayAction.Add(myHumazier.ReactionDelay, () => myItemManager.UseGhostblade());
             }
@@ -133,7 +133,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Fiora.Combo.W").GetValue<bool>()) || (config.Item("EC.Fiora.Misc.W").GetValue<bool>()))
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Fiora.Combo.W").GetValue<bool>()) || (Root.Item("EC.Fiora.Misc.W").GetValue<bool>()))
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -160,7 +160,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Fiora.Combo.E").GetValue<bool>() && E.IsReady())
+                    if (Root.Item("EC.Fiora.Combo.E").GetValue<bool>() && E.IsReady())
                     {
                         E.Cast();
                     }
@@ -171,7 +171,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit.IsMe)
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Fiora.Combo.Items").GetValue<bool>()) && Orbwalking.InAutoAttackRange(target))
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Fiora.Combo.Items").GetValue<bool>()) && Orbwalking.InAutoAttackRange(target))
                 {
                     myItemManager.UseItems(2, null);
                 }
@@ -180,7 +180,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Fiora.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Fiora.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }

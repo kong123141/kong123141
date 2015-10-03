@@ -40,13 +40,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Caitlyn.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Caitlyn.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Caitlyn.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                combomenu.AddItem(new MenuItem("EC.Caitlyn.Combo.R", "Use R").SetValue(true));
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {                
                 miscmenu.AddItem(new MenuItem("EC.Caitlyn.Misc.W", "W Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Caitlyn.Misc.W2", "W Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -54,7 +55,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Caitlyn.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Caitlyn.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Caitlyn.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -62,9 +63,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Caitlyn.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Caitlyn.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Caitlyn.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Caitlyn.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Caitlyn.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Caitlyn.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Caitlyn.Combo.R").GetValue<bool>();
+            
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -77,7 +80,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseW && W.IsReady())
                     {
-                        mySpellcast.CircularPrecise(Target, W, HitChance.High);
+                        mySpellcast.CircularPrecise(Target, W, HitChance.Medium, W.Range);
                     }
                     if (UseE && E.IsReady())
                     {                        
@@ -85,6 +88,13 @@ namespace EndifsCreations.Plugins
                         var test = pred.CastPosition.Extend(Player.ServerPosition, 400);
                         if (test.CountEnemiesInRange(600) > 0 || test.UnderTurret(true)) return;
                         mySpellcast.Linear(Target, E, HitChance.High, true);
+                    }
+                    if (UseR && R.IsReady())
+                    {
+                        if (Target.IsValidTarget() && !Orbwalking.InAutoAttackRange(Target) && R.IsKillable(Target))
+                        {
+                            mySpellcast.Unit(Target, R);
+                        }
                     }
                 }
                 catch { }
@@ -114,6 +124,9 @@ namespace EndifsCreations.Plugins
                 case myOrbwalker.OrbwalkingMode.Combo:
                     Combo();
                     break;
+                case myOrbwalker.OrbwalkingMode.LaneClear:
+                    myFarmManager.LaneLinear(Q, Q.Range,true);
+                    break;
             }            
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
@@ -133,7 +146,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Caitlyn.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Caitlyn.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= W.Range)
                 {
@@ -144,7 +157,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Caitlyn.Misc.W2").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Caitlyn.Misc.W2").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.Sender.ServerPosition) <= W.Range)
                 {
@@ -156,19 +169,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Caitlyn.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Caitlyn.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Caitlyn.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Caitlyn.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Caitlyn.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Caitlyn.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Caitlyn.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Caitlyn.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

@@ -1,0 +1,2 @@
+﻿New: Added combo mode for Heal and Exhaust (optional)
+Fixed: Always using exhaust even in combo mode.

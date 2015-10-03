@@ -3,8 +3,8 @@
 // any form or by any means, mechanical, electronical or otherwise, is prohibited
 // without the prior written consent of the copyright owner.
 // 
-// Document:	activator/champion.cs
-// Date:		01/07/2015
+// Document:	Base/Champion.cs
+// Date:		22/09/2015
 // Author:		Robin Kurisu
 #endregion
 

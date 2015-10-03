@@ -24,6 +24,9 @@ namespace EndifsCreations.Plugins
             E = new Spell(SpellSlot.E, 525); //150 splash
             R = new Spell(SpellSlot.R, 900);
 
+            W.SetTargetted(float.MaxValue, float.MaxValue);
+            R.SetTargetted(float.MaxValue, float.MaxValue);
+
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
@@ -38,18 +41,18 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Kayle.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Kayle.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Kayle.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Kayle.Misc.Q", "Q Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Kayle.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Kayle.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -57,16 +60,16 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Kayle.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Kayle.Combo.W").GetValue<bool>();      
-            var UseE = config.Item("EC.Kayle.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Kayle.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Kayle.Combo.W").GetValue<bool>();      
+            var UseE = Root.Item("EC.Kayle.Combo.E").GetValue<bool>();
             
-            var CastItems = config.Item("EC.Kayle.Combo.Items").GetValue<bool>();
+            var CastItems = Root.Item("EC.Kayle.Combo.Items").GetValue<bool>();
             if (UseW && W.IsReady())
             {
                 if (myUtility.PlayerHealthPercentage < 70)
                 {
-                    W.Cast(Player);
+                    mySpellcast.Unit(null, W);
                 }
                 else
                 {
@@ -74,7 +77,7 @@ namespace EndifsCreations.Plugins
                     var Allies = HeroManager.Allies.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= W.Range).OrderBy(i => i.Health);
                     foreach (var heal in Allies.Where(x => x.Health < x.MaxHealth))
                     {
-                        W.Cast(heal);
+                        mySpellcast.Unit(heal, W);
                     }
                 }
             }
@@ -136,22 +139,22 @@ namespace EndifsCreations.Plugins
                     break;
             }
         }
-        protected override void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, myCustomEvents.DamageTriggerType type)
+        protected override void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, float damage, myDamageBuffer.DamageTriggers type)
         {
-            if (target.IsMe)
+            if (sender != null && target.IsMe)
             {
                 switch (type)
                 {
-                    case myCustomEvents.DamageTriggerType.Killable:                      
-                            if (config.Item("EC.Kayle.Combo.R").GetValue<bool>() && R.IsReady())
-                            {
-                                R.CastOnUnit(Player);
-                            }                        
-                        break;
-                    case myCustomEvents.DamageTriggerType.TonsOfDamage:
-                        if (W.IsReady())
+                    case myDamageBuffer.DamageTriggers.TonsOfDamage:
+                        if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Kayle.Combo.W").GetValue<bool>() && W.IsReady())
                         {
-                            W.Cast(Player);
+                            mySpellcast.Unit(null, W);
+                        }
+                        break;
+                    case myDamageBuffer.DamageTriggers.Killable:
+                        if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Kayle.Combo.R").GetValue<bool>() && R.IsReady())
+                        {
+                            mySpellcast.Unit(null, R);
                         }
                         break;
                 }
@@ -161,7 +164,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady() && myUtility.PlayerHealthPercentage < 75)
             {
-                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Kayle.Combo.W").GetValue<bool>())
+                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Kayle.Combo.W").GetValue<bool>())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -184,7 +187,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Kayle.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Kayle.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -196,11 +199,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Kayle.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Kayle.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Kayle.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Kayle.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

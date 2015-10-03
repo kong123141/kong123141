@@ -317,7 +317,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
 
                 /* This does not need to be handled for the updated predictions, but left as a reference.*/
-
                 if (input.RangeCheckFrom.Distance(result.CastPosition, true) > Math.Pow(input.Range, 2))
                 {
                     if (result.Hitchance != HitChance.OutOfRange)
@@ -336,12 +335,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
-                var positions = new List<Vector3> { result.CastPosition };
-                var originalUnit = input.Unit;
+                var positions = new List<Vector3> { result.CastPosition, result.UnitPosition };
+
                 result.CollisionObjects = Collision.GetCollision(positions, input);
-                result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
+
             //Set hit chance
             if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
             {
@@ -359,6 +358,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 return result;
             }
 
+            if (UnitTracker.GetSpecialSpellEndTime(input.Unit) > 0)
+            {
+                result.Hitchance = HitChance.VeryHigh;
+                return result;
+            }
+
             result.Hitchance = HitChance.High;
 
             var lastWaypiont = input.Unit.GetWaypoints().Last().To3D();
@@ -366,25 +371,24 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var distanceFromToUnit = input.From.Distance(input.Unit.ServerPosition);
             var distanceFromToWaypoint = lastWaypiont.Distance(input.From);
 
-            float totalDelay;
+            float speedDelay = distanceFromToUnit / input.Speed;
 
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
-                totalDelay = input.Delay;
+                speedDelay = 0;
             else
-                totalDelay = distanceFromToUnit / input.Speed + input.Delay;
-            
+                speedDelay = distanceFromToUnit / input.Speed;
+
+            float totalDelay = speedDelay + input.Delay;
             float moveArea = input.Unit.MoveSpeed * totalDelay;
             float fixRange = moveArea * 0.6f;
-            double angleMove = 30 + (input.Radius / 15);
+            double angleMove = 30 + (input.Radius / 20);
             float backToFront = moveArea * 1.5f;
-            float pathMinLen = 500f + backToFront;
-            
+            float pathMinLen = 600f + backToFront;
+
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
-                pathMinLen = backToFront;
-                fixRange = moveArea * 0.4f;
+                fixRange = moveArea * (0.2f + input.Delay);
                 backToFront = moveArea;
-                angleMove += 15;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
@@ -404,7 +408,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 {
                     if (GetAngle(input.From, input.Unit) < angleMove)
                     {
-                        backToFront = moveArea / 2 ;
+                        backToFront = moveArea / 2;
                         result.Hitchance = HitChance.VeryHigh;
                     }
                     else
@@ -414,7 +418,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition)
             {
-                if (UnitTracker.GetLastStopMoveTime(input.Unit) < 0.6d)
+                if (UnitTracker.GetLastStopMoveTime(input.Unit) < 0.4d)
                     result.Hitchance = HitChance.High;
                 else if (distanceFromToUnit > input.Range - fixRange)
                     result.Hitchance = HitChance.Medium;
@@ -439,7 +443,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (input.Type == SkillshotType.SkillshotCircle)
             {
-                if (totalDelay < 1.1 && UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
+                if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
+                    result.Hitchance = HitChance.VeryHigh;
+                else if (distanceFromToUnit < input.Range - fixRange)
                     result.Hitchance = HitChance.VeryHigh;
             }
 
@@ -451,14 +457,20 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.Medium;
                 else if (input.Unit.Path.Count() > 0)
                 {
-                    if (distanceUnitToWaypoint < backToFront || input.Unit.Position == input.Unit.ServerPosition)
+                    if (distanceUnitToWaypoint < moveArea || input.Unit.Position == input.Unit.ServerPosition)
                         result.Hitchance = HitChance.Medium;
                 }
+                if (UnitTracker.GetLastVisableTime(input.Unit) < 0.05d)
+                {
+                    result.Hitchance = HitChance.Medium;
+                }
             }
+            if (distanceFromToWaypoint > input.Unit.Distance(input.From) && GetAngle(input.From, input.Unit) > angleMove)
+                result.Hitchance = HitChance.VeryHigh;
 
             if (input.Unit.Distance(input.From) < 300 || distanceFromToWaypoint < 400 || input.Unit.MoveSpeed < 200f)
                 result.Hitchance = HitChance.VeryHigh;
-            
+
             return result;
         }
 
@@ -473,7 +485,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 var endP = dashData.Path.Last();
                 var dashPred = GetPositionOnPath(
                     input, new List<Vector2> { input.Unit.ServerPosition.To2D(), endP }, dashData.Speed);
-                if (dashPred.Hitchance >= HitChance.High && dashPred.UnitPosition.To2D().Distance(input.Unit.Position.To2D(), endP, true) < 200 )
+                if (dashPred.Hitchance >= HitChance.High && dashPred.UnitPosition.To2D().Distance(input.Unit.Position.To2D(), endP, true) < 200)
                 {
                     dashPred.CastPosition = dashPred.UnitPosition;
                     dashPred.Hitchance = HitChance.Dashing;
@@ -500,7 +512,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
                 //Figure out where the unit is going.
             }
-            
+
             return result;
         }
 
@@ -1014,7 +1026,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public static List<Obj_AI_Base> GetCollision(List<Vector3> positions, PredictionInput input)
         {
             var result = new List<Obj_AI_Base>();
-
             foreach (var position in positions)
             {
                 foreach (var objectType in input.CollisionObjects)
@@ -1038,7 +1049,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                 else
                                 {
                                     var bonus = 20;
-                                    if (minion.ServerPosition.To2D().Distance(input.From.To2D()) < input.Radius/2)
+                                    if (minion.ServerPosition.To2D().Distance(input.From.To2D()) < input.Radius / 2)
                                         bonus = 40;
                                     if (minion.ServerPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <=
                                         Math.Pow((input.Radius + bonus + minion.BoundingRadius), 2))
@@ -1126,9 +1137,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-
             return result.Distinct().ToList();
         }
+    }
+
+    internal class Spells
+    {
+        public string name { get; set; }
+        public double duration { get; set; }
     }
 
     internal class UnitTrackerInfo
@@ -1137,18 +1153,47 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public int AaTick { get; set; }
         public int NewPathTick { get; set; }
         public int StopMoveTick { get; set; }
+        public int LastInvisableTick { get; set; }
+        public int SpecialSpellFinishTick { get; set; }
     }
 
     internal static class UnitTracker
     {
         public static List<UnitTrackerInfo> UnitTrackerInfoList = new List<UnitTrackerInfo>();
         private static List<Obj_AI_Hero> Champion = new List<Obj_AI_Hero>();
+        private static List<Spells> spells = new List<Spells>();
+
         static UnitTracker()
         {
+            spells.Add(new Spells() { name = "katarinar", duration = 1 }); //Katarinas R
+            spells.Add(new Spells() { name = "drain", duration = 1 }); //Fiddle W
+            spells.Add(new Spells() { name = "crowstorm", duration = 1 }); //Fiddle R
+            spells.Add(new Spells() { name = "consume", duration = 0.5 }); //Nunu Q
+            spells.Add(new Spells() { name = "absolutezero", duration = 1 }); //Nunu R
+            spells.Add(new Spells() { name = "staticfield", duration = 0.5 }); //Blitzcrank R
+            spells.Add(new Spells() { name = "cassiopeiapetrifyinggaze", duration = 0.5 }); //Cassio's R
+            spells.Add(new Spells() { name = "ezrealtrueshotbarrage", duration = 1 }); //Ezreal's R
+            spells.Add(new Spells() { name = "galioidolofdurand", duration = 1 }); //Ezreal's R                                                                   
+            spells.Add(new Spells() { name = "luxmalicecannon", duration = 1 }); //Lux R
+            spells.Add(new Spells() { name = "reapthewhirlwind", duration = 1 }); //Jannas R
+            spells.Add(new Spells() { name = "jinxw", duration = 0.6 }); //jinxW
+            spells.Add(new Spells() { name = "jinxr", duration = 0.6 }); //jinxR
+            spells.Add(new Spells() { name = "missfortunebullettime", duration = 1 }); //MissFortuneR
+            spells.Add(new Spells() { name = "shenstandunited", duration = 1 }); //ShenR
+            spells.Add(new Spells() { name = "threshe", duration = 0.4 }); //ThreshE
+            spells.Add(new Spells() { name = "threshrpenta", duration = 0.75 }); //ThreshR
+            spells.Add(new Spells() { name = "threshq", duration = 0.75 }); //ThreshQ
+            spells.Add(new Spells() { name = "infiniteduress", duration = 1 }); //Warwick R
+            spells.Add(new Spells() { name = "meditate", duration = 1 }); //yi W
+            spells.Add(new Spells() { name = "alzaharnethergrasp", duration = 1 }); //Malza R
+            spells.Add(new Spells() { name = "lucianq", duration = 0.5 }); //Lucian Q
+            spells.Add(new Spells() { name = "caitlynpiltoverpeacemaker", duration = 0.5 }); //Caitlyn Q
+            spells.Add(new Spells() { name = "velkozr", duration = 0.5 }); //Velkoz R 
+
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
                 Champion.Add(hero);
-                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = hero.NetworkId, AaTick = Utils.TickCount, StopMoveTick = Utils.TickCount, NewPathTick = Utils.TickCount });
+                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = hero.NetworkId, AaTick = Utils.TickCount, StopMoveTick = Utils.TickCount, NewPathTick = Utils.TickCount, SpecialSpellFinishTick = Utils.TickCount, LastInvisableTick = Utils.TickCount });
             }
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Base.OnNewPath += Obj_AI_Hero_OnNewPath;
@@ -1157,9 +1202,17 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            foreach (var hero in Champion.Where(hero => hero.IsValid && hero.IsVisible && hero.Path.Count() > 0))
+            foreach (var hero in Champion)
             {
-                UnitTrackerInfoList.Find(x => x.NetworkId == hero.NetworkId).StopMoveTick = Utils.TickCount;   
+                if (hero.IsVisible)
+                {
+                    if (hero.Path.Count() > 0)
+                        UnitTrackerInfoList.Find(x => x.NetworkId == hero.NetworkId).StopMoveTick = Utils.TickCount;
+                }
+                else
+                {
+                    UnitTrackerInfoList.Find(x => x.NetworkId == hero.NetworkId).LastInvisableTick = Utils.TickCount;
+                }
             }
         }
 
@@ -1167,14 +1220,27 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (!(sender is Obj_AI_Hero)) { return; }
             UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).NewPathTick = Utils.TickCount;
-
         }
 
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!(sender is Obj_AI_Hero) || !args.SData.IsAutoAttack()) { return; }
-            UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).AaTick = Utils.TickCount;
+            if (!(sender is Obj_AI_Hero)) { return; }
+            if (args.SData.IsAutoAttack())
+                UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).AaTick = Utils.TickCount;
+            else
+            {
+                var foundSpell = spells.Find(x => args.SData.Name.ToLower() == x.name.ToLower());
+                if (foundSpell != null)
+                {
+                    UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).SpecialSpellFinishTick = Utils.TickCount + (int)(foundSpell.duration * 1000);
+                }
+            }
+        }
 
+        public static double GetSpecialSpellEndTime(Obj_AI_Base unit)
+        {
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+            return (TrackerUnit.SpecialSpellFinishTick - Utils.TickCount) / 1000d;
         }
 
         public static double GetLastAutoAttackTime(Obj_AI_Base unit)
@@ -1189,10 +1255,17 @@ namespace OneKeyToWin_AIO_Sebby.Core
             return (Utils.TickCount - TrackerUnit.NewPathTick) / 1000d;
         }
 
+        public static double GetLastVisableTime(Obj_AI_Base unit)
+        {
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+
+            return (Utils.TickCount - TrackerUnit.LastInvisableTick) / 1000d;
+        }
+
         public static double GetLastStopMoveTime(Obj_AI_Base unit)
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
-            
+
             return (Utils.TickCount - TrackerUnit.StopMoveTick) / 1000d;
         }
     }

@@ -36,11 +36,11 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Cresendo", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Sona.UseFCKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Sona.UseFCKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Sona.UseFCType", "R").SetValue(new StringList(new[] { "Cresendo", "Flash Cresendo" })));
                 custommenu.AddItem(new MenuItem("EC.Sona.UseFCDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Sona.UseFCDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -48,19 +48,19 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Sona.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Sona.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Sona.Combo.R", "Use R").SetValue(false));                
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {               
                 harassmenu.AddItem(new MenuItem("EC.Sona.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Sona.Harass.W", "Use W").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
                 laneclearmenu.AddItem(new MenuItem("EC.Sona.Farm.Q", "Use Q").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Sona.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
@@ -68,7 +68,7 @@ namespace EndifsCreations.Plugins
                 miscmenu.AddItem(new MenuItem("EC.Sona.Misc.W", "W Heals").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Sona.Misc.W2", "W Shields").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Sona.UseRMisc", "R Interrupts").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -76,7 +76,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Sona.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Sona.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Sona.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -84,23 +84,12 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(R.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Sona.Combo.Q").GetValue<bool>();            
-            var UseE = config.Item("EC.Sona.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Sona.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Sona.Combo.Q").GetValue<bool>();            
+            var UseE = Root.Item("EC.Sona.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Sona.Combo.R").GetValue<bool>();
             if (UseQ && Q.IsReady())
             {
-                if (Target.IsValidTarget() && Q.IsInRange(Target))
-                {
-                    if (myUtility.ImmuneToMagic(Target)) return;
-                    Q.Cast();
-                }
-                else
-                {
-                    if (Player.CountEnemiesInRange(800) > 0)
-                    {
-                        Q.Cast();
-                    }
-                }
+                mySpellcast.PointBlank(null, Q, 800);
             }
             if (UseR && R.IsReady())
             {
@@ -132,7 +121,7 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Sona.Harass.Q").GetValue<bool>();
+            var UseQ = Root.Item("EC.Sona.Harass.Q").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -145,9 +134,9 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Sona.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Sona.Farm.ManaPercent").GetValue<Slider>().Value) return;
             if (Player.UnderTurret(true)) return;
-            if (config.Item("EC.Sona.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Sona.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range).Where(x => Q.IsKillable(x));
                 if (minionQ.Any()) Q.Cast();
@@ -158,7 +147,7 @@ namespace EndifsCreations.Plugins
             if (R.IsReady())
             {
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
-                switch (config.Item("EC.Sona.UseFCType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Sona.UseFCType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         Obj_AI_Hero target; 
@@ -194,7 +183,7 @@ namespace EndifsCreations.Plugins
         }
         private void AutoHeal()
         {
-            if (!config.Item("EC.Sona.Misc.W").GetValue<bool>() || Player.InFountain() || Player.InShop() || Player.HasBuff("Recall") || Player.IsWindingUp) return;
+            if (!Root.Item("EC.Sona.Misc.W").GetValue<bool>() || Player.InFountain() || Player.InShop() || Player.HasBuff("Recall") || Player.IsWindingUp) return;
             if (myUtility.PlayerManaPercentage < 25) return;
             if (W.IsReady())
             {
@@ -225,7 +214,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetRHitChance()
         {
-            switch (config.Item("EC.Sona.RPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Sona.RPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -284,9 +273,9 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Sona.Combo.W").GetValue<bool>()) ||
-                    (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && config.Item("EC.Sona.Harass.W").GetValue<bool>()) ||
-                    (config.Item("EC.Sona.Misc.W2").GetValue<bool>())
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Sona.Combo.W").GetValue<bool>()) ||
+                    (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && Root.Item("EC.Sona.Harass.W").GetValue<bool>()) ||
+                    (Root.Item("EC.Sona.Misc.W2").GetValue<bool>())
                     )
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
@@ -310,7 +299,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Sona.UseRMisc").GetValue<bool>() && R.IsReady())
+            if (Root.Item("EC.Sona.UseRMisc").GetValue<bool>() && R.IsReady())
             {
                 if (sender.IsEnemy && args.DangerLevel == Interrupter2.DangerLevel.High)
                 {
@@ -322,33 +311,33 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Sona.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Sona.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Sona.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Sona.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Sona.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Sona.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Sona.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Sona.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }
             if (R.Level > 0 && R.IsReady())
             {
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
-                switch (config.Item("EC.Sona.UseFCType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Sona.UseFCType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
-                        if (config.Item("EC.Sona.UseFCDrawDistance").GetValue<bool>())
+                        if (Root.Item("EC.Sona.UseFCDrawDistance").GetValue<bool>())
                         {
                             Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                         }
-                        if (config.Item("EC.Sona.UseFCDrawTarget").GetValue<bool>())
+                        if (Root.Item("EC.Sona.UseFCDrawTarget").GetValue<bool>())
                         {
                             Obj_AI_Hero target;
                             if (TargetSelector.GetSelectedTarget() != null && TargetSelector.GetSelectedTarget().IsValidTarget())
@@ -377,12 +366,12 @@ namespace EndifsCreations.Plugins
                     case 1:
                         if (FlashSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                         {
-                            if (config.Item("EC.Sona.UseFCDrawDistance").GetValue<bool>())
+                            if (Root.Item("EC.Sona.UseFCDrawDistance").GetValue<bool>())
                             {
                                 Render.Circle.DrawCircle(Player.Position, 425f, Color.Fuchsia, 7);
                                 Render.Circle.DrawCircle(Player.Position, R.Range + 425f, Color.Fuchsia, 7);
                             }
-                            if (config.Item("EC.Sona.UseFCDrawTarget").GetValue<bool>())
+                            if (Root.Item("EC.Sona.UseFCDrawTarget").GetValue<bool>())
                             {
 
                                 var FC = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&

@@ -17,20 +17,19 @@ namespace EndifsCreations.Controller
     {
         private static readonly Items.Item Ghostblade = ItemData.Youmuus_Ghostblade.GetItem();
         private static readonly Items.Item Tiamat = ItemData.Tiamat_Melee_Only.GetItem();
+        private static readonly Items.Item Zhonya = ItemData.Zhonyas_Hourglass.GetItem();
 
         public static void UseGhostblade()
         {
-            if (Ghostblade.IsReady())
-            {
-                Ghostblade.Cast();
-            }
+            if (Ghostblade.IsReady()) Ghostblade.Cast();
+        }
+        public static void UseZhonya()
+        {
+            if (Zhonya.IsReady()) Zhonya.Cast();
         }
         public static void UseTiamat()
         {
-            if (Tiamat.IsReady())
-            {
-                Tiamat.Cast();
-            }
+            if (Tiamat.IsReady()) Tiamat.Cast();
         }
 
         public static void UseItems(int index, Obj_AI_Base target)

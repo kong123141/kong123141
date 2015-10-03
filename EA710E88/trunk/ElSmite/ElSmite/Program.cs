@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LeagueSharp.Common;
-
-namespace ElSmite
+﻿namespace ElSmite
 {
+    using System;
+
+    using LeagueSharp.Common;
+
     // ReSharper disable once ClassNeverInstantiated.Global
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        #region Methods
+
+        private static void Main(string[] args)
         {
             try
             {
@@ -21,5 +20,7 @@ namespace ElSmite
                 Console.WriteLine("An error occurred: '{0}'", e);
             }
         }
+
+        #endregion
     }
 }

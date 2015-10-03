@@ -41,41 +41,41 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Nocturne.Combo.E", "Use E").SetValue(true));              
                 combomenu.AddItem(new MenuItem("EC.Nocturne.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Nocturne.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Nocturne.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Nocturne.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Nocturne.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
                 laneclearmenu.AddItem(new MenuItem("EC.Nocturne.Farm.Q", "Use Q").SetValue(false));
                 laneclearmenu.AddItem(new MenuItem("EC.Nocturne.Farm.Q.Value", "Q More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Nocturne.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Nocturne.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Nocturne.Jungle.E", "Use E").SetValue(true)); 
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Nocturne.QPredHitchance", "Q Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
                 miscmenu.AddItem(new MenuItem("EC.Nocturne.Misc.W", "W Spellblock").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Nocturne.Misc.E", "E Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Nocturne.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nocturne.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nocturne.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -83,9 +83,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Nocturne.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Nocturne.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Nocturne.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Nocturne.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Nocturne.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Nocturne.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -119,8 +119,8 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Nocturne.Harass.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Nocturne.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Nocturne.Harass.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Nocturne.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (target.IsValidTarget() && !Player.UnderTurret(true) && !target.UnderTurret(true) && !Player.IsWindingUp)
             {
@@ -136,20 +136,20 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Nocturne.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Nocturne.Farm.ManaPercent").GetValue<Slider>().Value) return;
             var minions = MinionManager.GetMinions(Player.ServerPosition, Player.AttackRange * 2, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None);
-            if (minions.Count >= 3 && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (minions.Count >= 3 && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 myItemManager.UseItems(2, null);
             }
-            if (config.Item("EC.Nocturne.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Nocturne.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var MinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 var QLine = Q.GetLineFarmLocation(MinionsQ);
                 if (QLine.Position.IsValid() && Vector3.Distance(Player.ServerPosition, QLine.Position.To3D()) > Player.AttackRange)
                 {
                     if (Player.UnderTurret(true)) return;
-                    if (QLine.MinionsHit > config.Item("EC.Nocturne.Farm.Q.Value").GetValue<Slider>().Value)
+                    if (QLine.MinionsHit > Root.Item("EC.Nocturne.Farm.Q.Value").GetValue<Slider>().Value)
                     {
                         if (myUtility.IsFacing(Player, QLine.Position.To3D())) Q.Cast(QLine.Position);
                     }
@@ -163,7 +163,7 @@ namespace EndifsCreations.Plugins
             if (mobs.Count <= 0) return;
             var mob = mobs[0];
             if (mob == null) return;
-            if (config.Item("EC.Nocturne.Jungle.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Nocturne.Jungle.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (largemobs != null)
                 {
@@ -175,7 +175,7 @@ namespace EndifsCreations.Plugins
                     Q.Cast(QLine.Position);
                 }
             }
-            if (config.Item("EC.Nocturne.Jungle.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Nocturne.Jungle.E").GetValue<bool>() && E.IsReady())
             {
                 if (largemobs != null && E.IsInRange(largemobs))
                 {
@@ -202,7 +202,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQHitChance()
         {
-            switch (config.Item("EC.Nocturne.QPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Nocturne.QPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -250,9 +250,9 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Nocturne.Combo.W").GetValue<bool>()) ||
-                    (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && config.Item("EC.Nocturne.Harass.W").GetValue<bool>()) ||
-                    (config.Item("EC.Nocturne.Misc.W").GetValue<bool>())
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Nocturne.Combo.W").GetValue<bool>()) ||
+                    (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass && Root.Item("EC.Nocturne.Harass.W").GetValue<bool>()) ||
+                    (Root.Item("EC.Nocturne.Misc.W").GetValue<bool>())
                     )
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
@@ -276,7 +276,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Nocturne.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Nocturne.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.Sender.ServerPosition) <= E.Range)
                 {
@@ -287,7 +287,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Nocturne.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Nocturne.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range)
                 {
@@ -302,7 +302,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Nocturne.Combo.Items").GetValue<bool>())
+                    if (Root.Item("EC.Nocturne.Combo.Items").GetValue<bool>())
                     {
                         myItemManager.UseItems(0, null);
                     }
@@ -337,15 +337,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Nocturne.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Nocturne.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Nocturne.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Nocturne.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Nocturne.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Nocturne.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R2.Range, Color.Fuchsia);
             }

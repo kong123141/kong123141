@@ -34,10 +34,10 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Flash Flay", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Thresh.UseFFKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Thresh.UseFFKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Thresh.UseFFDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Thresh.UseFFDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -51,13 +51,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Thresh.Combo.EType", "E").SetValue(new StringList(new[] { "Inwards", "Outwards" })));
                 combomenu.AddItem(new MenuItem("EC.Thresh.RComboValue", "R More Than").SetValue(new Slider(1, 1, 5)));
                 combomenu.AddItem(new MenuItem("EC.Thresh.Combo.Dive", "Turret Dive").SetValue(false));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {               
                 harassmenu.AddItem(new MenuItem("EC.Thresh.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Thresh.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -65,13 +65,13 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Thresh.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Thresh.Farm.EType", "E").SetValue(new StringList(new[] { "Inwards", "Outwards" })));
                 laneclearmenu.AddItem(new MenuItem("EC.Thresh.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Thresh.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Thresh.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
@@ -80,7 +80,7 @@ namespace EndifsCreations.Plugins
                 miscmenu.AddItem(new MenuItem("EC.Thresh.Misc.Q", "Q Interrupts").SetValue(true));
                 miscmenu.AddItem(new MenuItem("EC.Thresh.Misc.E", "E Interrupts").SetValue(true));
                 miscmenu.AddItem(new MenuItem("EC.Thresh.Misc.E2", "E Gapcloser").SetValue(true));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -89,7 +89,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Thresh.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Thresh.Draw.R", "R").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Thresh.Draw.QPred", "Q Prediction").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -97,11 +97,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical, true);
 
-            var UseQ = config.Item("EC.Thresh.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Thresh.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Thresh.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Thresh.Combo.R").GetValue<bool>();
-            var UseQ2 = config.Item("EC.Thresh.Combo.Q2").GetValue<bool>();
+            var UseQ = Root.Item("EC.Thresh.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Thresh.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Thresh.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Thresh.Combo.R").GetValue<bool>();
+            var UseQ2 = Root.Item("EC.Thresh.Combo.Q2").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -114,17 +114,17 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseQ2 && Target == LastQTarget && (myUtility.TickCount - QTick > 2000 && myUtility.TickCount - QTick < 3000) && Target.HasBuff("ThreshQ") && !Target.HasBuff("threshqfakeknockup"))
                     {
-                        if (Target.UnderTurret(true) && !config.Item("EC.Thresh.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.UnderTurret(true) && !Root.Item("EC.Thresh.Combo.Dive").GetValue<bool>()) return;
                         Q.Cast();
                     }
                     if (UseW && W.IsReady() && !Player.IsWindingUp)
                     {
-                        switch (config.Item("EC.Thresh.Combo.WType").GetValue<StringList>().SelectedIndex)
+                        switch (Root.Item("EC.Thresh.Combo.WType").GetValue<StringList>().SelectedIndex)
                         {
                             case 0:
                                 if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= 900)
                                 {
-                                    switch (config.Item("EC.Thresh.Combo.WLogic").GetValue<StringList>().SelectedIndex)
+                                    switch (Root.Item("EC.Thresh.Combo.WLogic").GetValue<StringList>().SelectedIndex)
                                     {
                                         case 0:
                                             if (Target.HasBuff("ThreshQ"))
@@ -148,7 +148,7 @@ namespace EndifsCreations.Plugins
                                 var Ally = HeroManager.Allies.Where(x => !x.IsDead && !x.IsMe && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= 1125).OrderByDescending(i => i.Distance(Player)).FirstOrDefault();
                                 if (Ally != null)
                                 {
-                                    switch (config.Item("EC.Thresh.Combo.WLogic").GetValue<StringList>().SelectedIndex)
+                                    switch (Root.Item("EC.Thresh.Combo.WLogic").GetValue<StringList>().SelectedIndex)
                                     {
                                         case 0:
                                             if (Target.HasBuff("ThreshQ"))
@@ -169,7 +169,7 @@ namespace EndifsCreations.Plugins
                                 }
                                 break;
                             case 2:
-                                switch (config.Item("EC.Thresh.Combo.WLogic").GetValue<StringList>().SelectedIndex)
+                                switch (Root.Item("EC.Thresh.Combo.WLogic").GetValue<StringList>().SelectedIndex)
                                 {
 
                                     case 0:
@@ -193,7 +193,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseE && E.IsReady() && E.IsInRange(Target) && !Player.IsDashing() && !Player.IsWindingUp && !Target.HasBuff("ThreshQ") && (myUtility.TickCount - QTick > 2000))
                     {
-                        switch (config.Item("EC.Thresh.Combo.EType").GetValue<StringList>().SelectedIndex)
+                        switch (Root.Item("EC.Thresh.Combo.EType").GetValue<StringList>().SelectedIndex)
                         {
                             case 0:
                                 if (myUtility.TickCount - JumpTime < (1000 + Game.Ping))
@@ -225,7 +225,7 @@ namespace EndifsCreations.Plugins
                         {
                             if (ValidTargets[0].HealthPercent < 50) R.Cast();
                         }
-                        else if (ValidTargets.Count() > config.Item("EC.Thresh.RComboValue").GetValue<Slider>().Value)
+                        else if (ValidTargets.Count() > Root.Item("EC.Thresh.RComboValue").GetValue<Slider>().Value)
                         {
                             R.Cast();
                         }
@@ -236,8 +236,8 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Thresh.Harass.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Thresh.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Thresh.Harass.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Thresh.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -257,15 +257,15 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Thresh.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Thresh.Farm.ManaPercent").GetValue<Slider>().Value) return;
             if (Player.UnderTurret(true)) return;
-            if (config.Item("EC.Thresh.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && myOrbwalker.IsWaiting())
+            if (Root.Item("EC.Thresh.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && myOrbwalker.Waiting)
             {
                 var minionE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 if (minionE == null) return;
                 foreach (var x in minionE)
                 {
-                    if (MinionManager.GetMinions(x.ServerPosition, 200f).Count() > config.Item("EC.Thresh.Farm.E.Value").GetValue<Slider>().Value)
+                    if (MinionManager.GetMinions(x.ServerPosition, 200f).Count() > Root.Item("EC.Thresh.Farm.E.Value").GetValue<Slider>().Value)
                     {
                         if (x.ServerPosition.UnderTurret(true))
                         {
@@ -277,7 +277,7 @@ namespace EndifsCreations.Plugins
                         }
                         else
                         {
-                            switch (config.Item("EC.Thresh.Farm.EType").GetValue<StringList>().SelectedIndex)
+                            switch (Root.Item("EC.Thresh.Farm.EType").GetValue<StringList>().SelectedIndex)
                             {
                                 case 0:
                                     E.Cast(EInwards(Player, x.ServerPosition));
@@ -295,14 +295,14 @@ namespace EndifsCreations.Plugins
         {
             var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault();
             var largemobs = myFarmManager.GetLargeMonsters(Player.Position, Q.Range).FirstOrDefault();
-            if (config.Item("EC.Thresh.Jungle.Q").GetValue<bool>() && Q.IsReady() && myUtility.TickCount - QTick >= QTime && !Player.IsWindingUp && !QLeap)
+            if (Root.Item("EC.Thresh.Jungle.Q").GetValue<bool>() && Q.IsReady() && myUtility.TickCount - QTick >= QTime && !Player.IsWindingUp && !QLeap)
             {
                 if (largemobs != null && Q.IsInRange(largemobs) && Q.IsKillable(largemobs) && !Player.IsWindingUp)
                 {
                     Q.Cast(largemobs.ServerPosition);
                 }
             }
-            if (config.Item("EC.Thresh.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Thresh.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
             {
                 if (largemobs != null && E.IsInRange(largemobs))
                 {
@@ -356,7 +356,7 @@ namespace EndifsCreations.Plugins
             PredictionOutput pred = Q.GetPrediction(target);
             if (pred.CollisionObjects.Count == 0 && Vector3.Distance(Player.ServerPosition, pred.CastPosition) <= Q.Range)
             {
-                switch (config.Item("EC.Thresh.QPredLogic").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Thresh.QPredLogic").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         if (pred.Hitchance >= QHitChance)
@@ -399,7 +399,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQHitChance()
         {
-            switch (config.Item("EC.Thresh.QPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Thresh.QPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -480,7 +480,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Thresh.Farm.E").GetValue<bool>() && E.IsReady() && (myUtility.PlayerManaPercentage > config.Item("EC.Thresh.Farm.ManaPercent").GetValue<Slider>().Value))
+            if (Root.Item("EC.Thresh.Farm.E").GetValue<bool>() && E.IsReady() && (myUtility.PlayerManaPercentage > Root.Item("EC.Thresh.Farm.ManaPercent").GetValue<Slider>().Value))
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null &&
@@ -494,7 +494,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Thresh.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Thresh.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (args.DangerLevel == Interrupter2.DangerLevel.High)
                 {
@@ -502,7 +502,7 @@ namespace EndifsCreations.Plugins
                     QPrediction(sender);
                 }
             }
-            if (config.Item("EC.Thresh.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Thresh.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (Vector3.Distance(Player.ServerPosition, sender.ServerPosition) < E.Range)
                 {
@@ -513,7 +513,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Thresh.Misc.E2").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Thresh.Misc.E2").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -525,30 +525,30 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Thresh.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Thresh.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Thresh.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Thresh.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Thresh.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Thresh.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Thresh.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Thresh.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }
             if (FlashSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready && E.IsReady())
             {
-                if (config.Item("EC.Thresh.UseFFDrawDistance").GetValue<bool>())
+                if (Root.Item("EC.Thresh.UseFFDrawDistance").GetValue<bool>())
                 {
                     Render.Circle.DrawCircle(Player.Position, 425f, Color.Fuchsia, 7);
                     Render.Circle.DrawCircle(Player.Position, E.Range + 425f, Color.Fuchsia, 7);
                 }
-                if (config.Item("EC.Thresh.UseFFDrawTarget").GetValue<bool>())
+                if (Root.Item("EC.Thresh.UseFFDrawTarget").GetValue<bool>())
                 {
                     var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
                     var FF = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&
@@ -561,7 +561,7 @@ namespace EndifsCreations.Plugins
                     }
                 }
             }
-            if (config.Item("EC.Thresh.Draw.QPred").GetValue<bool>())
+            if (Root.Item("EC.Thresh.Draw.QPred").GetValue<bool>())
             {
                 Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (Target.IsValidTarget(Q.Range))

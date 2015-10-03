@@ -34,13 +34,13 @@ namespace EndifsCreations.Plugins
             {
                 combomenu.AddItem(new MenuItem("EC.Singed.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Singed.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Singed.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Singed.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -48,8 +48,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(W.Range, TargetSelector.DamageType.Magical);
 
-            var UseW = config.Item("EC.Singed.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Singed.Combo.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Singed.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Singed.Combo.E").GetValue<bool>();
 
             if (Target.IsValidTarget())
             {
@@ -58,7 +58,7 @@ namespace EndifsCreations.Plugins
                 {     
                     if (UseW && W.IsReady())
                     {
-                        mySpellcast.CircularAoe(Target, W, HitChance.High);
+                        mySpellcast.CircularAoe(Target, W, HitChance.High, W.Range, W.Instance.SData.CastRadius);
                     }
                     if (UseE && E.IsReady())
                     {
@@ -90,7 +90,7 @@ namespace EndifsCreations.Plugins
         {
             if (Player.IsDead) return;
 
-            if (config.Item("EC.Singed.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Singed.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }

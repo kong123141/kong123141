@@ -44,7 +44,7 @@ namespace Activator.Summoners
 
             foreach (var tar in Activator.Heroes.Where(hero => hero.Player.IsValidTarget(Range)))
             {
-                if (Parent.Item(Parent.Name + "useon" + tar.Player.ChampionName).GetValue<bool>())
+                if (Parent.Item(Parent.Name + "useon" + tar.Player.NetworkId).GetValue<bool>())
                     mark.CastIfHitchanceEquals(tar.Player, HitChance.Medium);
             }
         }

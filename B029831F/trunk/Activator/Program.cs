@@ -3,8 +3,8 @@
 // any form or by any means, mechanical, electronical or otherwise, is prohibited
 // without the prior written consent of the copyright owner.
 // 
-// Document:	activator/program.cs
-// Date:		01/07/2015
+// Document:	Activator/Program.cs
+// Date:		22/09/2015
 // Author:		Robin Kurisu
 #endregion
 
@@ -14,7 +14,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-#region Namespaces
+#region Namespaces © 2015 Kurisu Solutions
 using LeagueSharp;
 using LeagueSharp.Common;
 using Activator.Base;
@@ -42,7 +42,7 @@ namespace Activator
 
         public static bool UseEnemyMenu, UseAllyMenu;
         public static System.Version Version;
-        public static List<Champion> Heroes = new List<Champion>(); 
+        public static List<Champion> Heroes = new List<Champion>();
 
         private static void Main(string[] args)
         {
@@ -64,7 +64,7 @@ namespace Activator
 
                 Origin = new Menu("Activator", "activator", true);
 
-                var cmenu = new Menu("Cleansers", "cleansers");
+                var cmenu = new Menu("Cleansers", "cmenu");
                 SubMenu(cmenu, false);
                 GetItemGroup("Items.Cleansers").ForEach(t => NewItem((CoreItem)NewInstance(t), cmenu));
                 Origin.AddSubMenu(cmenu);
@@ -121,12 +121,15 @@ namespace Activator
                 Origin.AddToMainMenu();
 
                 // drawings
-                Drawings.Load();
+                Drawings.Init();
 
-                // damage prediction
-                Projections.Load();
+                // handlers
+                Projections.Init();
 
-                // object manager
+                // tracks dangerous or lethal auras
+                Buffs.StartOnUpdate();
+
+                // tracks "troys" that belong to heroes such as viktors ult
                 Gametroys.StartOnUpdate();
 
                 Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
@@ -163,7 +166,7 @@ namespace Activator
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                Game.PrintChat("Fatal error loading Activator!");
+                Game.PrintChat("<font color=\"#FFF280\">Fatal error loading Activator</font>: " + e.Message);
             }
         }
 
@@ -262,7 +265,7 @@ namespace Activator
                 foreach (var item in GameTroyData.Troys.Where(x => x.ChampionName == i.ChampionName))
                 {
                     TroysInGame = true;
-                    Gametroy.Troys.Add(new Gametroy(i, item.Slot, item.Name, 0, false));
+                    GameTroy.Troys.Add(new GameTroy(i, item.Slot, item.Name, 0, false));
                 }
             }
         }
@@ -292,7 +295,7 @@ namespace Activator
             foreach (var hero in both ? HeroManager.AllHeroes : enemy ? HeroManager.Enemies : HeroManager.Allies)
             {
                 var side = hero.Team == Player.Team ? "[Ally]" : "[Enemy]";
-                menu.AddItem(new MenuItem(parent.Name + "useon" + hero.ChampionName,
+                menu.AddItem(new MenuItem(parent.Name + "useon" + hero.NetworkId,
                     "Use for " + hero.ChampionName + " " + side).DontSave()).SetValue(true);
             }
 

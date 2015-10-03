@@ -37,12 +37,12 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Grand Skyfall", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Pantheon.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Pantheon.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Pantheon.UseRType", "R").SetValue(new StringList(new[] { "Less Hit", "R Killable", "YOLO", "Furthest", "Lowest HP" })));
                 custommenu.AddItem(new MenuItem("EC.Pantheon.UseRTypeLessHit", "Hit <").SetValue(new Slider(4, 1, 10)));
                 custommenu.AddItem(new MenuItem("EC.Pantheon.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Pantheon.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -52,14 +52,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Pantheon.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Pantheon.TDHaveShield", "Shield Check").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Pantheon.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Pantheon.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Pantheon.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Pantheon.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -71,27 +71,27 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Pantheon.EFarmType", "E").SetValue(new StringList(new[] { "Any", "Only Siege", "Slider Value" })));
                 laneclearmenu.AddItem(new MenuItem("EC.Pantheon.Farm.E.Value", "(Slider Value) E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Pantheon.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Pantheon.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Pantheon.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Pantheon.Jungle.E", "Use E").SetValue(true)); 
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Pantheon.Misc.W", "W Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Pantheon.Misc.W2", "W Interrupts ").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Pantheon.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Pantheon.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Pantheon.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -99,10 +99,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-            var UseQ = config.Item("EC.Pantheon.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Pantheon.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Pantheon.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Pantheon.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Pantheon.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Pantheon.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Pantheon.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Pantheon.Combo.Items").GetValue<bool>();
 
             if (Target.IsValidTarget())
             {            
@@ -125,8 +125,8 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseW && W.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        if (Target.UnderTurret(true) && !config.Item("EC.Pantheon.Combo.Dive").GetValue<bool>()) return;
-                        if (Target.UnderTurret(true) && config.Item("EC.Pantheon.Combo.Dive").GetValue<bool>() && config.Item("EC.Pantheon.TDHaveShield").GetValue<bool>() && !Shield) return;
+                        if (Target.UnderTurret(true) && !Root.Item("EC.Pantheon.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.UnderTurret(true) && Root.Item("EC.Pantheon.Combo.Dive").GetValue<bool>() && Root.Item("EC.Pantheon.TDHaveShield").GetValue<bool>() && !Shield) return;
                         mySpellcast.Unit(Target, W);
                     }
                     if (UseE && E.IsReady())
@@ -154,8 +154,8 @@ namespace EndifsCreations.Plugins
         private void Harass()
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, false);
-            var UseQ = config.Item("EC.Pantheon.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Pantheon.Harass.W").GetValue<bool>();
+            var UseQ = Root.Item("EC.Pantheon.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Pantheon.Harass.W").GetValue<bool>();
             if (target.IsValidTarget())
             {
                 if (UseQ && Q.IsReady() && !Player.IsDashing())
@@ -170,17 +170,17 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Pantheon.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Pantheon.Farm.ManaPercent").GetValue<Slider>().Value) return;
             if (Player.IsCastingInterruptableSpell() || Player.IsChannelingImportantSpell()) return;
             var minions = MinionManager.GetMinions(Player.ServerPosition, Player.AttackRange * 2, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None);
-            if (minions.Count >= 3 && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (minions.Count >= 3 && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 myItemManager.UseItems(2, null);
             }
-            if (config.Item("EC.Pantheon.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing())
+            if (Root.Item("EC.Pantheon.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing())
             {
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range).ToList();
-                switch (config.Item("EC.Pantheon.QFarmType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Pantheon.QFarmType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         var SelectQ = minionQ.FirstOrDefault(x => Q.IsKillable(x) && !Orbwalking.InAutoAttackRange(x));
@@ -196,10 +196,10 @@ namespace EndifsCreations.Plugins
                         break;
                 }
             }
-            if (config.Item("EC.Pantheon.Farm.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Pantheon.Farm.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
             {
                 var minionW = MinionManager.GetMinions(Player.ServerPosition, W.Range).OrderBy(i => i.Distance(Player)).Where(x => !x.UnderTurret(true)).ToList();
-                switch (config.Item("EC.Pantheon.WFarmType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Pantheon.WFarmType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         var SelectW = minionW.FirstOrDefault(x => W.IsKillable(x));
@@ -217,10 +217,10 @@ namespace EndifsCreations.Plugins
                         break;
                 }
             }
-            if (config.Item("EC.Pantheon.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && !Player.UnderTurret(true))
+            if (Root.Item("EC.Pantheon.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && !Player.UnderTurret(true))
             {
                 var AllE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
-                switch (config.Item("EC.Pantheon.EFarmType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Pantheon.EFarmType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         //Any
@@ -241,7 +241,7 @@ namespace EndifsCreations.Plugins
                         //Most                        
                         foreach (var x in AllE)
                         {
-                            if (E.IsInRange(x) && MinionManager.GetMinions(x.ServerPosition, 300).Count() > config.Item("EC.Pantheon.Farm.E.Value").GetValue<Slider>().Value)
+                            if (E.IsInRange(x) && MinionManager.GetMinions(x.ServerPosition, 300).Count() > Root.Item("EC.Pantheon.Farm.E.Value").GetValue<Slider>().Value)
                             {
                                 E.Cast(x.ServerPosition);
                             }
@@ -258,7 +258,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null && !Player.IsWindingUp)
             {
-                if (config.Item("EC.Pantheon.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob) && !Player.IsDashing())
+                if (Root.Item("EC.Pantheon.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob) && !Player.IsDashing())
                 {
                     if (largemobs != null)
                     {
@@ -269,7 +269,7 @@ namespace EndifsCreations.Plugins
                         Q.CastOnUnit(mob);
                     }
                 }
-                if (config.Item("EC.Pantheon.Jungle.W").GetValue<bool>() && W.IsReady() && W.IsInRange(mob))
+                if (Root.Item("EC.Pantheon.Jungle.W").GetValue<bool>() && W.IsReady() && W.IsInRange(mob))
                 {
                     if (PassiveCount() <= 3 && !Shield)
                     {
@@ -283,7 +283,7 @@ namespace EndifsCreations.Plugins
                         }
                     }
                 }
-                if (config.Item("EC.Pantheon.Jungle.E").GetValue<bool>() && E.IsReady())
+                if (Root.Item("EC.Pantheon.Jungle.E").GetValue<bool>() && E.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -304,7 +304,7 @@ namespace EndifsCreations.Plugins
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && x.IsTargetable && !myUtility.ImmuneToDeath(x));
                 var targets = EnemyList.Where(x => !x.InFountain() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < R.Range);
                 Obj_AI_Hero mandropthis = null;
-                switch (config.Item("EC.Pantheon.UseRType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Pantheon.UseRType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         mandropthis = targets.OrderBy(i => (i.Health / Player.GetAutoAttackDamage(i))).FirstOrDefault();
@@ -404,7 +404,7 @@ namespace EndifsCreations.Plugins
         }       
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Pantheon.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Pantheon.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= W.Range)
                 {
@@ -415,7 +415,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Pantheon.Misc.W2").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Pantheon.Misc.W2").GetValue<bool>() && W.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= W.Range)
                 {
@@ -431,7 +431,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (!Player.IsWindingUp && config.Item("EC.Pantheon.Combo.Items").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
+                    if (!Player.IsWindingUp && Root.Item("EC.Pantheon.Combo.Items").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
                     {
                         myItemManager.UseItems(2, null);
                     }
@@ -451,19 +451,19 @@ namespace EndifsCreations.Plugins
             if (ObjectManager.Player.IsDead) return;
             if (R.IsReady())
             {
-                if (config.Item("EC.Pantheon.UseRDrawDistance").GetValue<bool>())
+                if (Root.Item("EC.Pantheon.UseRDrawDistance").GetValue<bool>())
                 {
                     Utility.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 1, 30, true);
                 }
-                if (config.Item("EC.Pantheon.UseRDrawTarget").GetValue<bool>())
+                if (Root.Item("EC.Pantheon.UseRDrawTarget").GetValue<bool>())
                 {
                     var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && x.IsTargetable && !myUtility.ImmuneToDeath(x));
                     var targets = EnemyList.Where(x => !x.InFountain() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) < R.Range);
                     Obj_AI_Hero drawthis = null;
-                    switch (config.Item("EC.Pantheon.UseRType").GetValue<StringList>().SelectedIndex)
+                    switch (Root.Item("EC.Pantheon.UseRType").GetValue<StringList>().SelectedIndex)
                     {
                         case 0:
-                            drawthis = targets.OrderBy(i => (i.Health / Player.GetAutoAttackDamage(i))).FirstOrDefault(x => x.Health / Player.GetAutoAttackDamage(x) <= config.Item("EC.Pantheon.UseRTypeLessHit").GetValue<Slider>().Value);
+                            drawthis = targets.OrderBy(i => (i.Health / Player.GetAutoAttackDamage(i))).FirstOrDefault(x => x.Health / Player.GetAutoAttackDamage(x) <= Root.Item("EC.Pantheon.UseRTypeLessHit").GetValue<Slider>().Value);
                             break;
                         case 1:
                             drawthis = targets.FirstOrDefault(x => R.IsKillable(x));
@@ -489,15 +489,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Pantheon.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Pantheon.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Pantheon.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Pantheon.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Pantheon.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Pantheon.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

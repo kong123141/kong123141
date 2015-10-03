@@ -40,21 +40,21 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Braum.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Braum.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Braum.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Braum.Misc.Q", "Q Gapclosers").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Braum.Misc.W", "W Shields").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Braum.Misc.E", "E Blocks").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Braum.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Braum.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Braum.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -62,9 +62,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Braum.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Braum.Combo.W").GetValue<bool>();
-            var UseR = config.Item("EC.Braum.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Braum.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Braum.Combo.W").GetValue<bool>();
+            var UseR = Root.Item("EC.Braum.Combo.R").GetValue<bool>();
             if (UseW && W.IsReady() && Player.CountEnemiesInRange(200) > 0)
             {
                 W.Cast(Player);
@@ -109,7 +109,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if (config.Item("EC.Braum.Misc.E").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Braum.Combo.E").GetValue<bool>()) && E.IsReady())
+                if (Root.Item("EC.Braum.Misc.E").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Braum.Combo.E").GetValue<bool>()) && E.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -124,7 +124,8 @@ namespace EndifsCreations.Plugins
                         Utility.DelayAction.Add(myHumazier.ReactionDelay, () => E.Cast(spell.Start));                      
                     }
                 }
-                if (config.Item("EC.Braum.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Braum.Combo.W").GetValue<bool>()) && W.IsReady())
+                //Todo switch to damage buffer
+                if (Root.Item("EC.Braum.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Braum.Combo.W").GetValue<bool>()) && W.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -151,7 +152,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Braum.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Braum.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -163,15 +164,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Braum.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Braum.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Braum.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Braum.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Braum.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Braum.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var wtc = Drawing.WorldToScreen(Game.CursorPos);
                 var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Game.CursorPos, R.Range), R.Width);

@@ -25,6 +25,8 @@ namespace XinZhao
 
         public static Items Items;
 
+        public static Extra Extra; 
+        
         public static AssassinManager AssassinManager;
 
         public static Spell Q, W, E, R;
@@ -72,7 +74,7 @@ namespace XinZhao
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
 
-            var mLane = new Menu("Lane Moed", "LaneMode");
+            var mLane = new Menu("Lane Mode", "LaneMode");
             mLane.AddItem(new MenuItem("EnabledFarm", "Enable! (On/Off: Mouse Scroll)").SetValue(true));
             mLane.AddItem(new MenuItem("Lane.UseQ", "Use Q").SetValue(false));
             mLane.AddItem(new MenuItem("Lane.UseW", "Use W").SetValue(false));
@@ -112,6 +114,8 @@ namespace XinZhao
             Config.SubMenu("Misc").AddItem(new MenuItem("InterruptSpells", "Interrupt spells using R").SetValue(true));
             Config.SubMenu("Misc").AddItem(new MenuItem("BlockR", "Block R if it won't hit").SetValue(false));
 
+            Extra = new Extra();
+            
             Config.AddToMainMenu();
 
             PlayerSpells.Initialize();
@@ -124,7 +128,7 @@ namespace XinZhao
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
 
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
-
+            
             Drawing.OnDraw += Drawing_OnDraw;
 
             WelcomeMessage();
@@ -135,6 +139,16 @@ namespace XinZhao
             if (!(args.Target is Obj_AI_Hero) || Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
             {
                 return;
+            }
+            
+            foreach (var item in
+                  Items.ItemDb.Where(
+                      i =>
+                      i.Value.ItemType == Items.EnumItemType.OnTarget
+                      && i.Value.TargetingType == Items.EnumItemTargettingType.EnemyHero && i.Value.Item.IsReady()))
+            {
+                Game.PrintChat(item.Value.Item.Id.ToString());
+                item.Value.Item.Cast();
             }
 
             if (Q.IsReady())
@@ -366,9 +380,9 @@ namespace XinZhao
 
         private static void JungleFarm()
         {
-            var useQ = Config.Item("Lane.UseQ").GetValue<bool>();
-            var useW = Config.Item("Lane.UseW").GetValue<bool>();
-            var useE = Config.Item("Lane.UseE").GetValue<bool>();
+            var useQ = Config.Item("Jungle.UseQ").GetValue<bool>();
+            var useW = Config.Item("Jungle.UseW").GetValue<bool>();
+            var useE = Config.Item("Jungle.UseE").GetValue<bool>();
 
             var mobs = MinionManager.GetMinions(
                 ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral,

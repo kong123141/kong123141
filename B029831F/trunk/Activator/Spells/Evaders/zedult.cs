@@ -32,11 +32,14 @@ namespace Activator.Spells.Evaders
             if (!Menu.Item("use" + Name).GetValue<bool>() || !IsReady())
                 return;
 
+            if (Player.GetSpell(SpellSlot.R).Name != "ZedR")
+                return;
+
             foreach (var hero in Activator.Allies())
             {
                 if (hero.Player.NetworkId == Player.NetworkId)
                 { 
-                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                         continue;
 
                     if (hero.Attacker == null)

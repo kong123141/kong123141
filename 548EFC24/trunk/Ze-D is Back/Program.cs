@@ -763,60 +763,26 @@ namespace Zed
         private static void CastQ(Obj_AI_Base target)
         {
             if (!_q.IsReady()) return;
-            float time = 0;
             
             if (WShadow != null && target.Distance(WShadow.ServerPosition) <= 900 && target.Distance(_player.ServerPosition)>450)
             {
-             
-                    
-                    time = 0.15f+ target.Distance(WShadow.ServerPosition) / 1750f;
-                    var dist= target.MoveSpeed*time;
 
-                    var hithere = target.GetWaypoints().Count > 1
-                        ? target.Position.Extend(target.GetWaypoints()[1].To3D(), dist)
-                        : target.Position;
-                    for (int i = 0; i < 3; i++)
-                    {
-                        time = 0.15f + hithere.Distance(WShadow.ServerPosition) / 1750f;
-                        hithere = target.GetWaypoints().Count > 1
-                        ? target.Position.Extend(target.GetWaypoints()[1].To3D(), dist)
-                        : target.Position;
-                        dist = target.MoveSpeed * time;
-                    }
-                    if (hithere.Distance(_player.ServerPosition) < 900)
-                    {
-                        var time2 = (hithere.Distance(_player.ServerPosition) - hithere.Distance(WShadow.ServerPosition))/1750f;
-                        var dist2 = time2 * target.MoveSpeed;
-                        hithere = hithere.Extend(WShadow.ServerPosition, -(dist2));
-                    }
-
-                    
+                    var shadowpred = _q.GetPrediction(target);
                 _q.UpdateSourcePosition(WShadow.ServerPosition, WShadow.ServerPosition);
-                    _q.Cast(hithere);
+                 if (shadowpred.Hitchance >= HitChance.Medium)
+                    _q.Cast(target);
 
               
             }
             else
             {
-               time = 0.15f+ target.Distance(_player.ServerPosition) / 1750f;
-               var dist = target.MoveSpeed * time;
-
-                var hithere = target.GetWaypoints().Count > 1
-                    ? target.Position.Extend(target.GetWaypoints()[1].To3D(), dist)
-                    : target.Position;
-                for (int i = 0; i < 3; i++)
-                {
-                    time = 0.15f + hithere.Distance(_player.ServerPosition) / 1750f;
-                    hithere = target.GetWaypoints().Count > 1
-                    ? target.Position.Extend(target.GetWaypoints()[1].To3D(), dist)
-                    : target.Position;
-                    dist = target.MoveSpeed * time;
-                }
+                
                 _q.UpdateSourcePosition(_player.ServerPosition, _player.ServerPosition);
+                var normalpred = _q.GetPrediction(target);
 
-                if (hithere.Distance(_player.ServerPosition) < 900)
+                if (normalpred.CastPosition.Distance(_player.ServerPosition) < 900 && normalpred.Hitchance >= HitChance.Medium)
                 {
-                    _q.Cast(hithere);
+                    _q.Cast(target);
                 }
                
 
@@ -824,6 +790,7 @@ namespace Zed
                 
 
         }
+
         private static void CastE()
         {
             if (!_e.IsReady()) return;

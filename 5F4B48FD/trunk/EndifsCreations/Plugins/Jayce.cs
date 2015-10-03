@@ -51,20 +51,20 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Jayce.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Jayce.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Jayce.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }            
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Jayce.Muramana", "Muramana").SetValue(new Slider(50)));
                 miscmenu.AddItem(new MenuItem("EC.Jayce.Misc.E", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Jayce.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Jayce.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Jayce.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -73,11 +73,11 @@ namespace EndifsCreations.Plugins
             Target = TargetSelector.GetSelectedTarget() != null && TargetSelector.GetSelectedTarget().IsValidTarget() ? TargetSelector.GetSelectedTarget() :
                 Hammer ? TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical) : TargetSelector.GetTarget(1470f, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Jayce.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Jayce.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Jayce.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Jayce.Combo.R").GetValue<bool>();            
-            var CastItems = config.Item("EC.Jayce.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Jayce.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Jayce.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Jayce.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Jayce.Combo.R").GetValue<bool>();            
+            var CastItems = Root.Item("EC.Jayce.Combo.Items").GetValue<bool>();
             if (Hammer)
             {
                 if (UseR && R.IsReady())
@@ -89,10 +89,7 @@ namespace EndifsCreations.Plugins
                 }
                 if (UseW && W.IsReady())
                 {
-                    if (Player.CountEnemiesInRange(W.Range) > 0)
-                    {
-                        W.Cast();
-                    }
+                    mySpellcast.PointBlank(null, W, W.Range);
                 }
             }
             
@@ -262,7 +259,7 @@ namespace EndifsCreations.Plugins
                     myUtility.Reset();
                     if (Player.HasBuff("Muramana"))
                     {                                   
-                        if (Cannon || (myUtility.PlayerManaPercentage < config.Item("EC.Jayce.Muramana").GetValue<Slider>().Value))
+                        if (Cannon || (myUtility.PlayerManaPercentage < Root.Item("EC.Jayce.Muramana").GetValue<Slider>().Value))
                         {
                             if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                         }
@@ -284,7 +281,7 @@ namespace EndifsCreations.Plugins
                 {
                     if (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.E)
                     {
-                        if (ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > config.Item("EC.Jayce.Muramana").GetValue<Slider>().Value)
+                        if (ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > Root.Item("EC.Jayce.Muramana").GetValue<Slider>().Value)
                         {
                             if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                         }
@@ -294,7 +291,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Jayce.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Jayce.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -316,7 +313,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Jayce.Combo.W").GetValue<bool>())
+                    if (Root.Item("EC.Jayce.Combo.W").GetValue<bool>())
                     {
                         if (Cannon)
                         {
@@ -331,15 +328,15 @@ namespace EndifsCreations.Plugins
             if (Player.IsDead) return;
             if (Hammer)
             {
-                if (config.Item("EC.Jayce.Draw.Q").GetValue<bool>() && Q.Level > 0)
+                if (Root.Item("EC.Jayce.Draw.Q").GetValue<bool>() && Q.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
                 }
-                if (config.Item("EC.Jayce.Draw.W").GetValue<bool>() && W.Level > 0)
+                if (Root.Item("EC.Jayce.Draw.W").GetValue<bool>() && W.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
                 }
-                if (config.Item("EC.Jayce.Draw.E").GetValue<bool>() && E.Level > 0)
+                if (Root.Item("EC.Jayce.Draw.E").GetValue<bool>() && E.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
                 }
@@ -347,7 +344,7 @@ namespace EndifsCreations.Plugins
             }
             else if (Cannon)
             {
-                if (config.Item("EC.Jayce.Draw.Q").GetValue<bool>() && Q2.Level > 0)
+                if (Root.Item("EC.Jayce.Draw.Q").GetValue<bool>() && Q2.Level > 0)
                 {
                     if (Q2.Range >= 1500)
                     {
@@ -355,7 +352,7 @@ namespace EndifsCreations.Plugins
                     }
                     Render.Circle.DrawCircle(Player.Position, Q2.Range, Color.White);
                 }               
-                if (config.Item("EC.Jayce.Draw.E").GetValue<bool>() && E2.Level > 0)
+                if (Root.Item("EC.Jayce.Draw.E").GetValue<bool>() && E2.Level > 0)
                 {
                     Render.Circle.DrawCircle(Player.Position, E2.Range, Color.White);
                 }

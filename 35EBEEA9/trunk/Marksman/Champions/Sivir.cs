@@ -1,22 +1,36 @@
 #region
-
 using System;
-using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using Marksman.Utils;
-
 #endregion
 
 namespace Marksman.Champions
 {
+    using System.Collections.Generic;
+    using SharpDX;
+    using Color = System.Drawing.Color;
+
+    class DangerousSpells
+    {
+        public string ChampionName { get; private set; }
+        public SpellSlot SpellSlot { get; private set; }
+
+        public DangerousSpells(string championName, SpellSlot spellSlot)
+        {
+            this.ChampionName = championName;
+            this.SpellSlot = spellSlot;
+        }
+    }
+
     internal class Sivir : Champion
     {
         public static Spell Q;
-        private Menu _menuSupportedSpells;
         public Spell E;
         public Spell W;
+        private Menu _menuSupportedSpells;
+        public static List<DangerousSpells> DangerousList = new List<DangerousSpells>();
 
         public Sivir()
         {
@@ -29,19 +43,56 @@ namespace Marksman.Champions
 
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
 
+            DangerousList.Add(new DangerousSpells("darius", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("fiddlesticks", SpellSlot.Q));
+            DangerousList.Add(new DangerousSpells("garen", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("leesin", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("nautilius", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("skarner", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("syndra", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("warwick", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("warwick", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("zed", SpellSlot.R));
+            DangerousList.Add(new DangerousSpells("tristana", SpellSlot.R));
+
             Utils.Utils.PrintMessage("Sivir loaded.");
-            Utils.Utils.PrintMessage("Sivir E Support Loaded! Please check the Marksman Menu for her E Spell");
+//            Utils.Utils.PrintMessage("Sivir E Support Loaded! Please check the Marksman Menu for her E Spell");
         }
 
         public void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!sender.IsMe && sender.IsEnemy && (sender is Obj_AI_Hero) && args.Target.IsMe && E.IsReady() &&
-                ((Obj_AI_Hero) sender).ChampionName == "Vayne")
+            if (sender.IsEnemy && sender is Obj_AI_Hero && args.Target.IsMe && this.E.IsReady())
             {
-                var buffs = ObjectManager.Player.Buffs.Where(b => b.Name.Contains("silvereddebuff"));
-                if (buffs.Count() == 2 && Evade.Config.MenuSkillShots.Item("VayneBlockSilverBuff").GetValue<bool>())
-                    E.Cast();
+                foreach (var c in DangerousList.Where(c => ((Obj_AI_Hero)sender).ChampionName.ToLower() == c.ChampionName))
+                {
+                    if (args.SData.Name == ((Obj_AI_Hero)sender).GetSpell(c.SpellSlot).Name)
+                    {
+                        this.E.Cast();
+                    }
+                }
             }
+
+            if (((Obj_AI_Hero)sender).ChampionName.ToLower() == "kalista" && args.SData.Name == ((Obj_AI_Hero)sender).GetSpell(SpellSlot.E).Name)
+            {
+                var bCount = ObjectManager.Player.Buffs.Count(b => b.Name.Contains("kalistaexpungemarker"));
+                if (bCount > 0)
+                    this.E.Cast();
+            }
+            
+            if (((Obj_AI_Hero)sender).ChampionName.ToLower() == "vayne" && args.SData.Name == ((Obj_AI_Hero)sender).GetSpell(SpellSlot.E).Name)
+            {
+                for (var i = 1; i < 8; i++)
+                {
+                    var championBehind = ObjectManager.Player.Position
+                                         + Vector3.Normalize(
+                                             ((Obj_AI_Hero)sender).ServerPosition - ObjectManager.Player.Position)
+                                         * (-i * 50);
+                    if (championBehind.IsWall())
+                    {
+                        this.E.Cast();
+                    }
+                }
+            }     
         }
 
         public override void Game_OnGameUpdate(EventArgs args)
@@ -118,7 +169,7 @@ namespace Marksman.Champions
 
         public override void Drawing_OnDraw(EventArgs args)
         {
-            Spell[] spellList = {Q};
+            Spell[] spellList = { Q };
             foreach (var spell in spellList)
             {
                 var menuItem = GetValue<Circle>("Draw" + spell.Slot);

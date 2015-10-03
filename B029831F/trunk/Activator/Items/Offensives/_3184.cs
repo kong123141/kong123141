@@ -69,7 +69,7 @@ namespace Activator.Items.Offensives
                     UseItem(Tar.Player, true);
                 }
 
-                if (!Parent.Item(Parent.Name + "useon" + Tar.Player.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + Tar.Player.NetworkId).GetValue<bool>())
                     return;
 
                 if (Tar.Player.Health/Tar.Player.MaxHealth*100 <=

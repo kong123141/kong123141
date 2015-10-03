@@ -3,6 +3,7 @@
     //      Wall, pins to wall. bool pin ? else default?
     //      Circular Toggle, togglestate condition
     //      Charged spells, Sion / Varus / Vi / Xerath
+    //      Fix CircularPrecise isn't "precise"
 #endregion Todo
 
 using System;
@@ -22,10 +23,18 @@ namespace EndifsCreations.Controller
         //  <summary>
         //      Spell cast blocking
         //  </summary>
-        private static bool AllowCasting =  true;
+        private static bool CanCast = true;
         private static void SetAllow(bool value)
         {
-            AllowCasting = value;
+            CanCast = value;
+        }
+
+        private static bool AllowCasting
+        {
+            get
+            {
+                return CanCast && !Player.IsWindingUp && !myOrbwalker.Waiting;
+            }
         }
         public static void Pause(int time)
         {
@@ -199,7 +208,7 @@ namespace EndifsCreations.Controller
                 {
                     spell.Cast(box.End);
                 }
-                else if (box.IsInside(Pred.CastPosition) && Vector2.Distance(target.ServerPosition.To2D(), myUtility.PredictMovement(target, spell.Delay, spell.Speed)) <= spell.Width + target.BoundingRadius)
+                else if (box.IsInside(Pred.CastPosition) && Vector2.Distance(target.ServerPosition.To2D(), myUtility.PredictMovement(target, spell.Delay, spell.Speed).To2D()) <= spell.Width + target.BoundingRadius)
                 {
                     spell.Cast(Pred.CastPosition);
                 }
@@ -216,16 +225,19 @@ namespace EndifsCreations.Controller
             {
                 spell.CastOnUnit(Player);
             }
-            if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= spell.Range)
+            else 
             {
-                spell.CastOnUnit(target);
+                if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= spell.Range)
+                {
+                    spell.CastOnUnit(target);
+                }
             }
         }
 
         //  <summary>
         //      Use for linear spells with secondary range on collision
         //  </summary>
-        public static void Extension(Obj_AI_Hero target, Spell spell,float castrange, float maxrange, bool linear = true, bool minion = true, bool enemy = false)
+        public static void Extension(Obj_AI_Hero target, Spell spell, float castrange, float maxrange, bool linear = true, bool minion = true, bool enemy = false)
         {
             if (!AllowCasting) return;
             if (target == null || !target.IsValidTarget())
@@ -247,21 +259,15 @@ namespace EndifsCreations.Controller
                     else
                     {
                         var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(potential.ServerPosition, maxrange), potential.BoundingRadius);
-                        if (minion)
+                        var minioninbox = MinionManager.GetMinions(Player.Position, castrange).Where(x => box.IsInside(x)).ToList();
+                        var enemyinbox = HeroManager.Enemies.Where(x => box.IsInside(x) && x.IsValidTarget(castrange)).ToList();
+                        if (minion && minioninbox.Any())
                         {
-                            var minioninbox = MinionManager.GetMinions(Player.Position, castrange).Where(x => box.IsInside(x)).ToList();
-                            if (minioninbox.Any())
-                            {
-                                spell.Cast(minioninbox[0]);
-                            }
+                            spell.Cast(minioninbox[0]);
                         }
-                        if (enemy)
+                        if (enemy && enemyinbox.Any())
                         {
-                            var enemyinbox = HeroManager.Enemies.Where(x => box.IsInside(x) && x.IsValidTarget(castrange)).ToList();
-                            if (enemyinbox.Any())
-                            {
-                                spell.Cast(enemyinbox[0]);
-                            }
+                            spell.Cast(enemyinbox[0]);
                         }
                     }
                 }
@@ -286,7 +292,7 @@ namespace EndifsCreations.Controller
                     {
                         if (Player.ChampionName.Equals("Yasuo"))
                         {
-                            var minioninbox = MinionManager.GetMinions(Player.Position, castrange).Where(x => box.IsInside(x) && !x.HasBuff("")).ToList();
+                            var minioninbox = MinionManager.GetMinions(Player.Position, castrange).Where(x => box.IsInside(x) && !x.HasBuff("YasuoDashWrapper")).ToList();
                             if (minioninbox.Any())
                             {
                                 minioninbox.Reverse();
@@ -310,6 +316,52 @@ namespace EndifsCreations.Controller
                             spell.Cast(enemyinbox[0]);
                         }
                     }
+                }
+            }
+        }
+
+        //  <summary>
+        //      Cast linear spell to vector
+        //  </summary>
+        public static void PointVector(Vector3 vecpos, Spell spell, float extend = 0)
+        {
+            if (!AllowCasting) return;
+            if (Vector3.Distance(Player.ServerPosition, vecpos) <= spell.Range + extend)
+            {
+                spell.Cast(Player.ServerPosition.Extend(vecpos, Vector3.Distance(Player.ServerPosition, vecpos) + extend));
+            }
+        }
+
+        //  <summary>
+        //      Cast circular aoe spells around player
+        //  </summary>
+        public static void PointBlank(Obj_AI_Hero target, Spell spell = null, float radius = 0, int count = 0)
+        {
+            if (!AllowCasting || spell == null) return;
+            var findrange = radius > 300 ? (radius * 9 / 10) : radius; //topkek math
+            if (target != null)
+            {
+                if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= findrange)
+                {
+                    if (count > 0)
+                    {
+                        if (Player.CountEnemiesInRange(findrange) - 1 > count)
+                        {
+                            spell.Cast();
+                        }
+                    }
+                    else
+                    {
+                        spell.Cast();
+                    }
+                    
+                }
+            }
+            else
+            {
+                if (Player.CountEnemiesInRange(findrange) > count)
+                {
+                    spell.Cast();
                 }
             }
         }
@@ -340,21 +392,52 @@ namespace EndifsCreations.Controller
             }
             if (Vector3.Distance(Player.ServerPosition, Pred.CastPosition) <= spell.Range)
             {
-                if (Pred.Hitchance >= hitchance)
+                Pos = Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, Pred.CastPosition));
+                switch (collision)
                 {
-                    Pos = Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, Pred.CastPosition));
-                    switch (collision)
-                    {
-                        case true:
+                    case true:
+                        if (Pred.Hitchance >= hitchance)
+                        {
                             if (Pred.CollisionObjects.Count <= passable)
                             {
                                 spell.Cast(Pos);
                             }
-                            break;
-                        case false:
+                        }
+                        break;
+                    case false:
+                        if (myUtility.MovingAway(target) && myUtility.IsFacing(Player, target.ServerPosition))
+                        {
+                            myDevTools.DebugMode("Running away");
+                            if (Vector3.Distance(target.ServerPosition, Player.ServerPosition) < spell.Range / 2)
+                            {
+                                Pos = Player.ServerPosition.Extend(target.ServerPosition, spell.Range);
+                                spell.Cast(Pos);
+                                myDevTools.DebugMode("running away, chase, cast1");
+                            }
+                            else if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) > spell.Range / 2 && Vector3.Distance(Player.ServerPosition, target.ServerPosition) < spell.Range)
+                            {
+                                var testdist = Vector3.Distance(Player.ServerPosition, target.ServerPosition) + (spell.Range / 2);
+                                var testchace = Player.ServerPosition.Extend(target.ServerPosition, testdist > spell.Range ? spell.Range : testdist);
+                                spell.Cast(testchace);
+                                myDevTools.DebugMode("running away, chase, cast2");
+                            }
+                        }
+                        else if (Pred.Hitchance >= hitchance)
+                        {
                             spell.Cast(Pos);
-                            break;
-                    }
+                            myDevTools.DebugMode("hitchance normal");
+                            if (target.IsMoving && myUtility.IsFacing(target, Player.ServerPosition))
+                            {
+                                spell.Cast(Pred.CastPosition);
+                                myDevTools.DebugMode("hitchance - moving, cast3");
+                            }
+                            else
+                            {
+                                myDevTools.DebugMode("hitchance, cast4");
+                                spell.Cast(Pos);
+                            }
+                        }                       
+                        break;
                 }
             }
         }
@@ -387,39 +470,46 @@ namespace EndifsCreations.Controller
             }
             if (Vector3.Distance(Player.ServerPosition, Pred.CastPosition) <= spell.Range)
             {
-                if (Pred.Hitchance >= hitchance)
-                {
-                    Pos = random ?
-                    myUtility.RandomPos(min, max, range, Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, Pred.CastPosition))) :
-                    Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, Pred.CastPosition));
+                Pos = random ?
+                myUtility.RandomPos(min, max, range, Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, Pred.CastPosition))) :
+                Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, Pred.CastPosition));
 
-                    switch (collision)
-                    {
-                        case true:
+                switch (collision)
+                {
+                    case true:
+                        if (Pred.Hitchance >= hitchance)
+                        {
                             if (Pred.CollisionObjects.Count <= passable)
                             {
                                 spell.Cast(Pos);
                             }
-                            break;
-                        case false:
+                        }
+                        break;
+                    case false:
+                        if (myUtility.MovingAway(target) && myUtility.IsFacing(Player, target.ServerPosition))
+                        {
+                            myDevTools.DebugMode("Running away");
+                            if (Pred.Hitchance >= hitchance)
+                            {
+                                spell.Cast(Pos);
+                                myDevTools.DebugMode("hitchance");
+                            }
+                            if (Vector3.Distance(target.ServerPosition, Player.ServerPosition) <= Math.Min(300, (spell.Range / 2)) &&
+                                Vector3.Distance(Player.ServerPosition.Extend(target.ServerPosition, spell.Range), target.ServerPosition) < spell.Range)
+                            {
+                                spell.Cast(target.ServerPosition);
+                                myDevTools.DebugMode("chase");
+                            }
+                        }
+                        else if (Pred.Hitchance >= hitchance)
+                        {
                             spell.Cast(Pos);
-                            break;
-                    }
+                            myDevTools.DebugMode("hitchance normal");
+                        } 
+                        break;
                 }
             }
-        }
-
-        //  <summary>
-        //      Use for linear spells without hitchance checks
-        //  </summary>
-        public static void LinearVector(Vector3 vecpos, Spell spell, float extend = 0)
-        {
-            if (!AllowCasting) return;
-            if (Vector3.Distance(Player.ServerPosition, vecpos) <= spell.Range + extend)
-            {
-                spell.Cast(Player.ServerPosition.Extend(vecpos, Vector3.Distance(Player.ServerPosition, vecpos) + extend));
-            }
-        }
+        }        
 
         //  <summary>
         //      Use for rectangular spells without target
@@ -446,7 +536,26 @@ namespace EndifsCreations.Controller
                 }
             }
         }
-        
+
+        //  <summary>
+        //      Viktor and Rumble, also, these shouldn't be blocked by windwall fyi, thanks rito
+        //  </summary>
+        public static void LinearTwoPoints(Obj_AI_Hero target, Spell spell, float castrange, float pathlength = 0, int minimum = 0)
+        {
+            if (!AllowCasting) return;
+            //Start point, target or mouse
+            //loops targets within maxrange, 
+            //basic. expanding soon tm
+            if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= castrange && Vector3.Distance(Game.CursorPos, target.ServerPosition) <= castrange)
+            {
+                spell.Cast(Player.ServerPosition.Extend(Game.CursorPos, Vector3.Distance(Player.ServerPosition, Game.CursorPos)), target.ServerPosition);
+            }
+            else if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= castrange + pathlength)
+            {
+                spell.Cast(Player.ServerPosition.Extend(target.ServerPosition, castrange), target.ServerPosition);
+            }
+        }
+
         #endregion Linear
 
         #region Circular
@@ -468,63 +577,91 @@ namespace EndifsCreations.Controller
         //  <summary>
         //      Use for aoe circular spells, checks for other potential target, if not goes for singular
         //  </summary>
-        public static void CircularAoe(Obj_AI_Hero target, Spell spell, HitChance hitchance)
+        public static void CircularAoe(Obj_AI_Hero target, Spell spell, HitChance hitchance, float castrange = 0, float radius = 0)
         {
             if (!AllowCasting) return;
+            var findrange = castrange + Math.Max(0, radius > 300 ? (radius * 2 / 3) : radius);
             if (myUtility.MovementDisabled(target))
             {
                 Pos = myUtility.RandomPos(1, 25, 25, Player.ServerPosition.Extend(target.ServerPosition, Vector3.Distance(Player.ServerPosition, target.ServerPosition)));
                 spell.Cast(Pos);
             }
-            var nearby = HeroManager.Enemies.Where(x => x.IsValidTarget(spell.Range) && x != target).ToList();
-            if (nearby.Count > 0)
-            {
-                var predlist = new List<Obj_AI_Hero>();
-                foreach (var enemy in nearby)
+            var nearby = HeroManager.Enemies.Where(x => x.IsValidTarget(findrange) && x != target && Vector3.Distance(target.ServerPosition, x.ServerPosition) <= Math.Max(0, radius > 300 ? (radius * 3 / 4) : radius)).ToList();
+            if (nearby.Any())
+            {               
+                var test = nearby.Where(o => spell.GetPrediction(o).Hitchance >= HitChance.Medium).ToList();
+                if (!test.Any())
                 {
-                    PredictionOutput prediction = spell.GetPrediction(enemy);
-                    if (prediction.Hitchance >= HitChance.Medium && Vector3.Distance(target.ServerPosition, enemy.ServerPosition) <= (spell.Width/2))
-                    {
-                        predlist.Add(enemy);
-                    }
+                    CircularPrecise(target, spell, hitchance, spell.Range);
                 }
-                if (predlist.Count > 0)
+                else 
                 {
-                    spell.CastIfWillHit(target, predlist.Count);
+                    Pred = spell.GetPrediction(target, true, findrange);
+                    if (Pred.AoeTargetsHitCount >= test.Count)
+                    {
+                        Pos = Player.ServerPosition.Extend(Pred.CastPosition, Math.Min(findrange, Vector3.Distance(Player.ServerPosition, Pred.CastPosition)));
+                        spell.Cast(Pos);
+                        myDevTools.DebugMode("AOE will hit: " + test.Count);
+                    }
                 }
             }
             else
             {
-                Pred = spell.GetPrediction(target);
-                if (Vector3.Distance(ObjectManager.Player.ServerPosition, Pred.CastPosition) <= spell.Range + (spell.Width / 2))
-                {
-                    if (Pred.Hitchance >= hitchance)
-                    {
-                        Pos = myUtility.RandomPos(1, 25, 25, Pred.CastPosition.Extend(Player.ServerPosition, (spell.Width / 2)));
-                        spell.Cast(Pos);
-                    }
-                }
+                CircularPrecise(target, spell, hitchance, spell.Range);
             }
         }
 
         //  <summary>
         //      Use for ground targetted spells, e.g traps
         //  </summary>
-        public static void CircularPrecise(Obj_AI_Hero target, Spell spell, HitChance hitchance, int min = 0, int max = 25, int range = 25)
+        public static void CircularPrecise(Obj_AI_Hero target, Spell spell, HitChance hitchance, float castrange, float radius = 0, int min = 0, int max = 10, int range = 10)
         {
             if (!AllowCasting) return;
+            var findrange = castrange + Math.Max(0, radius > 300 ? (radius * 2 / 3) : radius);
             Pred = spell.GetPrediction(target);
-            if (myUtility.MovementDisabled(target))
+            if (myUtility.MovementDisabled(target) && Vector3.Distance(Player.ServerPosition, target.ServerPosition) <= findrange)
             {
                 Pos = myUtility.RandomPos(min, max, range, Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, target.ServerPosition)));
                 spell.Cast(Pos);
             }
-            if (Vector3.Distance(Player.ServerPosition, Pred.CastPosition) <= spell.Range)
+            if (myUtility.MovingAway(target) && myUtility.IsFacing(Player, target.ServerPosition))
             {
+                myDevTools.DebugMode("Running away 2");
+
+                if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) < radius)
+                {
+                    Pos = myUtility.RandomPos(min, max, range, Player.ServerPosition.Extend(target.ServerPosition, Vector3.Distance(Player.ServerPosition, target.ServerPosition) + (radius * 1 / 3)));
+                    spell.Cast(Pos);
+                    myDevTools.DebugMode("precise - running away, in radius");
+                }
+                else if (Vector3.Distance(Player.ServerPosition, target.ServerPosition) > radius && Vector3.Distance(Player.ServerPosition, target.ServerPosition) < findrange)
+                {
+                    var testdist = Vector3.Distance(Player.ServerPosition, target.ServerPosition) + (radius * 2 / 3);
+                    var testchace = Player.ServerPosition.Extend(target.ServerPosition, testdist > findrange ? findrange : testdist);
+                    spell.Cast(testchace);
+                    myDevTools.DebugMode("precise - running away, chase");
+                }
+            }
+            else if (Vector3.Distance(Player.ServerPosition, Pred.CastPosition) <= findrange)
+            {
+                var centertotarget = Pred.CastPosition.Extend(target.ServerPosition, radius);
+                if (Vector3.Distance(Pred.CastPosition, target.ServerPosition) <= Vector3.Distance(Pred.CastPosition, centertotarget))
+                {
+                    myDevTools.DebugMode("precise - in radius, cast3");
+                    spell.Cast(Pred.CastPosition);
+                }
                 if (Pred.Hitchance >= hitchance)
                 {
-                    Pos = myUtility.RandomPos(min, max, range, Player.ServerPosition.Extend(Pred.CastPosition, Vector3.Distance(Player.ServerPosition, Pred.CastPosition)));
-                    spell.Cast(Pos);
+                    if (target.IsMoving && myUtility.IsFacing(target, Player.ServerPosition))
+                    {
+                        spell.Cast(Pred.CastPosition);
+                        myDevTools.DebugMode("precise - hitchance - moving, cast4");
+                    }
+                    else
+                    {
+                        myDevTools.DebugMode("precise - hitchance, cast5");
+                        spell.Cast(Pred.CastPosition);
+                    }
                 }
             }
         }
@@ -581,7 +718,7 @@ namespace EndifsCreations.Controller
                                 break;
                         }
                     }
-                    else if (box.IsInside(Pred.CastPosition) && Vector2.Distance(target.ServerPosition.To2D(), myUtility.PredictMovement(target, spell.Delay, spell.Speed)) <= spell.Width + target.BoundingRadius)
+                    else if (box.IsInside(Pred.CastPosition) && Vector2.Distance(target.ServerPosition.To2D(), myUtility.PredictMovement(target, spell.Delay, spell.Speed).To2D()) <= spell.Width + target.BoundingRadius)
                     {
                         switch (safecheck)
                         {

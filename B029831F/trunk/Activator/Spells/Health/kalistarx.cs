@@ -53,7 +53,7 @@ namespace Activator.Spells.Health
                 {
                     if (hero.Player.Distance(cooptarget.ServerPosition) <= Range)
                     {
-                        if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                        if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                             continue;
 
                         if (!cooptarget.HasBuffOfType(BuffType.Invulnerability))

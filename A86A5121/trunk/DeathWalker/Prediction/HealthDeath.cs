@@ -36,10 +36,16 @@ namespace DetuksSharp.Prediction
             GameObject.OnCreate += onCreate;
             GameObject.OnDelete += onDelete;
 
+            Obj_AI_Base.OnDoCast += onDoCast;
+
             Obj_AI_Base.OnProcessSpellCast += onMeleeStartAutoAttack;
             Spellbook.OnStopCast += onMeleeStopAutoAttack;
         }
 
+        private static void onDoCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+
+        }
 
         private static void onMeleeStartAutoAttack(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
@@ -223,11 +229,11 @@ namespace DetuksSharp.Prediction
             try
             {
 
-            var hitingUnitDamage = misslesHeadedOnDamage(unit);
-           // if (unit.Health < hitingUnitDamage * 0.65)
-            //    Console.WriteLine("Ignore cus almost dead!");
+                var hitingUnitDamage = misslesHeadedOnDamage(unit);
+               // if (unit.Health < hitingUnitDamage * 0.65)
+                //    Console.WriteLine("Ignore cus almost dead!");
 
-            return unit.Health < hitingUnitDamage * 0.65;
+                return unit.Health < hitingUnitDamage * 0.65;
             }
             catch (Exception)
             {
@@ -239,6 +245,7 @@ namespace DetuksSharp.Prediction
         public static float getLastHitPred(AttackableUnit unit, int msTime, bool ignoreAlmostDead = true)
         {
             var predDmg = 0f;
+            var predDmgPlus500ms = 0f;
 
             foreach (var attacks in activeDamageMakers.Values)
             {
@@ -253,6 +260,7 @@ namespace DetuksSharp.Prediction
                 {
                     hitOn = now +  (int)((attacks.missle.Position.Distance(unit.Position)*1000) / attacks.sData.MissileSpeed)+100;
                 }
+
                 if (now < hitOn && hitOn < now + msTime)
                 {
                     predDmg += attacks.dealDamage;
@@ -269,7 +277,7 @@ namespace DetuksSharp.Prediction
 
             foreach (var attacks in activeDamageMakers.Values)
             {
-                if (attacks.target == null || attacks.target.NetworkId != unit.NetworkId || (ignoreAlmostDead && almostDead(attacks.source)))
+                if (attacks.target == null || attacks.target.NetworkId != unit.NetworkId || (ignoreAlmostDead && almostDead(attacks.source)) || attacks.source.IsMe)
                     continue;
                 int hitOn = 0;
                 if (attacks.missle == null || attacks.sData.MissileSpeed == 0)
@@ -389,7 +397,7 @@ namespace DetuksSharp.Prediction
             {
                 if (isValidTarget())
                     return target;
-                var predTarget = minionsAround.Where(min => !min.IsDead)
+                var predTarget = minionsAround.Where(min => !min.IsDead && min.Distance(source,true)<650*650)
                         .OrderBy(min => min.Distance(source.Position, true))
                         .FirstOrDefault();
                 setTarget(predTarget);

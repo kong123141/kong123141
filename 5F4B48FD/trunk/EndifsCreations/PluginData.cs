@@ -41,7 +41,7 @@ namespace EndifsCreations
         protected SpellSlot BarrierSlot = ObjectManager.Player.GetSpellSlot("summonerbarrier");
         protected SpellSlot HealSlot = ObjectManager.Player.GetSpellSlot("summonerheal");
 
-        public static Menu config, plugins;
+        public static Menu Root, Additional;
      
         protected PluginData()
         {
@@ -52,38 +52,47 @@ namespace EndifsCreations
 
         private void InitializeTools()
         {
-            new myHumazier();
-            new myRePriority();
+            new myRePriority();           
             //new myMarkDash();
         }
         
         private void InitializeSharedMenu()
         {
-            config = new Menu("Endif's " + Player.ChampionName, Player.ChampionName, true);
+            Root = new Menu("Endif's " + Player.ChampionName, Player.ChampionName, true);
             var myorb = new Menu("myOrbwalker", "myOrbwalker");
             {
                 myOrbwalker.AddToMenu(myorb);
-                config.AddSubMenu(myorb);
+                Root.AddSubMenu(myorb);
             }
             var ts = new Menu("Target Selector", "Target Selector");
             {
                 TargetSelector.AddToMenu(ts);
-                config.AddSubMenu(ts);
+                Root.AddSubMenu(ts);
             }
             var di = new Menu("Damage Indicator", "Damage Indicator");
             {
                 myDamageIndicator.AddToMenu(di);
-                config.AddSubMenu(di);
+                Root.AddSubMenu(di);
             }
-            myHumazier.AddToMenu(myorb);
-            config.AddToMainMenu();
-            plugins = new Menu("Endif's Plugins", "EndifsPlugins", true);
-            if (SmiteSlot != SpellSlot.Unknown || IgniteSlot != SpellSlot.Unknown || BarrierSlot != SpellSlot.Unknown || HealSlot != SpellSlot.Unknown)
+            var hm = new Menu("Humanizer", "Humanizer");
             {
-                mySummonerSpell.AddToMenu(plugins);
+                myHumazier.AddToMenu(hm);
+                Root.AddSubMenu(hm);
+            }            
+            var ss = new Menu("Summoner Spells", "Summoner Spells");
+            {
+                if (SmiteSlot != SpellSlot.Unknown || IgniteSlot != SpellSlot.Unknown || BarrierSlot != SpellSlot.Unknown || HealSlot != SpellSlot.Unknown)
+                {
+                    mySummonerSpell.AddToMenu(ss);
+                }
+                Root.AddSubMenu(ss);
             }
-            myDevTools.AddToMenu(plugins);            
-            plugins.AddToMainMenu();
+            Root.AddToMainMenu();
+
+            Additional = new Menu("Endif's Plugins", "EndifsPlugins", true);            
+            myDevTools.AddToMenu(Additional);
+            myTowerAggro.AddToMenu(Additional);
+            Additional.AddToMainMenu();
         }
         private void InitializeEvents()
         {            
@@ -110,9 +119,11 @@ namespace EndifsCreations
             Obj_AI_Base.OnDelete += OnDelete;            
             Obj_AI_Base.OnDamage += OnDamage;
             Obj_AI_Base.OnBuffAdd += OnBuffAdd;
-            Obj_AI_Base.OnBuffRemove += OnBuffRemove;         
-            myCustomEvents.ProcessDamageBuffer += ProcessDamageBuffer;
+            Obj_AI_Base.OnBuffRemove += OnBuffRemove;
+            Obj_AI_Base.OnDoCast += OnDoCast;
+            myDamageBuffer.ProcessDamageBuffer += ProcessDamageBuffer;
         }
+
         protected virtual void OnDash(Obj_AI_Base sender, Dash.DashItem args) { }        
         protected virtual void OnProcessPacket(GamePacketEventArgs args) { }
         protected virtual void OnSendPacket(GamePacketEventArgs args) { }
@@ -138,6 +149,7 @@ namespace EndifsCreations
         protected virtual void OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args) { }
         protected virtual void OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args) { }
         protected virtual void OnBuffRemove(Obj_AI_Base sender, Obj_AI_BaseBuffRemoveEventArgs args) { }
-        protected virtual void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, myCustomEvents.DamageTriggerType type) { }
+        protected virtual void OnDoCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args) { }
+        protected virtual void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, float damage, myDamageBuffer.DamageTriggers type) { }
     }
 }

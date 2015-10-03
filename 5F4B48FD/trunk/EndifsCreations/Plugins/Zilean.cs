@@ -25,6 +25,8 @@ namespace EndifsCreations.Plugins
             R = new Spell(SpellSlot.R, 900);
 
             Q.SetSkillshot(0.30f, 210f, 2000f, false, SkillshotType.SkillshotCircle);
+            E.SetTargetted(float.MaxValue, float.MaxValue);
+            R.SetTargetted(float.MaxValue, float.MaxValue);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -39,14 +41,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Zilean.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Zilean.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Zilean.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Zilean.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Zilean.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Zilean.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -54,9 +56,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Zilean.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Zilean.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Zilean.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Zilean.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Zilean.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Zilean.Combo.E").GetValue<bool>();
 
             if (Target.IsValidTarget())
             {
@@ -68,11 +70,11 @@ namespace EndifsCreations.Plugins
                         {
                             if (Target.HasBuff("ZileanQEnemyBomb"))
                             {
-                                mySpellcast.CircularPrecise(Target, Q, HitChance.High, 0, 0, 0);
+                                mySpellcast.CircularPrecise(Target, Q, HitChance.High, Q.Range,200, 0, 0, 0);
                             }
                             else
                             {
-                                mySpellcast.CircularPrecise(Target, Q, HitChance.High);
+                                mySpellcast.CircularPrecise(Target, Q, HitChance.High, Q.Range, 200);
                             }
                         }
                     }
@@ -113,22 +115,19 @@ namespace EndifsCreations.Plugins
                     break;                
             }
         }
-        protected override void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, myCustomEvents.DamageTriggerType type)
+        protected override void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, float damage, myDamageBuffer.DamageTriggers type)
         {
             if (sender != null && target.IsMe)
             {
                 switch (type)
                 {
-                    case myCustomEvents.DamageTriggerType.Killable:
-                        if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
+                    case myDamageBuffer.DamageTriggers.Killable:
+                        if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Zilean.Combo.R").GetValue<bool>() && R.IsReady())
                         {
-                            if (config.Item("EC.Zilean.Combo.R").GetValue<bool>() && R.IsReady())
-                            {
-                                R.Cast();
-                            }
+                            mySpellcast.Unit(null, R);
                         }
                         break;
-                    case myCustomEvents.DamageTriggerType.TonsOfDamage:
+                    case myDamageBuffer.DamageTriggers.TonsOfDamage:
                         break;
                 }
             }
@@ -150,15 +149,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Zilean.Draw.W").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Zilean.Draw.W").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Zilean.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Zilean.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Zilean.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Zilean.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

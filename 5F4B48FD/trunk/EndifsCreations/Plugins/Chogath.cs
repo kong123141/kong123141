@@ -37,25 +37,25 @@ namespace EndifsCreations.Plugins
             var custommenu = new Menu("Feast", "Custom");
             {
                 custommenu.AddItem(new MenuItem("EC.Chogath.UseAutoR", "Auto").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
                 combomenu.AddItem(new MenuItem("EC.Chogath.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Chogath.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Chogath.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Chogath.Misc.Q", "Q Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Chogath.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Chogath.Draw.W", "W").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         private void Custom()
@@ -70,8 +70,8 @@ namespace EndifsCreations.Plugins
         {   
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Chogath.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Chogath.Combo.W").GetValue<bool>();            
+            var UseQ = Root.Item("EC.Chogath.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Chogath.Combo.W").GetValue<bool>();            
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;                
@@ -80,7 +80,7 @@ namespace EndifsCreations.Plugins
                     if (myUtility.ImmuneToMagic(Target)) return;
                     if (UseQ && Q.IsReady())
                     {             
-                        mySpellcast.CircularAoe(Target, Q, HitChance.High);
+                        mySpellcast.CircularAoe(Target, Q, HitChance.High, Q.Range, 200);
                     }
                     if (UseW && W.IsReady())
                     {
@@ -97,7 +97,7 @@ namespace EndifsCreations.Plugins
                 myUtility.Reset();
                 return;
             }
-            if (config.Item("EC.Chogath.UseAutoR").GetValue<bool>())
+            if (Root.Item("EC.Chogath.UseAutoR").GetValue<bool>())
             {
                 Custom();
             }
@@ -134,7 +134,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Chogath.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Chogath.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range + (Q.Width/2))
                 {
@@ -147,11 +147,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Chogath.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Chogath.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Chogath.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Chogath.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }

@@ -1,7 +1,6 @@
 ﻿namespace PandaTeemo
 {
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using LeagueSharp;
@@ -16,37 +15,31 @@
     /// <summary>
     /// Shroom Locations
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
     internal class ShroomTables
     { 
         /// <summary>
         /// List of Locations in Summoner's Rift
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public List<Vector3> SummonersRift = new List<Vector3>();
 
         /// <summary>
         /// List of Locations in Howling Abyss
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public List<Vector3> HowlingAbyss = new List<Vector3>();
 
         /// <summary>
         /// List of Locations in Butcher's Bridge
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public List<Vector3> ButcherBridge = new List<Vector3>();
 
         /// <summary>
         /// List of Location in Crystal Scar
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public List<Vector3> CrystalScar = new List<Vector3>();
 
         /// <summary>
         /// List of Location in Twisted Treeline
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public List<Vector3> TwistedTreeline = new List<Vector3>();
 
         /// <summary>

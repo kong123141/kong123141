@@ -16,15 +16,15 @@ namespace LickyLicky
     {
         static Menu mainMenu = new Menu("Tahm", "Tahm", true);
         private static string[] allyNames;
-        private static Obj_AI_Hero Player;
+        public static Obj_AI_Hero Player;
         private static string buffName = "TahmKenchPDebuffCounter";
         private static string tahmSlow = "tahmkenchwhasdevouredtarget";
-        private static SwallowedTarget current = SwallowedTarget.None;
+        public static SwallowedTarget current = SwallowedTarget.None;
         private static bool usedWEnemy = false;
         private static bool usedWMinion = false;
-        private static Spell Q, W, W2, E, R;
+        public static Spell Q, W, W2, E, R;
 
-        enum SwallowedTarget
+        public enum SwallowedTarget
         {
             Enemy,
             Ally,
@@ -61,7 +61,7 @@ namespace LickyLicky
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
             Interrupter2.OnInterruptableTarget += OnInterruptableSpell;
             Drawing.OnDraw += Drawing_OnDraw;
-
+            IncomingDamage.Init();
         }
 
         static void PopulateMenu()
@@ -142,7 +142,7 @@ namespace LickyLicky
             {
                 moveToPosition();
             }
-
+            #region KS
             if (mainMenu.Item("Killsteal").IsActive())
             {
                 try
@@ -172,13 +172,14 @@ namespace LickyLicky
                 }
                 catch { }
             }
-
+#endregion
+            #region combo
             if (mainMenu.SubMenu("Combo").Item("Combo").IsActive())
             {
                 Obj_AI_Hero target =
                     ObjectManager.Get<Obj_AI_Hero>().Where(x => x.Distance(Player) <= Q.Range && x.IsEnemy && x.IsTargetable && !x.IsDead)
                         .OrderByDescending(x => x.GetBuffCount(buffName))
-                        .ThenBy(x => x.Distance(Player))
+                        .ThenBy(x => x.Distance(Player)).ThenBy(x=> x.HealthPercent)
                         .FirstOrDefault();
                 if (target != null)
                 {
@@ -189,20 +190,34 @@ namespace LickyLicky
                         case 1:
                         case 2:
                             if(mainMenu.SubMenu("Combo").Item("Use Q").IsActive())
-                            Q.Cast(target);
-                            if (target.Distance(Player) <= 200)
-                                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                            Q.Cast(target.Position);
+                            if (target.Distance(Player) <= 200) Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                            else
+                            {
+                                if (current == SwallowedTarget.None)
+                                {
+                                    Obj_AI_Minion closestEMinion =
+                                        ObjectManager.Get<Obj_AI_Minion>()
+                                            .Where(x => x.IsEnemy && x.Distance(Player) < 250)
+                                            .FirstOrDefault();
+                                    W.CastOnUnit(closestEMinion);
+                                }
+                                else if (current == SwallowedTarget.Minion)
+                                    W2.CastIfHitchanceEquals(target, HitChance.High);
+                            }
                             break;
                         case 3:
                             if(mainMenu.SubMenu("Combo").Item("Use Q").IsActive())
-                            Q.Cast(target);
+                            Q.Cast(target.Position);
 
-                            if (current == SwallowedTarget.None && mainMenu.SubMenu("Combo").Item("Use W").IsActive())
+                            if (current == SwallowedTarget.None && mainMenu.SubMenu("Combo").Item("Use W").IsActive() && target.Distance(Player)<=230)
                                 W.CastOnUnit(target);
                             break;
                     }
                 }
             }
+            #endregion
+            #region Harass
             else if (mainMenu.SubMenu("Harass").Item("Harass").IsActive())
             {
 
@@ -211,12 +226,12 @@ namespace LickyLicky
                     Obj_AI_Hero target =
                         ObjectManager.Get<Obj_AI_Hero>().Where(x => x.Distance(Player) <= Q.Range && x.IsEnemy && x.IsTargetable && !x.IsDead)
                             .OrderByDescending(x => x.GetBuffCount(buffName))
-                            .ThenBy(x => x.Distance(Player))
+                            .ThenBy(x => x.Distance(Player)).ThenBy(x=>x.HealthPercent)
                             .FirstOrDefault();
                     if (target != null)
                     {
                         if (mainMenu.SubMenu("Harass").Item("Use Q").IsActive())
-                        Q.Cast(target);
+                        Q.Cast(target.Position);
                         if (target.Distance(Player) <= 250 && target.GetBuffCount(buffName) == 3 && current == SwallowedTarget.None && mainMenu.SubMenu("Harass").Item("Use W").IsActive())
                             W.CastOnUnit(target);
                         else if (current == SwallowedTarget.None && mainMenu.SubMenu("Harass").Item("Use W").IsActive())
@@ -230,9 +245,10 @@ namespace LickyLicky
                     }
                 }
             }
+#endregion
+            #region Flee
             else if (mainMenu.SubMenu("Flee").Item("Flee").IsActive())
             {
-
                 try
                 {
                     if (mainMenu.SubMenu("Flee").Item("Use Q").IsActive())
@@ -254,10 +270,11 @@ namespace LickyLicky
 
                     try
                     {
+                        //Only swallows the ally if they have health below the slider.
                         var swallowAlly =
                         ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(
                             x => x.HealthPercent < mainMenu.SubMenu("Shield").Item("Devour Ally at Percent HP").GetValue<Slider>().Value
-                                && x.IsAlly && Player.Distance(x) <= 500
+                                && x.IsAlly && Player.Distance(x) <= 300
                                 && !x.IsDead);
                         if (current == SwallowedTarget.None)
                             W.CastOnUnit(swallowAlly);
@@ -267,7 +284,7 @@ namespace LickyLicky
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 
             }
-
+#endregion
         }
         static void moveToPosition()
         {
@@ -289,9 +306,9 @@ namespace LickyLicky
 
         static void OnProcessSpell(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            //Modified Kalista Soulbound code from Corey
-            //Need to check in fountain otherwise recalls could make you swallow
-            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && !Player.InFountain())
+            // Modified Kalista Soulbound code from Corey
+            // Need to check in fountain otherwise recalls could make you swallow
+            /*if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && !Player.InFountain())
             {
                 try
                 {
@@ -300,7 +317,7 @@ namespace LickyLicky
                             x => x.HealthPercent < mainMenu.SubMenu("Shield").Item("Devour Ally at Percent HP").GetValue<Slider>().Value
                                 && x.IsAlly && Player.Distance(x) <= 500
                                 && !x.IsDead);
-                    if (swallowAlly != null && current ==SwallowedTarget.None && W.IsReady())
+                    if (swallowAlly != null && current == SwallowedTarget.None && W.IsReady())
                     {
                         W.CastOnUnit(swallowAlly);
                     }
@@ -319,8 +336,8 @@ namespace LickyLicky
                         E.Cast();
                 }
                 catch { }
-            }
-            else if (sender.IsMe)
+            }*/
+            if (sender.IsMe)
             {
                 SpellSlot s = Player.Spellbook.Spells.First(x => x.SData.Name == args.SData.Name).Slot;
                 if (s.ToString().Equals("W"))
@@ -336,7 +353,6 @@ namespace LickyLicky
                 
             }
         }
-
         static void OnInterruptableSpell(object enemy, Interrupter2.InterruptableTargetEventArgs args)
         {
             try

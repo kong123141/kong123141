@@ -38,7 +38,7 @@ namespace EndifsCreations.Plugins
                 //combomenu.AddItem(new MenuItem("EC.Tristana.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Tristana.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Tristana.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }            
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -46,14 +46,14 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Tristana.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Tristana.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Tristana.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
         private void Combo()
         {
             Target = myUtility.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            var UseR = config.Item("EC.Tristana.Combo.R").GetValue<bool>();
+            var UseR = Root.Item("EC.Tristana.Combo.R").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 try
@@ -109,11 +109,11 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Tristana.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Tristana.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
-                    if (config.Item("EC.Tristana.Combo.E").GetValue<bool>() && E.IsReady())
+                    if (Root.Item("EC.Tristana.Combo.E").GetValue<bool>() && E.IsReady())
                     {
                         mySpellcast.Unit((Obj_AI_Hero)args.Target, E);
                     }
@@ -130,19 +130,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Tristana.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Tristana.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Tristana.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Tristana.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Tristana.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Tristana.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Tristana.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Tristana.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

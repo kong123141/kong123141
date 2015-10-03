@@ -48,7 +48,7 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Corki.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Corki.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Corki.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }            
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -56,7 +56,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Corki.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Corki.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Corki.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -64,18 +64,18 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Corki.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Corki.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Corki.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Corki.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Corki.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Corki.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Corki.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Corki.Combo.R").GetValue<bool>();
 
             if (Target.IsValidTarget())
             {
                 try
-                {   
+                {
                     if (UseQ && Q.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularPrecise(Target, Q, HitChance.High);
+                        mySpellcast.CircularPrecise(Target, Q, HitChance.High, Q.Range, 250);
                     }
                     if (UseW && W.IsReady())
                     {
@@ -135,19 +135,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Corki.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Corki.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Corki.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Corki.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Corki.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Corki.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Corki.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Corki.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 if (Player.HasBuff("corkimissilebarragecounterbig"))
                 {

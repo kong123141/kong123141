@@ -40,13 +40,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Diana.Combo.R2", "Use R (Second)").SetValue(true));                
                 combomenu.AddItem(new MenuItem("EC.Diana.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Diana.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Diana.Misc.W", "W Shields").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Diana.Misc.E", "E Interrupts").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -54,34 +54,28 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Diana.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Diana.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Diana.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
         private void Combo()
         {
-            var UseQ = config.Item("EC.Diana.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Diana.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Diana.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Diana.Combo.R").GetValue<bool>();
-            var UseR2 = config.Item("EC.Diana.Combo.R2").GetValue<bool>();
+            var UseQ = Root.Item("EC.Diana.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Diana.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Diana.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Diana.Combo.R").GetValue<bool>();
+            var UseR2 = Root.Item("EC.Diana.Combo.R2").GetValue<bool>();
 
             Target = myUtility.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             if (!Player.IsDashing())
             {
                 if (UseW && W.IsReady())
                 {
-                    if (Player.CountEnemiesInRange(W.Range) > 0)
-                    {
-                        W.Cast();
-                    }
+                    mySpellcast.PointBlank(null, W, W.Range);
                 }
                 if (UseE && E.IsReady())
                 {
-                    if (Player.CountEnemiesInRange(E.Range) > 0)
-                    {
-                        E.Cast();
-                    }
+                    mySpellcast.PointBlank(null, E, E.Range);
                 }
             }
             if (LastTarget == null && (Target != null && Target.IsValidTarget()))
@@ -98,7 +92,7 @@ namespace EndifsCreations.Plugins
                     }
                     else
                     {
-                        mySpellcast.LinearVector(LastTarget.ServerPosition, Q, LastTarget.BoundingRadius);
+                        mySpellcast.PointVector(LastTarget.ServerPosition, Q, LastTarget.BoundingRadius);
                     }
                 }
                 if (UseR && R.IsReady() && myUtility.TickCount - LastR > 1000)
@@ -163,7 +157,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if ((config.Item("EC.Diana.Misc.W").GetValue<bool>()))
+                if ((Root.Item("EC.Diana.Misc.W").GetValue<bool>()))
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -202,7 +196,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Diana.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Diana.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range)
                 {
@@ -214,19 +208,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Diana.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Diana.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Diana.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Diana.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Diana.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Diana.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Diana.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Diana.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

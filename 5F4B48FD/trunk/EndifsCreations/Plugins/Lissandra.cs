@@ -43,11 +43,11 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Frozen Tomb", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Lissandra.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Lissandra.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Lissandra.UseRType", "R").SetValue(new StringList(new[] { "Self", "Target" })));
                 custommenu.AddItem(new MenuItem("EC.Lissandra.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Lissandra.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -57,14 +57,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Lissandra.Combo.E2", "Use E Second Cast").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Lissandra.Combo.R", "Use R (On dying)").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Lissandra.Combo.Dive", "Turret Dive").SetValue(false));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Lissandra.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Lissandra.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Lissandra.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -74,28 +74,28 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Lissandra.Farm.W.Value", "W More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Lissandra.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Lissandra.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Lissandra.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Lissandra.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Lissandra.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }  
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Lissandra.QPredHitchance", "Q Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));                
                 miscmenu.AddItem(new MenuItem("EC.Lissandra.Misc.W", "W Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Lissandra.UseRMisc", "R Interrupts").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Lissandra.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Lissandra.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Lissandra.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -103,10 +103,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Lissandra.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Lissandra.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Lissandra.Combo.E").GetValue<bool>();
-            var UseE2 = config.Item("EC.Lissandra.Combo.E2").GetValue<bool>();
+            var UseQ = Root.Item("EC.Lissandra.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Lissandra.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Lissandra.Combo.E").GetValue<bool>();
+            var UseE2 = Root.Item("EC.Lissandra.Combo.E2").GetValue<bool>();
             if (UseQ && Q.IsReady())
             {
                 if (!Target.IsValidTarget())
@@ -115,11 +115,8 @@ namespace EndifsCreations.Plugins
                 }
             }
             if (UseW && W.IsReady())
-            {
-                if (Player.CountEnemiesInRange(W.Range) > 0)
-                {
-                    W.Cast();
-                }
+            {                
+                mySpellcast.PointBlank(null, W, W.Range);
             }
             if (UseE && UseE2 && E.IsReady())
             {
@@ -127,7 +124,7 @@ namespace EndifsCreations.Plugins
                 {
                     if (myUtility.TickCount - LastE >= (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) / 0.7f))
                     {
-                        if (Target.UnderTurret(true) && !config.Item("EC.Lissandra.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.UnderTurret(true) && !Root.Item("EC.Lissandra.Combo.Dive").GetValue<bool>()) return;
                         E.Cast();
                     }
                 }
@@ -163,9 +160,9 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Lissandra.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Lissandra.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Lissandra.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Lissandra.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Lissandra.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Lissandra.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q2.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -190,12 +187,12 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Lissandra.Farm.ManaPercent").GetValue<Slider>().Value)
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Lissandra.Farm.ManaPercent").GetValue<Slider>().Value)
             {
                 if (!Passive) return;
             }
             if (Player.UnderTurret(true)) return;            
-            if (config.Item("EC.Lissandra.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Lissandra.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
             {
                 var minionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 if (minionQ == null) return;
@@ -213,20 +210,20 @@ namespace EndifsCreations.Plugins
                     }
                 }
             }
-            if (config.Item("EC.Lissandra.Farm.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Lissandra.Farm.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
             {
                 var minionW = MinionManager.GetMinions(Player.ServerPosition, W.Range);
                 if (minionW == null) return;
-                if (minionW.Count() > config.Item("EC.Lissandra.Farm.W.Value").GetValue<Slider>().Value)
+                if (minionW.Count() > Root.Item("EC.Lissandra.Farm.W.Value").GetValue<Slider>().Value)
                 {
                    W.Cast();
                 }
             }
-            if (config.Item("EC.Lissandra.Farm.E").GetValue<bool>() && E.IsReady() && myUtility.TickCount - LastE > 1800)
+            if (Root.Item("EC.Lissandra.Farm.E").GetValue<bool>() && E.IsReady() && myUtility.TickCount - LastE > 1800)
             {
                 var minionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 var ELine = E.GetLineFarmLocation(minionsE);
-                if (ELine.MinionsHit > config.Item("EC.Lissandra.Farm.E.Value").GetValue<Slider>().Value)
+                if (ELine.MinionsHit > Root.Item("EC.Lissandra.Farm.E.Value").GetValue<Slider>().Value)
                 {
                     if (myUtility.IsFacing(Player, ELine.Position.To3D())) E.Cast(ELine.Position);
                 }
@@ -240,7 +237,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Lissandra.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob) && !Player.IsWindingUp)
+                if (Root.Item("EC.Lissandra.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob) && !Player.IsWindingUp)
                 {
                     if (largemobs != null)
                     {
@@ -251,7 +248,7 @@ namespace EndifsCreations.Plugins
                         Q.Cast(mob.Position);
                     }
                 }
-                if (config.Item("EC.Lissandra.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Lissandra.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < W.Range)
                     {
@@ -259,7 +256,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (Vector3.Distance(Player.ServerPosition, mob.ServerPosition) < W.Range) W.Cast();
                 }
-                if (config.Item("EC.Lissandra.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && myUtility.TickCount - LastE > 1800)
+                if (Root.Item("EC.Lissandra.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp && myUtility.TickCount - LastE > 1800)
                 {
                     if (largemobs != null)
                     {
@@ -297,7 +294,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQHitChance()
         {
-            switch (config.Item("EC.Lissandra.QPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Lissandra.QPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -343,21 +340,19 @@ namespace EndifsCreations.Plugins
                     break;
             }            
         }
-        protected override void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, myCustomEvents.DamageTriggerType type)
+        protected override void ProcessDamageBuffer(Obj_AI_Base sender, Obj_AI_Hero target, SpellData spell, float damage, myDamageBuffer.DamageTriggers type)
         {
             if (sender != null && target.IsMe)
             {
                 switch (type)
                 {
-                    case myCustomEvents.DamageTriggerType.Killable:
-                        if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo &&
-                            config.Item("EC.Lissandra.Combo.R").GetValue<bool>() &&
-                            R.IsReady())
+                    case myDamageBuffer.DamageTriggers.Killable:
+                        if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Lissandra.Combo.R").GetValue<bool>() && R.IsReady())
                         {
-                            R.Cast();
+                            mySpellcast.Unit(null, R);
                         }
                         break;
-                    case myCustomEvents.DamageTriggerType.TonsOfDamage:
+                    case myDamageBuffer.DamageTriggers.TonsOfDamage:
                         break;
                 }
             }
@@ -374,7 +369,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Lissandra.UseRMisc").GetValue<bool>() && R.IsReady())
+            if (Root.Item("EC.Lissandra.UseRMisc").GetValue<bool>() && R.IsReady())
             {
                 if (Vector3.Distance(Player.ServerPosition,sender.ServerPosition) <= R.Range && args.DangerLevel == Interrupter2.DangerLevel.High)
                 {
@@ -385,7 +380,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Lissandra.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Lissandra.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= W.Range)
                 {
@@ -397,28 +392,28 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Lissandra.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Lissandra.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Lissandra.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Lissandra.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Lissandra.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Lissandra.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
             if (R.Level > 0 && R.IsReady())
             {
-                switch (config.Item("EC.Lissandra.UseRType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Lissandra.UseRType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
-                       if (config.Item("EC.Lissandra.UseRDrawDistance").GetValue<bool>())
+                       if (Root.Item("EC.Lissandra.UseRDrawDistance").GetValue<bool>())
                         {
                             Render.Circle.DrawCircle(Player.Position, E.Range + 225, Color.Fuchsia, 7);
                         }
-                        if (config.Item("EC.Lissandra.UseRDrawTarget").GetValue<bool>())
+                        if (Root.Item("EC.Lissandra.UseRDrawTarget").GetValue<bool>())
                         {
                             var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
                             var target = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&
@@ -433,11 +428,11 @@ namespace EndifsCreations.Plugins
                         }
                         break;
                     case 1:
-                       if (config.Item("EC.Lissandra.UseRDrawDistance").GetValue<bool>())
+                       if (Root.Item("EC.Lissandra.UseRDrawDistance").GetValue<bool>())
                         {
                             Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                         }
-                       if (config.Item("EC.Lissandra.UseRDrawTarget").GetValue<bool>())
+                       if (Root.Item("EC.Lissandra.UseRDrawTarget").GetValue<bool>())
                        {
                            var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
                            var target = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&

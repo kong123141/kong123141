@@ -35,42 +35,42 @@ namespace EndifsCreations.Plugins
         {
             var combomenu = new Menu("Combo", "Combo");
             {
-                //combomenu.AddItem(new MenuItem("EC.Aatrox.Combo.Q", "Use Q").SetValue(true));
+                combomenu.AddItem(new MenuItem("EC.Aatrox.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Aatrox.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Aatrox.Combo.R", "Use R").SetValue(true));
                 //combomenu.AddItem(new MenuItem("EC.Aatrox.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Aatrox.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Aatrox.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
                 laneclearmenu.AddItem(new MenuItem("EC.Aatrox.Farm.Q", "Use Q").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Aatrox.Farm.E", "Use E").SetValue(true));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Aatrox.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Aatrox.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }  
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Aatrox.Misc.W", "Auto W").SetValue(true));
                 miscmenu.AddItem(new MenuItem("EC.Aatrox.Misc.W.Value", "+/- 10 from").SetValue(new Slider(50)));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Aatrox.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Aatrox.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Aatrox.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -78,19 +78,23 @@ namespace EndifsCreations.Plugins
         {
             Target =  myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             
-            //var UseQ = config.Item("EC.Aatrox.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Aatrox.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Aatrox.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Aatrox.Combo.Items").GetValue<bool>();
-            if (UseR && R.IsReady() && Player.CountEnemiesInRange(400) > 1)
+            var UseQ = Root.Item("EC.Aatrox.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Aatrox.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Aatrox.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Aatrox.Combo.Items").GetValue<bool>();
+            if (UseR && R.IsReady())
             {
-                R.Cast();
+                mySpellcast.PointBlank(null, R, 400, 1);
             }
             if (Target.IsValidTarget())
             {                
                 if (myUtility.ImmuneToDeath(Target)) return;                
                 try
                 {
+                    if (UseQ && Q.IsReady())
+                    {
+                        mySpellcast.CircularPrecise(Target, Q, HitChance.High, Q.Range, 250);
+                    }
                     if (UseE && E.IsReady())
                     {
                         mySpellcast.Linear(Target, E, HitChance.High);
@@ -116,7 +120,7 @@ namespace EndifsCreations.Plugins
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (target != null)
             {                
-                if (config.Item("EC.Aatrox.Harass.E").GetValue<bool>() && E.IsReady())
+                if (Root.Item("EC.Aatrox.Harass.E").GetValue<bool>() && E.IsReady())
                 {
                     mySpellcast.Linear(target, E, HitChance.High);
                 }
@@ -124,22 +128,22 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (config.Item("EC.Aatrox.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Aatrox.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 myFarmManager.LaneCircular(Q, Q.Range, 225);
             }
-            if (config.Item("EC.Aatrox.Farm.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Aatrox.Farm.E").GetValue<bool>() && E.IsReady())
             {
                 myFarmManager.LaneLinear(E, E.Range);
             }
         }
         private void JungleClear()
         {
-            if (config.Item("EC.Aatrox.Jungle.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Aatrox.Jungle.Q").GetValue<bool>() && Q.IsReady())
             {
                 myFarmManager.JungleCircular(Q, Q.Range, 225);
             }
-            if (config.Item("EC.Aatrox.Jungle.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Aatrox.Jungle.E").GetValue<bool>() && E.IsReady())
             {
                 myFarmManager.JungleLinear(E, E.Range);
             }
@@ -148,10 +152,10 @@ namespace EndifsCreations.Plugins
         private void SmartW()
         {
             if (Player.InFountain() || Player.InShop() || Player.HasBuff("Recall")) return;
-            if (config.Item("EC.Aatrox.Misc.W").GetValue<bool>())
+            if (Root.Item("EC.Aatrox.Misc.W").GetValue<bool>())
             {
                 var hpp = myUtility.PlayerHealthPercentage;
-                var t = config.Item("EC.Aatrox.Misc.W.Value").GetValue<Slider>().Value;
+                var t = Root.Item("EC.Aatrox.Misc.W.Value").GetValue<Slider>().Value;
                 if (Player.HasBuff("aatroxwlife")) //lifesteal
                 {
                     if (hpp > (Math.Max(10, t - 10)))
@@ -200,7 +204,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit.IsMe)
             {
-                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Aatrox.Combo.Items").GetValue<bool>()) && Orbwalking.InAutoAttackRange(target))
+                if ((myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Aatrox.Combo.Items").GetValue<bool>()) && Orbwalking.InAutoAttackRange(target))
                 {
                     myItemManager.UseItems(2, null);                    
                 }
@@ -208,7 +212,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R && config.Item("EC.Aatrox.Combo.Items").GetValue<bool>())
+            if (args.Slot == SpellSlot.R && Root.Item("EC.Aatrox.Combo.Items").GetValue<bool>())
             {
                 Utility.DelayAction.Add(myHumazier.ReactionDelay, () => myItemManager.UseGhostblade());
             }
@@ -216,15 +220,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Aatrox.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Aatrox.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Aatrox.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Aatrox.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Aatrox.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Aatrox.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

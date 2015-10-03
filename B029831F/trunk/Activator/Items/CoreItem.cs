@@ -1,4 +1,14 @@
-﻿using System;
+﻿#region Copyright © 2015 Kurisu Solutions
+// All rights are reserved. Transmission or reproduction in part or whole,
+// any form or by any means, mechanical, electronical or otherwise, is prohibited
+// without the prior written consent of the copyright owner.
+// 
+// Document:	Items/CoreItem.cs
+// Date:		22/09/2015
+// Author:		Robin Kurisu
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Activator.Base;
@@ -126,6 +136,12 @@ namespace Activator.Items
             Menu.AddItem(new MenuItem("use" + Name, "Use " + usefname)).SetValue(true);
             Menu.AddItem(new MenuItem("prior" + Name, DisplayName + " Priority")).SetValue(new Slider(Priority, 1, 7));
 
+            if (Category.Any(t => t == MenuType.SelfLowHP) &&
+               (Name.Contains("Potion") || Name.Contains("Flask") || Name.Contains("Biscuit")))
+            {
+                Menu.AddItem(new MenuItem("use" + Name + "cbat", "Predict Damage")).SetValue(true);
+            }
+
             if (Category.Any(t => t == MenuType.EnemyLowHP))
             {
                 Menu.AddItem(new MenuItem("enemylowhp" + Name + "pct", "Use on Enemy HP % <="))
@@ -134,11 +150,11 @@ namespace Activator.Items
 
             if (Category.Any(t => t == MenuType.SelfLowHP))
                 Menu.AddItem(new MenuItem("selflowhp" + Name + "pct", "Use on Hero HP % <="))
-                    .SetValue(new Slider(DefaultHP <= 50 || DefaultHP > 90 ? DefaultHP : 25));
+                    .SetValue(new Slider(DefaultHP <= 50 || DefaultHP > 90 ? DefaultHP : 45));
 
             if (Category.Any(t => t == MenuType.SelfMuchHP))
                 Menu.AddItem(new MenuItem("selfmuchhp" + Name + "pct", "Use on Hero Dmg Dealt % >="))
-                    .SetValue(new Slider(DefaultHP > 45 ? 55 : DefaultHP < 35 ? 45 : 35));
+                    .SetValue(new Slider(DefaultHP > 45 ? 55 : DefaultHP < 35 ? 45 : 40));
 
             if (Category.Any(t => t == MenuType.SelfLowMP))
                 Menu.AddItem(new MenuItem("selflowmp" + Name + "pct", "Use on Hero Mana % <="))

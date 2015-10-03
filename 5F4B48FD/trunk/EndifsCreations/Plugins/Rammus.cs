@@ -38,18 +38,18 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Rammus.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Rammus.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Rammus.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Rammus.Misc.W", "W Shields").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Rammus.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Rammus.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -57,10 +57,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(375 + Player.BoundingRadius, TargetSelector.DamageType.Physical);
 
-            var UseW = config.Item("EC.Rammus.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Rammus.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Rammus.Combo.Items").GetValue<bool>();
-            var UseR = config.Item("EC.Rammus.Combo.R").GetValue<bool>();
+            var UseW = Root.Item("EC.Rammus.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Rammus.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Rammus.Combo.Items").GetValue<bool>();
+            var UseR = Root.Item("EC.Rammus.Combo.R").GetValue<bool>();
             if (UseE && E.IsReady())
             {
                 if (Target.IsValidTarget() && Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= E.Range)
@@ -71,41 +71,38 @@ namespace EndifsCreations.Plugins
                         E.CastOnUnit(Target);
                     }
                     else 
-                    {
-                        
+                    {                        
                         E.CastOnUnit(Target);
                     }
                 }
                 else
                 {
                     var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !myUtility.ImmuneToMagic(x));
-                    var rtarget = EnemyList.Where(x => x.IsVisible &&
+                    var etarget = EnemyList.Where(x => x.IsVisible &&
                                  Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= E.Range &&
                                  x != Target).OrderBy(i => i.BaseAttackDamage).ThenBy(i => i.Health).FirstOrDefault();
-                    if (rtarget != null && rtarget.IsValidTarget())
+                    if (etarget != null && etarget.IsValidTarget())
                     {
                         if (Player.HasBuff("DefensiveBallCurl"))
                         {
-                            E.CastOnUnit(rtarget);
+                            E.CastOnUnit(etarget);
                         }
                         else
                         {
                             if (UseW && W.IsReady()) W.Cast();
-                            E.CastOnUnit(rtarget);
+                            E.CastOnUnit(etarget);
                         }
                     }
                 }
 
             }
-            if (UseR && R.IsReady())
-            {
-                if (Player.CountEnemiesInRange(R.Range) >= 3)
-                {
-                    R.Cast();
-                }
-            }
+           
             if (Target.IsValidTarget())
             {
+                if (UseR && R.IsReady())
+                {
+                    mySpellcast.PointBlank(Target, R, R.Range, 2);
+                }
                 if (CastItems)
                 {
                     if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= 450f)
@@ -141,7 +138,7 @@ namespace EndifsCreations.Plugins
         {            
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if (config.Item("EC.Rammus.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Rammus.Combo.W").GetValue<bool>()) && W.IsReady())
+                if (Root.Item("EC.Rammus.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Rammus.Combo.W").GetValue<bool>()) && W.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -169,11 +166,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Rammus.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Rammus.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Rammus.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Rammus.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

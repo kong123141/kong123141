@@ -38,17 +38,17 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Jax.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Jax.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Jax.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Jax.Misc.E", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Jax.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -56,17 +56,14 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Jax.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Jax.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Jax.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Jax.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Jax.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Jax.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Jax.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Jax.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Jax.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Jax.Combo.Items").GetValue<bool>();
             if (UseE && E.IsReady() && !EActive)
             {
-                if (Player.CountEnemiesInRange(E.Range) > 0)
-                {
-                    E.Cast();
-                }
+                mySpellcast.PointBlank(null, E, E.Range);
             }
             if (Target.IsValidTarget())
             {
@@ -146,7 +143,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Jax.Combo.W").GetValue<bool>() && W.IsReady() && Orbwalking.InAutoAttackRange(target) && !WActive)
+                    if (Root.Item("EC.Jax.Combo.W").GetValue<bool>() && W.IsReady() && Orbwalking.InAutoAttackRange(target) && !WActive)
                     {
                         W.Cast();
                     }
@@ -191,7 +188,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Jax.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Jax.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -203,7 +200,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Jax.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Jax.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }

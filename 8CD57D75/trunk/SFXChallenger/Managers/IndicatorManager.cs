@@ -33,6 +33,7 @@ using SharpDX;
 using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 using Spell = SFXChallenger.Wrappers.Spell;
+using Utils = SFXChallenger.Helpers.Utils;
 
 #endregion
 
@@ -125,7 +126,7 @@ namespace SFXChallenger.Managers
         {
             try
             {
-                if (Drawing.Direct3DDevice == null || Drawing.Direct3DDevice.IsDisposed)
+                if (Drawing.Direct3DDevice == null || Drawing.Direct3DDevice.IsDisposed || !Utils.ShouldDraw())
                 {
                     return;
                 }
@@ -221,7 +222,8 @@ namespace SFXChallenger.Managers
                 var aa = _menu.Item(_menu.Name + ".attacks").GetValue<Slider>().Value;
                 if (aa > 0)
                 {
-                    damage += (float) (ObjectManager.Player.GetAutoAttackDamage(target) * aa);
+                    damage += (float) ObjectManager.Player.GetAutoAttackDamage(target, true);
+                    damage += (float) (ObjectManager.Player.GetAutoAttackDamage(target) * (aa - 1));
                 }
                 damage +=
                     Functions.Where(function => _menu.Item(_menu.Name + "." + function.Key).GetValue<bool>())

@@ -33,24 +33,19 @@ namespace EndifsCreations.Plugins
         }
         private void LoadMenus()
         {            
-            var custommenu = new Menu("Crowstorm", "Custom");
-            {
-                custommenu.AddItem(new MenuItem("EC.FiddleSticks.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
-                config.AddSubMenu(custommenu);
-            }
             var combomenu = new Menu("Combo", "Combo");
             {
                 combomenu.AddItem(new MenuItem("EC.FiddleSticks.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.FiddleSticks.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.FiddleSticks.Combo.E", "Use E").SetValue(true));                
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {               
                 harassmenu.AddItem(new MenuItem("EC.FiddleSticks.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.FiddleSticks.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.FiddleSticks.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -58,20 +53,20 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.FiddleSticks.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.FiddleSticks.Farm.W.Value", "W HP <").SetValue(new Slider(75)));
                 laneclearmenu.AddItem(new MenuItem("EC.FiddleSticks.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.FiddleSticks.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.FiddleSticks.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.FiddleSticks.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }  
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.FiddleSticks.Misc.Q", "Q Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.FiddleSticks.Misc.Q2", "Q Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -79,7 +74,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.FiddleSticks.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.FiddleSticks.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.FiddleSticks.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
 
         }
@@ -88,9 +83,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(W.Range, TargetSelector.DamageType.Magical);
             
-            var UseQ = config.Item("EC.FiddleSticks.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.FiddleSticks.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.FiddleSticks.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.FiddleSticks.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.FiddleSticks.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.FiddleSticks.Combo.E").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (myUtility.ImmuneToMagic(Target)) return;
@@ -102,8 +97,6 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseW && W.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        if (UseQ && Q.CanCast(Target) && Q.IsInRange(Target) && !myUtility.ImmuneToCC(Target)) return;
-                        if (UseE && E.CanCast(Target) && E.IsInRange(Target)) return;
                         mySpellcast.Unit(Target, W);
                     }
                     if (UseE && E.IsReady())
@@ -116,9 +109,9 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.FiddleSticks.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.FiddleSticks.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.FiddleSticks.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.FiddleSticks.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.FiddleSticks.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.FiddleSticks.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);            
             if (target.IsValidTarget())
             {
@@ -138,8 +131,8 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.FiddleSticks.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.FiddleSticks.Farm.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp && myUtility.PlayerHealthPercentage < config.Item("EC.FiddleSticks.Farm.W.Value").GetValue<Slider>().Value && !myOrbwalker.IsWaiting())
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.FiddleSticks.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.FiddleSticks.Farm.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp && myUtility.PlayerHealthPercentage < Root.Item("EC.FiddleSticks.Farm.W.Value").GetValue<Slider>().Value && !myOrbwalker.Waiting)
             {
                 var minionW = MinionManager.GetMinions(Player.ServerPosition, W.Range);
                 if (minionW == null) return;
@@ -163,7 +156,7 @@ namespace EndifsCreations.Plugins
                     }
                 }
             }
-            if (config.Item("EC.FiddleSticks.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.FiddleSticks.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
             {
                 if (Player.UnderTurret(true)) return;
                 var minionE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
@@ -191,14 +184,14 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.FiddleSticks.Jungle.Q").GetValue<bool>() && Q.IsReady())
+                if (Root.Item("EC.FiddleSticks.Jungle.Q").GetValue<bool>() && Q.IsReady())
                 {
                     if (largemobs != null)
                     {
                         Q.CastOnUnit(largemobs);
                     }
                 }
-                if (config.Item("EC.FiddleSticks.Jungle.W").GetValue<bool>() && W.IsReady())
+                if (Root.Item("EC.FiddleSticks.Jungle.W").GetValue<bool>() && W.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -209,7 +202,7 @@ namespace EndifsCreations.Plugins
                         W.CastOnUnit(mob);
                     }
                 }
-                if (config.Item("EC.FiddleSticks.Jungle.E").GetValue<bool>() && E.IsReady())
+                if (Root.Item("EC.FiddleSticks.Jungle.E").GetValue<bool>() && E.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -226,14 +219,15 @@ namespace EndifsCreations.Plugins
         {
             if (R.IsReady())
             {
-                var newvec = Player.ServerPosition.Extend(Game.CursorPos, R.Range);
-                if (newvec.CountEnemiesInRange(R.Width) >= 2)
+                var tomouse = Player.ServerPosition.Extend(Game.CursorPos, Vector3.Distance(Player.ServerPosition, Game.CursorPos));
+                var tomax = Player.ServerPosition.Extend(Game.CursorPos, R.Range);
+                var newvec = Vector3.Distance(Player.ServerPosition, tomouse) >= Vector3.Distance(Player.ServerPosition, tomax) ? tomax : tomouse;
+                if (newvec.CountEnemiesInRange(500) > 0)
                 {
                     R.Cast(newvec);
                 }
             }
         }
-
 
         protected override void OnUpdate(EventArgs args)
         {
@@ -270,11 +264,15 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (sender.Owner.IsMe) //Player.HasBuff("Drain") || Player.HasBuff("fearmonger_marker")
+            if (sender.Owner.IsMe)
             {
-                if (args.Slot == SpellSlot.E)
+                if (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.E)
                 {
-                    LastE = myUtility.TickCount;
+                    if (myUtility.TickCount - LastW < 200) args.Process = false;
+                }
+                if (args.Slot == SpellSlot.W)
+                {
+                    LastW = myUtility.TickCount;
                     mySpellcast.Pause(2500 + Game.Ping);
                 }
                 if (args.Slot == SpellSlot.R)
@@ -286,7 +284,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnBeforeAttack(myOrbwalker.BeforeAttackEventArgs args)
         {
-            if (Player.IsChannelingImportantSpell() || myUtility.TickCount - LastR <= 0.25f || myUtility.TickCount - LastE <= 0.25f)
+            if (Player.IsChannelingImportantSpell() || myUtility.TickCount - LastR <= 0.5f || myUtility.TickCount - LastW <= 0.5f)
             {
                 args.Process = false;
             }
@@ -303,7 +301,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.FiddleSticks.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.FiddleSticks.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= Q.Range)
                 {
@@ -314,7 +312,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.FiddleSticks.Misc.Q2").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.FiddleSticks.Misc.Q2").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -326,19 +324,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {                      
             if (Player.IsDead) return;
-            if (config.Item("EC.FiddleSticks.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.FiddleSticks.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.FiddleSticks.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.FiddleSticks.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.FiddleSticks.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.FiddleSticks.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.FiddleSticks.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.FiddleSticks.Draw.R").GetValue<bool>())
             {
                 var tomouse = Player.ServerPosition.Extend(Game.CursorPos, Vector3.Distance(Player.ServerPosition, Game.CursorPos));
                 var tomax = Player.ServerPosition.Extend(Game.CursorPos, R.Range);
@@ -346,9 +344,9 @@ namespace EndifsCreations.Plugins
                 var wts = Drawing.WorldToScreen(newvec);
                 var wtf = Drawing.WorldToScreen(Player.ServerPosition);
                 Drawing.DrawLine(wtf, wts, 2, Color.GhostWhite);
-                Render.Circle.DrawCircle(newvec, 600, Color.GhostWhite, 2);
-                Drawing.DrawText(wts.X - 20, wts.Y - 50, Color.Yellow, "Hits: " + newvec.CountEnemiesInRange(R.Width));
-            }            
+                Render.Circle.DrawCircle(newvec, 500, Color.GhostWhite, 2);
+                Drawing.DrawText(wts.X - 20, wts.Y - 50, Color.Yellow, "Hits: " + newvec.CountEnemiesInRange(500));
+            }
         }
     }
 }

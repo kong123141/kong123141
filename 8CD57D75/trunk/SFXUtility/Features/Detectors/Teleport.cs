@@ -86,17 +86,6 @@ namespace SFXUtility.Features.Detectors
 
                 try
                 {
-                    if (Menu.Item(Name + "DrawingDebug").GetValue<bool>())
-                    {
-                        if (_teleportObjects.Any())
-                        {
-                            var obj = _teleportObjects.First();
-                            obj.LastType = Packet.S2C.Teleport.Type.Recall;
-                            obj.LastStatus = Packet.S2C.Teleport.Status.Start;
-                            obj.Duration = 8000;
-                            obj.LastActionTime = Game.Time - obj.Duration + 1000;
-                        }
-                    }
                     if (Menu.Item(Name + "DrawingTextEnabled").GetValue<bool>())
                     {
                         var posX = Menu.Item(Name + "DrawingTextOffsetLeft").GetValue<Slider>().Value;
@@ -104,8 +93,7 @@ namespace SFXUtility.Features.Detectors
                         var count = 0;
                         foreach (var teleport in
                             _teleportObjects.Where(
-                                t => t.Hero.IsEnemy && t.LastStatus != Packet.S2C.Teleport.Status.Unknown && t.Update())
-                            )
+                                t => t.LastStatus != Packet.S2C.Teleport.Status.Unknown && t.Update()))
                         {
                             var text = teleport.ToString();
                             if (!string.IsNullOrWhiteSpace(text))
@@ -128,17 +116,15 @@ namespace SFXUtility.Features.Detectors
                         var posX = Menu.Item(Name + "DrawingBarOffsetLeft").GetValue<Slider>().Value;
                         var posY = Menu.Item(Name + "DrawingBarOffsetTop").GetValue<Slider>().Value;
                         var barWidth =
-                            (int) Math.Ceiling(Menu.Item(Name + "DrawingBarWidth").GetValue<Slider>().Value * dScale);
+                            (float) Math.Ceiling(Menu.Item(Name + "DrawingBarWidth").GetValue<Slider>().Value * dScale);
                         var teleports =
                             _teleportObjects.Where(
-                                t =>
-                                    t.Hero.IsEnemy && t.LastStatus != Packet.S2C.Teleport.Status.Unknown &&
-                                    t.Update(true)).OrderBy(t => t.Countdown);
+                                t => t.LastStatus != Packet.S2C.Teleport.Status.Unknown && t.Update(true))
+                                .OrderBy(t => t.Countdown);
                         foreach (var teleport in teleports.Where(t => t.Duration > 0 && !t.Hero.IsDead))
                         {
-                            var scale = barWidth / teleport.Duration;
                             var color = teleport.ToColor();
-                            var width = (int) (scale * teleport.Countdown);
+                            var width = barWidth / teleport.Duration * teleport.Countdown;
                             width = width > barWidth ? barWidth : width;
 
                             _line.Width = barHeight;
@@ -169,14 +155,14 @@ namespace SFXUtility.Features.Detectors
                             _line.End();
 
                             _barText.DrawTextCentered(
-                                teleport.Hero.ChampionName, posX + width,
+                                teleport.Hero.ChampionName, (int) (posX + width),
                                 (top
                                     ? posY - barHeight - seperatorHeight - 2
                                     : posY + barHeight * 2 + seperatorHeight * 2 + 2),
                                 new ColorBGRA(color.R, color.G, color.B, color.A));
 
                             _barText.DrawTextCentered(
-                                ((int) (teleport.Hero.HealthPercent)).ToString(), posX + width - 1,
+                                ((int) (teleport.Hero.HealthPercent)).ToString(), (int) (posX + width - 1),
                                 (top
                                     ? posY - barHeight - 3 - seperatorHeight - _barText.Description.Height + 3
                                     : posY + barHeight * 2 + 3 + seperatorHeight * 2 + _barText.Description.Height - 1),
@@ -261,7 +247,7 @@ namespace SFXUtility.Features.Detectors
                         new Slider((int) (Drawing.Height * 0.75d), 0, Drawing.Height)));
                 drawingBarMenu.AddItem(
                     new MenuItem(drawingBarMenu.Name + "OffsetLeft", "Offset Left").SetValue(
-                        new Slider((int) (Drawing.Width * 0.425d), 0, Drawing.Width)));
+                        new Slider((int) (Drawing.Width / 2f - ((int) (Drawing.Width / 1.5f)) / 2f), 0, Drawing.Width)));
                 drawingBarMenu.AddItem(
                     new MenuItem(drawingBarMenu.Name + "AdditionalTime", "Additional Time").SetValue(
                         new Slider(5, 0, 10))).ValueChanged += delegate(object o, OnValueChangeEventArgs args)
@@ -276,17 +262,37 @@ namespace SFXUtility.Features.Detectors
                 drawingMenu.AddSubMenu(drawingTextMenu);
                 drawingMenu.AddSubMenu(drawingBarMenu);
 
-                drawingMenu.AddItem(new MenuItem(drawingMenu.Name + "Debug", "Debug").SetValue(false)).ValueChanged +=
-                    delegate
+                drawingMenu.AddItem(new MenuItem(drawingMenu.Name + "Self", "Self").SetValue(false))
+                    .DontSave()
+                    .ValueChanged += delegate(object o, OnValueChangeEventArgs args)
                     {
-                        foreach (var teleport in _teleportObjects)
+                        if (args.GetNewValue<bool>())
                         {
-                            teleport.LastStatus = Packet.S2C.Teleport.Status.Unknown;
-                            teleport.LastType = Packet.S2C.Teleport.Type.Unknown;
+                            _teleportObjects.Add(new TeleportObject(ObjectManager.Player));
+                        }
+                        else
+                        {
+                            _teleportObjects.RemoveAll(t => t.Hero.NetworkId.Equals(ObjectManager.Player.NetworkId));
                         }
                     };
 
                 Menu.AddSubMenu(drawingMenu);
+
+                var notificationMenu = new Menu("Notification", Name + "Notification");
+
+                notificationMenu.AddItem(new MenuItem(notificationMenu.Name + "Started", "Started").SetValue(false));
+                notificationMenu.AddItem(new MenuItem(notificationMenu.Name + "Aborted", "Aborted").SetValue(false));
+                notificationMenu.AddItem(new MenuItem(notificationMenu.Name + "Finished", "Finished").SetValue(false));
+
+                Menu.AddSubMenu(notificationMenu);
+
+                var chatMenu = new Menu("Chat (Local)", Name + "Chat");
+
+                chatMenu.AddItem(new MenuItem(chatMenu.Name + "Started", "Started").SetValue(false));
+                chatMenu.AddItem(new MenuItem(chatMenu.Name + "Aborted", "Aborted").SetValue(false));
+                chatMenu.AddItem(new MenuItem(chatMenu.Name + "Finished", "Finished").SetValue(false));
+
+                Menu.AddSubMenu(chatMenu);
 
                 Menu.AddItem(new MenuItem(Name + "Enabled", "Enabled").SetValue(false));
 
@@ -362,6 +368,48 @@ namespace SFXUtility.Features.Detectors
                     teleport.Duration = duration;
                     teleport.LastStatus = packet.Status;
                     teleport.LastType = packet.Type;
+
+                    if (packet.Status == Packet.S2C.Teleport.Status.Finish)
+                    {
+                        if (Menu.Item(Name + "NotificationFinished").GetValue<bool>())
+                        {
+                            Notifications.AddNotification(teleport.Hero.ChampionName + " Finished.", 5000)
+                                .SetTextColor(Color.GreenYellow);
+                        }
+                        if (Menu.Item(Name + "ChatFinished").GetValue<bool>())
+                        {
+                            Game.PrintChat(
+                                string.Format("<font color='#8ACC25'>Finished: {0}</font>", teleport.Hero.ChampionName));
+                        }
+                    }
+
+                    if (packet.Status == Packet.S2C.Teleport.Status.Abort)
+                    {
+                        if (Menu.Item(Name + "NotificationAborted").GetValue<bool>())
+                        {
+                            Notifications.AddNotification(teleport.Hero.ChampionName + " Aborted.", 5000)
+                                .SetTextColor(Color.Orange);
+                        }
+                        if (Menu.Item(Name + "ChatAborted").GetValue<bool>())
+                        {
+                            Game.PrintChat(
+                                string.Format("<font color='#CC0000'>Aborted: {0}</font>", teleport.Hero.ChampionName));
+                        }
+                    }
+
+                    if (packet.Status == Packet.S2C.Teleport.Status.Start)
+                    {
+                        if (Menu.Item(Name + "NotificationStarted").GetValue<bool>())
+                        {
+                            Notifications.AddNotification(teleport.Hero.ChampionName + " Started.", 5000)
+                                .SetTextColor(Color.White);
+                        }
+                        if (Menu.Item(Name + "ChatStarted").GetValue<bool>())
+                        {
+                            Game.PrintChat(
+                                string.Format("<font color='#FFFFFF'>Started: {0}</font>", teleport.Hero.ChampionName));
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -376,7 +424,6 @@ namespace SFXUtility.Features.Detectors
             private int _duration;
             private Packet.S2C.Teleport.Status _lastStatus;
             private float _preLastActionTime;
-            private float _teleportStart;
 
             public TeleportObject(Obj_AI_Hero hero)
             {
@@ -399,7 +446,6 @@ namespace SFXUtility.Features.Detectors
                 set
                 {
                     _lastStatus = value;
-                    _teleportStart = _lastStatus == Packet.S2C.Teleport.Status.Start ? Game.Time : 0f;
                     _preLastActionTime = LastActionTime;
                     LastActionTime = Game.Time;
                 }
@@ -412,12 +458,15 @@ namespace SFXUtility.Features.Detectors
             {
                 get
                 {
+                    if (Hero.IsMe && LastStatus == Packet.S2C.Teleport.Status.Finish) {}
                     switch (LastStatus)
                     {
                         case Packet.S2C.Teleport.Status.Start:
-                            return Game.Time - _teleportStart;
+                            return Game.Time - LastActionTime;
                         case Packet.S2C.Teleport.Status.Finish:
-                            return Game.Time - LastActionTime > AdditionalBarTime ? 0 : Game.Time - _preLastActionTime;
+                            return Game.Time - LastActionTime > AdditionalBarTime
+                                ? 0
+                                : LastActionTime - _preLastActionTime;
                         case Packet.S2C.Teleport.Status.Abort:
                             return Game.Time - LastActionTime > AdditionalBarTime
                                 ? 0
@@ -427,11 +476,11 @@ namespace SFXUtility.Features.Detectors
                 }
             }
 
-            public float LastActionTime { private get; set; }
+            private float LastActionTime { get; set; }
 
             public override string ToString()
             {
-                var time = _teleportStart + Duration - Game.Time;
+                var time = LastActionTime + Duration - Game.Time;
                 if (time <= 0)
                 {
                     time = Game.Time - LastActionTime;

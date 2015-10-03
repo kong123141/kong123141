@@ -37,15 +37,15 @@ namespace MagicalGirlLux
 
             W = new Spell(SpellSlot.W, 1075);
 
-            E = new Spell(SpellSlot.E, 1075);
+            E = new Spell(SpellSlot.E, 1200);
 
             R = new Spell(SpellSlot.R, 3300);
 
-            Q.SetSkillshot(0.25f, 110f, 1300f, false, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 85f, 1150f, false, SkillshotType.SkillshotLine);
 
             W.SetSkillshot(0.25f, 110f, 1200f, false, SkillshotType.SkillshotLine);
 
-            E.SetSkillshot(0.25f, 280f, 1300f, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(0.25f, 280f, 950f, false, SkillshotType.SkillshotCircle);
 
             R.SetSkillshot(1f, 190f, float.MaxValue, false, SkillshotType.SkillshotLine);
 
@@ -105,18 +105,13 @@ namespace MagicalGirlLux
             drawing.AddItem(
                 new MenuItem("Rdraw", "Draw R Range").SetValue(new Circle(true, System.Drawing.Color.CornflowerBlue)));
 
-            drawing.SubMenu("Misc Drawings")
-                .AddItem(
-                    new MenuItem("dmgdrawer", "[Damage Indicator]:").SetValue(new StringList(new[] {"Custom", "Common"})));
-            drawing.SubMenu("Misc Drawings")
-                .AddItem(
-                    new MenuItem("dmgcolor", "Damage Draw Color").SetValue(new Circle(true, System.Drawing.Color.Orange)));
+            drawing.SubMenu("Misc Drawings").AddItem(
+                    new MenuItem("dmgdrawer", "[Damage Indicator]:").SetValue(new StringList(new[] {"Custom", "Common"}, 1)));
+            drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("dmgcolor", "Damage Draw Color").SetValue(new Circle(true, System.Drawing.Color.Orange)));
 
             drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("drawMinimapR", "Minimap [R] Range Indicator").SetValue(true));
-            drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("HUD", "Hud Display").SetValue(true));
-            drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("sliderY", "WIDTH [Default : 40]").SetValue(new Slider(40, 250, 0)));
-            drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("sliderX", "HEIGHT [Default : 40]").SetValue(new Slider(40, 250, 0)));
             drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("indicator", "Enemy Indicator").SetValue(true));
+            drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("LuxE.Indicator", "Lux E Indicator").SetValue(true));
             drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("jg", "Junglesteal Indicator").SetValue(true));
             drawing.SubMenu("Misc Drawings").AddItem(new MenuItem("ah", "AutoHarass Indicator").SetValue(true));
             //misc.AddItem(new MenuItem("skinhax", "Skin Manager").SetValue(true));
@@ -138,12 +133,12 @@ namespace MagicalGirlLux
 
 
 
-            laneclear
-                .AddItem(new MenuItem("laneQ", "Use Q").SetValue(true));
-            laneclear
-                .AddItem(new MenuItem("laneE", "Use E").SetValue(true));
-            laneclear
-                .AddItem(new MenuItem("lanemana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
+            laneclear.AddItem(new MenuItem("laneQ", "Use Q").SetValue(true));
+            laneclear.AddItem(new MenuItem("laneE", "Use E").SetValue(true));
+            laneclear.AddItem(new MenuItem("laneclear.Q.count", "[Q] Minion Count").SetValue(new Slider(1, 2, 0)));
+            laneclear.AddItem(new MenuItem("laneclear.E.count", "[E] Minion Count").SetValue(new Slider(3, 10, 0)));
+
+            laneclear.AddItem(new MenuItem("lanemana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
 
 
             jungleclear
@@ -183,7 +178,6 @@ namespace MagicalGirlLux
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawings.DrawEvent();
 
-            Obj_AI_Turret.OnAggro += Turretaggro;
             Obj_AI_Base.OnProcessSpellCast += TurretOnProcessSpellCast;
 
 
@@ -191,25 +185,23 @@ namespace MagicalGirlLux
 
         private static void TurretOnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!W.IsReady())
-                return;
+            try {
+                if (!W.IsReady())
+                    return;
 
-            if (!args.Target.IsMe || sender.IsAlly || sender.IsMinion)
+                if (!args.Target.IsMe || sender.IsAlly || sender.IsMinion || sender == null)
+                    return;
+
+
+                if (W.IsReady() && Config.Item("autow").GetValue<bool>())
+                    W.Cast(Game.CursorPos);
+            }
+            catch (Exception)
             {
-                return;
+                //will fix soonish
+            }
             }
 
-            if (W.IsReady() && Config.Item("autow").GetValue<bool>())
-                W.Cast(Game.CursorPos);
-        }
-
-        private static void Turretaggro(Obj_AI_Base sender, GameObjectAggroEventArgs args)
-        {
-            if (!W.IsReady())
-                return;
-            if (sender.Target.IsMe && W.IsReady() && Config.Item("autow").GetValue<bool>())
-                W.Cast(Game.CursorPos);
-        }
 
         public static float CalcDamage(Obj_AI_Base target)
         {
@@ -295,7 +287,7 @@ namespace MagicalGirlLux
         public static void GameObject_OnDelete(GameObject sender, EventArgs args)
         {
             //Lux E has detonated :S
-            if (sender.Name.Contains("Lux_Base_E") && sender.IsAlly)
+            if (sender.Name == "Lux_Base_E_tar_nova.troy")
             {
                 LuxEGameObject = null;
             }
@@ -304,7 +296,7 @@ namespace MagicalGirlLux
         public static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
             //Lux E spell position (detonation check/enemy check)
-            if (sender.Name.Contains("Lux_Base_E") && sender.IsAlly)
+            if (sender.Name == "Lux_Base_E_mis.troy")
             {
                 LuxEGameObject = sender;
             }
@@ -323,8 +315,7 @@ namespace MagicalGirlLux
             if (Config.Item("jg").GetValue<bool>())
             Drawing.DrawText(pos.X - 50, pos.Y + 50, System.Drawing.Color.Gold, "Junglesteal:");
 
-
-            if (Config.Item("jungleks").GetValue<KeyBind>().Active && Config.Item("jg").GetValue<bool>())
+           if (Config.Item("jungleks").GetValue<KeyBind>().Active && Config.Item("jg").GetValue<bool>())
             {
                 Drawing.DrawText(pos.X + 41, pos.Y + 50, System.Drawing.Color.LawnGreen, "On");
             }
@@ -673,32 +664,37 @@ namespace MagicalGirlLux
         private static void Laneclear()
         {
             var lanem = Config.Item("lanemana").GetValue<Slider>().Value;
-            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range + Q.Width);
-            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range + E.Width);
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
+            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
 
+            var eminions = Config.Item("laneclear.E.count").GetValue<Slider>().Value;
+            var qminions = Config.Item("laneclear.Q.count").GetValue<Slider>().Value;
 
-            var Qfarmpos = W.GetLineFarmLocation(allMinionsQ, Q.Width);
-            var Efarmpos = E.GetCircularFarmLocation(allMinionsE, E.Width);
-            if (Qfarmpos.MinionsHit >= 1 && Config.Item("laneQ").GetValue<bool>() && player.ManaPercent >= lanem)
+            var minions = MinionManager.GetMinions(E.Range, MinionTypes.All, MinionTeam.Enemy).Where(m => m.IsValid
+            && m.Distance(player) < E.Range).ToList();
+            var aaminions = MinionManager.GetMinions(E.Range, MinionTypes.All, MinionTeam.Enemy).Where(m => m.IsValid
+            && m.Distance(player) < Orbwalking.GetRealAutoAttackRange(player)).ToList();
+
+            var efarmpos = E.GetCircularFarmLocation(new List<Obj_AI_Base>(minions), E.Width);
+
+            if (efarmpos.MinionsHit >= eminions &&
+                E.IsReady() && Config.Item("laneE").GetValue<bool>())
+                E.Cast(efarmpos.Position);
+
+            var qfarmpos = Q.GetLineFarmLocation(new List<Obj_AI_Base>(minions), Q.Width);
+
+            if (qfarmpos.MinionsHit >= qminions &&
+                Q.IsReady() && Config.Item("laneQ").GetValue<bool>())
+                Q.Cast(qfarmpos.Position);
+
+            foreach (var minion in aaminions.Where(m => m.IsMinion && !m.IsDead
+            && m.HasBuff("luxilluminatingfraulein")))
             {
-                Q.Cast(Qfarmpos.Position);
-            }
-            foreach (var minion in allMinionsE.Where(a => a.HasBuff("luxilluminatingfraulein")))
-            {
-                var passivedmg = player.CalcDamage(minion, Damage.DamageType.Magical,
-                10 + (8 * player.Level) + 0.2 * player.FlatMagicDamageMod);
-                if (minion.Health < passivedmg && !player.IsWindingUp)
+                if (minion.IsValid)
                 {
-                    Orbwalker.ForceTarget(minion);
                     player.IssueOrder(GameObjectOrder.AutoAttack, minion);
                 }
             }
-            if (Efarmpos.MinionsHit >= 3 && allMinionsE.Count >= 2 && Config.Item("laneE").GetValue<bool>() &&
-                player.ManaPercent >= lanem)
-                E.Cast(Efarmpos.Position);
-
-            if (LuxEGameObject != null)
-                E.Cast();
         }
 
         private static void forceR()

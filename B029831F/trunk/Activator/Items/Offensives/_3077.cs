@@ -64,13 +64,16 @@ namespace Activator.Items.Offensives
 
         private void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
+            if (Player.ChampionName == "Riven")
+                return;
+
             if (!Menu.Item("use" + Name).GetValue<bool>() || !IsReady())
                 return;
 
             var hero = target as Obj_AI_Hero;
             if (hero.IsValidTarget(Range))
             {
-                if (!Parent.Item(Parent.Name + "useon" + hero.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + hero.NetworkId).GetValue<bool>())
                     return;
 
                 if (hero.Health / hero.MaxHealth * 100 <= Menu.Item("enemylowhp" + Name + "pct").GetValue<Slider>().Value)
@@ -87,6 +90,7 @@ namespace Activator.Items.Offensives
 
         public override void OnTick(EventArgs args)
         {
+
         }
     }
 }

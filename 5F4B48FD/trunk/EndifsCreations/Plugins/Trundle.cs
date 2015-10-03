@@ -38,17 +38,17 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Trundle.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Trundle.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Trundle.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Trundle.Misc.E", "E Interrupts").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Trundle.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -56,11 +56,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Trundle.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Trundle.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Trundle.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Trundle.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Trundle.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Trundle.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Trundle.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Trundle.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Trundle.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Trundle.Combo.Items").GetValue<bool>();
             if (UseR && R.IsReady() && Player.ServerPosition.CountEnemiesInRange(500) > 0 && Player.Spellbook.IsAutoAttacking)
             {
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToMagic(x));
@@ -179,7 +179,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Trundle.Combo.Q").GetValue<bool>() && Q.IsReady() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.Trundle.Combo.Q").GetValue<bool>() && Q.IsReady() && Orbwalking.InAutoAttackRange(target))
                     {
                         Q.Cast();
                     }
@@ -195,7 +195,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Trundle.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Trundle.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range)
                 {
@@ -207,7 +207,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Trundle.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Trundle.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

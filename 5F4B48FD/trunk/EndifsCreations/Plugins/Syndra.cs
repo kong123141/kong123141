@@ -42,7 +42,7 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Syndra.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Syndra.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Syndra.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -50,7 +50,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Syndra.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Syndra.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Syndra.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -58,10 +58,10 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E2.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Syndra.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Syndra.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Syndra.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Syndra.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Syndra.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Syndra.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Syndra.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Syndra.Combo.R").GetValue<bool>();
            
             if (Target.IsValidTarget())
             {
@@ -72,7 +72,7 @@ namespace EndifsCreations.Plugins
                     {
                         if (!Player.HasBuff("syndrawtooltip"))
                         {
-                            mySpellcast.CircularPrecise(Target, Q, HitChance.High);
+                            mySpellcast.CircularPrecise(Target, Q, HitChance.High, Q.Range, 75);
                         }
                     }
                     if (UseW && W.IsReady())
@@ -88,7 +88,7 @@ namespace EndifsCreations.Plugins
                         }
                         else if (myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                         {
-                            mySpellcast.LinearVector(Target.Position, W, Target.BoundingRadius);
+                            mySpellcast.PointVector(Target.Position, W, Target.BoundingRadius);
                         }
                     }
                     if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
@@ -96,7 +96,7 @@ namespace EndifsCreations.Plugins
                         var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Target.ServerPosition, E.Range), 50);
                         if (AllSpheres.Any(x => box.IsInside(x)))
                         {
-                            mySpellcast.LinearVector(box.End.To3D(), E, E2.Range);
+                            mySpellcast.PointVector(box.End.To3D(), E, E2.Range);
                         }
                     }
                     if (UseR && R.IsReady() && R.Instance.Ammo >= 5)
@@ -133,7 +133,7 @@ namespace EndifsCreations.Plugins
                     Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                     if (Target.IsValidTarget() && Q.IsReady())
                     {
-                        mySpellcast.CircularPrecise(Target, Q, HitChance.High);
+                        mySpellcast.CircularPrecise(Target, Q, HitChance.High, Q.Range, 75);
                     }
                     break;  
             }
@@ -165,15 +165,15 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Syndra.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Syndra.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Syndra.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Syndra.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Syndra.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Syndra.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
                 if (AllSpheres.Count > 0)
@@ -181,7 +181,7 @@ namespace EndifsCreations.Plugins
                     Render.Circle.DrawCircle(Player.Position, E2.Range, Color.Cyan);
                 }
             }
-            if (config.Item("EC.Syndra.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Syndra.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

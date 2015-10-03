@@ -108,6 +108,15 @@ namespace PRADA_Vayne.MyUtils
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
             MissileClient.OnCreate += MissileClient_OnCreate;
             Spellbook.OnStopCast += SpellbookOnStopCast;
+            //Obj_AI_Base.OnDoCast += OnDoCast;
+        }
+
+        private static void OnDoCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && args.SData.IsAutoAttack())
+            {
+                ResetAutoAttackTimer();
+            }
         }
 
         /// <summary>
@@ -246,7 +255,7 @@ namespace PRADA_Vayne.MyUtils
         /// </summary>
         public static bool CanAttack()
         {
-            return LeagueSharp.Common.Utils.GameTimeTickCount + Game.Ping / 2 + 25 >= LastAATick + Player.AttackDelay * 1000 && Attack;
+            return LeagueSharp.Common.Utils.GameTimeTickCount + Game.Ping / 2 + 25 >= LastAATick + Player.AttackDelay * 1000 + _random.Next(-10, 10) && Attack;
         }
 
         /// <summary>
@@ -293,20 +302,21 @@ namespace PRADA_Vayne.MyUtils
             bool useFixedDistance = true,
             bool randomizeMinDistance = true)
         {
-            if (LeagueSharp.Common.Utils.GameTimeTickCount - LastMoveCommandT < _delay && !overrideTimer)
+            if (LeagueSharp.Common.Utils.GameTimeTickCount - LastMoveCommandT < _delay + _random.Next(-10, 10) && !overrideTimer)
             {
                 return;
             }
 
             LastMoveCommandT = LeagueSharp.Common.Utils.GameTimeTickCount;
 
-            if (Player.ServerPosition.Distance(position, true) < holdAreaRadius * holdAreaRadius)
+            var playerPosition = Player.ServerPosition;
+
+            if (playerPosition.Distance(position, true) < holdAreaRadius*holdAreaRadius)
             {
-                if (Player.Path.Count() > 1)
+                if (Player.Path.Length > 0)
                 {
-                    Player.IssueOrder((GameObjectOrder)10, Player.ServerPosition);
-                    Player.IssueOrder(GameObjectOrder.HoldPosition, Player.ServerPosition);
-                    LastMoveCommandPosition = Player.ServerPosition;
+                    Player.IssueOrder(GameObjectOrder.Stop, playerPosition);
+                    LastMoveCommandPosition = playerPosition;
                 }
                 return;
             }
@@ -314,22 +324,18 @@ namespace PRADA_Vayne.MyUtils
             var point = position;
             if (useFixedDistance)
             {
-                point = Player.ServerPosition +
-                        (randomizeMinDistance ? (_random.NextFloat(0.6f, 1) + 0.2f) * _minDistance : _minDistance) *
-                        (position.To2D() - Player.ServerPosition.To2D()).Normalized().To3D();
+                point = playerPosition.Extend(
+                    position, (randomizeMinDistance ? (_random.NextFloat(0.6f, 1) + 0.2f)*_minDistance : _minDistance));
             }
             else
             {
                 if (randomizeMinDistance)
                 {
-                    point = Player.ServerPosition +
-                            (_random.NextFloat(0.6f, 1) + 0.2f) * _minDistance *
-                            (position.To2D() - Player.ServerPosition.To2D()).Normalized().To3D();
+                    point = playerPosition.Extend(position, (_random.NextFloat(0.6f, 1) + 0.2f)*_minDistance);
                 }
-                else if (Player.ServerPosition.Distance(position) > _minDistance)
+                else if (playerPosition.Distance(position) > _minDistance)
                 {
-                    point = Player.ServerPosition +
-                            _minDistance * (position.To2D() - Player.ServerPosition.To2D()).Normalized().To3D();
+                    point = playerPosition.Extend(position, _minDistance);
                 }
             }
 
@@ -360,20 +366,25 @@ namespace PRADA_Vayne.MyUtils
                         {
                             LastAATick = LeagueSharp.Common.Utils.GameTimeTickCount + Game.Ping + 100 - (int)(ObjectManager.Player.AttackCastDelay * 1000f);
                             _missileLaunched = false;
-                            
+
                             var d = GetRealAutoAttackRange(target) - 65;
-                            if (Player.Distance(target, true) > d * d)
+                            if (Player.Distance(target, true) > d * d && !Player.IsMelee)
                             {
                                 LastAATick = LeagueSharp.Common.Utils.GameTimeTickCount + Game.Ping + 400 - (int)(ObjectManager.Player.AttackCastDelay * 1000f);
                             }
                         }
-                        Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+
+                        if (!Player.IssueOrder(GameObjectOrder.AttackUnit, target))
+                        {
+                            //ResetAutoAttackTimer();
+                        }
+
                         _lastTarget = target;
                         return;
                     }
                 }
 
-                if (CanMove(extraWindup))
+                if ((!CanAttack() || !target.IsValidTarget()) && CanMove(extraWindup))
                 {
                     MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance);
                 }
@@ -406,6 +417,7 @@ namespace PRADA_Vayne.MyUtils
             if (missile != null && missile.SpellCaster.IsMe && IsAutoAttack(missile.SData.Name))
             {
                 _missileLaunched = true;
+                FireAfterAttack(missile.SpellCaster, missile.Target as AttackableUnit);
             }
         }
 
@@ -415,9 +427,13 @@ namespace PRADA_Vayne.MyUtils
             {
                 var spellName = Spell.SData.Name;
 
-                if (IsAutoAttackReset(spellName) && unit.IsMe)
+                if (spellName == "vaynetumble" && unit.IsMe)
                 {
-                    Utility.DelayAction.Add(250, ResetAutoAttackTimer);
+                    Utility.DelayAction.Add(100, () =>
+                    {
+                        ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, _lastTarget);
+                        LastAATick = LeagueSharp.Common.Utils.GameTimeTickCount;
+                    });
                 }
 
                 if (!IsAutoAttack(spellName))
@@ -440,9 +456,11 @@ namespace PRADA_Vayne.MyUtils
                             _lastTarget = target;
                         }
 
-                        //Trigger it for ranged until the missiles catch normal attacks again!
-                        Utility.DelayAction.Add(
-                            (int)(unit.AttackCastDelay * 1000 + 50), () => FireAfterAttack(unit, _lastTarget));
+                        if (unit.IsMelee)
+                        {
+                            Utility.DelayAction.Add(
+                                (int)(unit.AttackCastDelay * 1000 + 40), () => FireAfterAttack(unit, _lastTarget));
+                        }
                     }
                 }
 
@@ -500,7 +518,10 @@ namespace PRADA_Vayne.MyUtils
                         .SetValue(new Circle(true, Color.Gold)));
                 drawings.AddItem(
                     new MenuItem("AACircle2", "Enemy AA circle")
-                        .SetValue(new Circle(false, Color.White)));
+                        .SetValue(new Circle(false, Color.Red)));
+                drawings.AddItem(
+                    new MenuItem("AACircle3", "Target AA circle")
+                        .SetValue(new Circle(true, Color.Gold)));
                 drawings.AddItem(
                     new MenuItem("HoldZone", "HoldZone")
                         .SetValue(new Circle(false, Color.DarkRed)));
@@ -511,18 +532,6 @@ namespace PRADA_Vayne.MyUtils
                 misc.AddItem(
                     new MenuItem("HoldPosRadius", "Hold Position Radius").SetValue(new Slider(50, 0, 250)));
                 misc.AddItem(new MenuItem("PriorizeFarm", "Priorize farm over harass").SetShared().SetValue(true));
-                misc.AddItem(new MenuItem("FreezeHealth", "LaneFreeze Damage %").SetShared().SetValue(new Slider(50, 50)));
-                misc.AddItem(new MenuItem("PermaShow", "PermaShow").SetShared().SetValue(true)).ValueChanged += (s, args) =>
-                {
-                    if (args.GetNewValue<bool>())
-                    {
-                        _config.Item("Freeze").Permashow(true, "Freeze");
-                    }
-                    else
-                    {
-                        _config.Item("Freeze").Permashow(false);
-                    }
-                };
                 _config.AddSubMenu(misc);
 
                 /* Missile check */
@@ -531,9 +540,9 @@ namespace PRADA_Vayne.MyUtils
                 /* Delay sliders */
                 _config.AddItem(
                     new MenuItem("ExtraWindup", "Extra windup time").SetValue(new Slider(123, 0, 200)));
-                _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(0, 0, 200)));
+                _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(25, 0, 200)));
                 _config.AddItem(
-                    new MenuItem("MovementDelay", "Movement delay").SetValue(new Slider(100, 0, 250)))
+                    new MenuItem("MovementDelay", "Movement delay").SetValue(new Slider(80, 0, 250)))
                     .ValueChanged += (sender, args) => SetMovementDelay(args.GetNewValue<Slider>().Value);
 
 
@@ -548,11 +557,6 @@ namespace PRADA_Vayne.MyUtils
 
                 _config.AddItem(
                     new MenuItem("Orbwalk", "Combo").SetShared().SetValue(new KeyBind(32, KeyBindType.Press)));
-
-                _config.AddItem(
-                   new MenuItem("Freeze", "Lane Freeze (Toggle)").SetShared().SetValue(new KeyBind('H', KeyBindType.Toggle)));
-
-                _config.Item("Freeze").Permashow(_config.Item("PermaShow").GetValue<bool>(), "Freeze");
 
                 _delay = _config.Item("MovementDelay").GetValue<Slider>().Value;
 
@@ -675,7 +679,6 @@ namespace PRADA_Vayne.MyUtils
                 if (ActiveMode == OrbwalkingMode.LaneClear || ActiveMode == OrbwalkingMode.Mixed ||
                     ActiveMode == OrbwalkingMode.LastHit)
                 {
-                    var FreezeActive = _config.Item("Freeze").GetValue<KeyBind>().Active && (ActiveMode != OrbwalkingMode.LaneClear);
                     var MinionList =
                         ObjectManager.Get<Obj_AI_Minion>()
                             .Where(
@@ -687,15 +690,9 @@ namespace PRADA_Vayne.MyUtils
 
                     foreach (var minion in MinionList)
                     {
-                        var FreezeDamage = Player.GetAutoAttackDamage(minion, false) * (_config.Item("FreezeHealth").GetValue<Slider>().Value / 100f);
                         var t = (int)(Player.AttackCastDelay * 1000) - 100 + Game.Ping / 2 +
-                                1000 * (int)Player.Distance(minion) / (int)GetMyProjectileSpeed();
+                                   1000 * (int)Player.Distance(minion) / (int)GetMyProjectileSpeed();
                         var predHealth = HealthPrediction.GetHealthPrediction(minion, t, FarmDelay);
-
-                        if (FreezeActive && predHealth.Equals(minion.Health))
-                        {
-                            continue;
-                        }
 
                         if (minion.Team != GameObjectTeam.Neutral && MinionManager.IsMinion(minion, true))
                         {
@@ -704,7 +701,7 @@ namespace PRADA_Vayne.MyUtils
                                 FireOnNonKillableMinion(minion);
                             }
 
-                            if (predHealth > 0 && predHealth <= (FreezeActive ? FreezeDamage : Player.GetAutoAttackDamage(minion, true)))
+                            if (predHealth > 0 && predHealth <= (Player.GetAutoAttackDamage(minion, true)))
                             {
                                 return minion;
                             }
@@ -861,14 +858,24 @@ namespace PRADA_Vayne.MyUtils
                     Program.DrawingsMenu.Item("enemycounter").Permashow(false);
                     return;
                 }
+                if (!_config.Item("AACircle2").GetValue<Circle>().Active 
+                    && _config.Item("AACircle3").GetValue<Circle>().Active)
+                {
+                    var myTarget = GetTarget();
+                    if (myTarget != null)
+                    {
+                        Render.Circle.DrawCircle(myTarget.Position,  myTarget.IsValid<Obj_AI_Hero>() ? GetRealAutoAttackRange(myTarget) : 75,
+                            _config.Item("AACircle3").GetValue<Circle>().Color);
+                    }
+                }
 
                 if (_config.Item("AACircle").GetValue<Circle>().Active)
                 {
                     Render.Circle.DrawCircle(
                         Player.Position, GetRealAutoAttackRange(null) + 65,
                         _config.Item("AACircle").GetValue<Circle>().Color);
-                }
-
+                } 
+                
                 if (_config.Item("AACircle2").GetValue<Circle>().Active)
                 {
                     foreach (var target in

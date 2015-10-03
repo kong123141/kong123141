@@ -37,18 +37,18 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Malphite.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Malphite.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Malphite.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Malphite.Misc.Q", "Q Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Malphite.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Malphite.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -56,15 +56,12 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Malphite.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Malphite.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Malphite.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Malphite.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Malphite.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Malphite.Combo.Items").GetValue<bool>();
             if (UseE && E.IsReady())
             {
-                if (Player.CountEnemiesInRange(300) > 0)
-                {
-                    E.Cast();
-                }
+                mySpellcast.PointBlank(null, E, 300);
             }
             if (Target.IsValidTarget())
             {
@@ -114,7 +111,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Malphite.Combo.W").GetValue<bool>() && W.IsReady() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.Malphite.Combo.W").GetValue<bool>() && W.IsReady() && Orbwalking.InAutoAttackRange(target))
                     {
                         W.Cast();
                     }
@@ -123,7 +120,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Malphite.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Malphite.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -135,11 +132,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Malphite.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Malphite.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Malphite.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Malphite.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var tomouse = Player.ServerPosition.Extend(Game.CursorPos, Vector3.Distance(Player.ServerPosition, Game.CursorPos));
                 var tomax = Player.ServerPosition.Extend(Game.CursorPos, R.Range);

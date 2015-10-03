@@ -28,6 +28,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SFXChallenger.Abstracts;
+using SFXChallenger.Args;
 using SFXChallenger.Enumerations;
 using SFXChallenger.Helpers;
 using SFXChallenger.Library;
@@ -45,6 +46,8 @@ namespace SFXChallenger.Champions
 {
     internal class Graves : Champion
     {
+        private UltimateManager _ultimate;
+
         protected override ItemFlags ItemFlags
         {
             get { return ItemFlags.Offensive | ItemFlags.Defensive | ItemFlags.Flee; }
@@ -59,12 +62,46 @@ namespace SFXChallenger.Champions
 
         protected override void OnLoad()
         {
-            AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
+            GapcloserManager.OnGapcloser += OnEnemyGapcloser;
+        }
+
+        protected override void SetupSpells()
+        {
+            Q = new Spell(SpellSlot.Q, 850f);
+            Q.SetSkillshot(0.25f, 15f * (float) Math.PI / 180, 2000f, false, SkillshotType.SkillshotCone);
+
+            W = new Spell(SpellSlot.W, 900f, DamageType.Magical);
+            W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
+
+            E = new Spell(SpellSlot.E, 425f);
+
+            R = new Spell(SpellSlot.R, 1100f);
+            R.SetSkillshot(0.25f, 110f, 2100f, false, SkillshotType.SkillshotLine);
+
+            R2 = new Spell(SpellSlot.R, 750f);
+            R2.SetSkillshot(0f, (float) (60 * Math.PI / 180), 1500f, false, SkillshotType.SkillshotCone);
+
+            _ultimate = new UltimateManager
+            {
+                Combo = true,
+                Assisted = true,
+                Auto = true,
+                Flash = false,
+                Required = true,
+                Force = true,
+                Gapcloser = false,
+                GapcloserDelay = false,
+                Interrupt = false,
+                InterruptDelay = false,
+                Spells = Spells,
+                DamageCalculation =
+                    hero => CalcComboDamage(hero, Menu.Item(Menu.Name + ".combo.q").GetValue<bool>(), true)
+            };
         }
 
         protected override void AddToMenu()
         {
-            UltimateManager.AddToMenu(Menu, true, false, false, false, false, false, true, true, true);
+            _ultimate.AddToMenu(Menu);
 
             var comboMenu = Menu.AddSubMenu(new Menu("Combo", Menu.Name + ".combo"));
             HitchanceManager.AddToMenu(
@@ -83,11 +120,26 @@ namespace SFXChallenger.Champions
             HitchanceManager.AddToMenu(
                 harassMenu.AddSubMenu(new Menu("Hitchance", harassMenu.Name + ".hitchance")), "harass",
                 new Dictionary<string, HitChance> { { "Q", HitChance.High } });
-            ManaManager.AddToMenu(harassMenu, "harass", ManaCheckType.Minimum, ManaValueType.Percent);
+            ResourceManager.AddToMenu(
+                harassMenu,
+                new ResourceManagerArgs(
+                    "harass", ResourceType.Mana, ResourceValueType.Percent, ResourceCheckType.Minimum)
+                {
+                    DefaultValue = 30
+                });
             harassMenu.AddItem(new MenuItem(harassMenu.Name + ".q", "Use Q").SetValue(true));
 
             var laneclearMenu = Menu.AddSubMenu(new Menu("Lane Clear", Menu.Name + ".lane-clear"));
-            ManaManager.AddToMenu(laneclearMenu, "lane-clear", ManaCheckType.Minimum, ManaValueType.Percent);
+            ResourceManager.AddToMenu(
+                laneclearMenu,
+                new ResourceManagerArgs(
+                    "lane-clear", ResourceType.Mana, ResourceValueType.Percent, ResourceCheckType.Minimum)
+                {
+                    Advanced = true,
+                    MaxValue = 101,
+                    LevelRanges = new SortedList<int, int> { { 1, 6 }, { 6, 12 }, { 12, 18 } },
+                    DefaultValues = new List<int> { 50, 30, 30 }
+                });
             laneclearMenu.AddItem(new MenuItem(laneclearMenu.Name + ".q", "Use Q").SetValue(true));
             laneclearMenu.AddItem(new MenuItem(laneclearMenu.Name + ".q-min", "Q Min.").SetValue(new Slider(3, 1, 5)));
 
@@ -99,12 +151,30 @@ namespace SFXChallenger.Champions
 
             var miscMenu = Menu.AddSubMenu(new Menu("Misc", Menu.Name + ".miscellaneous"));
 
-            HeroListManager.AddToMenu(
-                miscMenu.AddSubMenu(new Menu("W Gapcloser", miscMenu.Name + "w-gapcloser")), "w-gapcloser", false, false,
-                true, false, false, false);
-            HeroListManager.AddToMenu(
-                miscMenu.AddSubMenu(new Menu("E Gapcloser", miscMenu.Name + "e-gapcloser")), "e-gapcloser", false, false,
-                true, false);
+            var wGapcloserMenu = miscMenu.AddSubMenu(new Menu("W Gapcloser", miscMenu.Name + "w-gapcloser"));
+            GapcloserManager.AddToMenu(
+                wGapcloserMenu,
+                new HeroListManagerArgs("w-gapcloser")
+                {
+                    IsWhitelist = false,
+                    Allies = false,
+                    Enemies = true,
+                    DefaultValue = false,
+                    Enabled = false
+                }, true);
+            BestTargetOnlyManager.AddToMenu(wGapcloserMenu, "w-gapcloser");
+
+            var eGapcloserMenu = miscMenu.AddSubMenu(new Menu("E Gapcloser", miscMenu.Name + "e-gapcloser"));
+            GapcloserManager.AddToMenu(
+                eGapcloserMenu,
+                new HeroListManagerArgs("e-gapcloser")
+                {
+                    IsWhitelist = false,
+                    Allies = false,
+                    Enemies = true,
+                    DefaultValue = false
+                }, true);
+            BestTargetOnlyManager.AddToMenu(eGapcloserMenu, "e-gapcloser");
 
             IndicatorManager.AddToMenu(DrawingManager.Menu, true);
             IndicatorManager.Add(Q);
@@ -113,74 +183,46 @@ namespace SFXChallenger.Champions
             IndicatorManager.Finale();
         }
 
-        protected override void SetupSpells()
-        {
-            Q = new Spell(SpellSlot.Q, 850f);
-            Q.SetSkillshot(0.25f, 15f * (float) Math.PI / 180, 2000f, false, SkillshotType.SkillshotCone);
-
-            W = new Spell(SpellSlot.W, 900f, DamageType.Magical);
-            W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
-
-            E = new Spell(SpellSlot.E, 425f);
-
-            R = new Spell(SpellSlot.R, 1100f);
-            R.SetSkillshot(0.25f, 110f, 2100f, false, SkillshotType.SkillshotLine);
-
-            R2 = new Spell(SpellSlot.R, 750f);
-            R2.SetSkillshot(0f, (float) (60 * Math.PI / 180), 1500f, false, SkillshotType.SkillshotCone);
-        }
-
         protected override void OnPreUpdate() {}
 
         protected override void OnPostUpdate()
         {
-            if (UltimateManager.Assisted() && R.IsReady())
+            if (_ultimate.IsActive(UltimateModeType.Assisted) && R.IsReady())
             {
-                if (Menu.Item(Menu.Name + ".ultimate.assisted.move-cursor").GetValue<bool>())
+                if (_ultimate.ShouldMove(UltimateModeType.Assisted))
                 {
                     Orbwalking.MoveTo(Game.CursorPos, Orbwalker.HoldAreaRadius);
                 }
 
-                if (
-                    !RLogic(
-                        TargetSelector.GetTarget(R),
-                        Menu.Item(Menu.Name + ".ultimate.assisted.min").GetValue<Slider>().Value,
-                        Menu.Item(Menu.Name + ".combo.q").GetValue<bool>() && Q.IsReady()))
+                if (!RLogic(UltimateModeType.Assisted, TargetSelector.GetTarget(R)))
                 {
-                    RLogicSingle(Menu.Item(Menu.Name + ".combo.q").GetValue<bool>() && Q.IsReady());
+                    RLogicSingle(UltimateModeType.Assisted);
                 }
             }
 
-            if (UltimateManager.Auto() && R.IsReady())
+            if (_ultimate.IsActive(UltimateModeType.Auto) && R.IsReady())
             {
-                if (
-                    !RLogic(
-                        TargetSelector.GetTarget(R),
-                        Menu.Item(Menu.Name + ".ultimate.auto.min").GetValue<Slider>().Value,
-                        Menu.Item(Menu.Name + ".combo.q").GetValue<bool>() && Q.IsReady(), UltimateModeType.Auto))
+                if (!RLogic(UltimateModeType.Auto, TargetSelector.GetTarget(R)))
                 {
-                    RLogicSingle(Menu.Item(Menu.Name + ".combo.q").GetValue<bool>() && Q.IsReady());
+                    RLogicSingle(UltimateModeType.Auto);
                 }
             }
         }
 
-        private void OnEnemyGapcloser(ActiveGapcloser args)
+        private void OnEnemyGapcloser(object sender, GapcloserManagerArgs args)
         {
             try
             {
-                if (!args.Sender.IsEnemy)
+                if (args.UniqueId == "w-gapcloser" && W.IsReady() &&
+                    BestTargetOnlyManager.Check("w-gapcloser", W, args.Hero))
                 {
-                    return;
-                }
-
-                if (HeroListManager.Check("w-gapcloser", args.Sender))
-                {
-                    if (args.End.Distance(Player.Position) < W.Range)
+                    if (args.End.Distance(Player.Position) <= W.Range)
                     {
                         W.Cast(args.End);
                     }
                 }
-                if (HeroListManager.Check("e-gapcloser", args.Sender))
+                if (args.UniqueId == "e-gapcloser" && E.IsReady() &&
+                    BestTargetOnlyManager.Check("e-gapcloser", E, args.Hero))
                 {
                     E.Cast(args.End.Extend(Player.Position, args.End.Distance(Player.Position) + E.Range));
                 }
@@ -196,19 +238,17 @@ namespace SFXChallenger.Champions
             var useQ = Menu.Item(Menu.Name + ".combo.q").GetValue<bool>() && Q.IsReady();
             var useW = Menu.Item(Menu.Name + ".combo.w").GetValue<bool>() && W.IsReady();
             var useE = Menu.Item(Menu.Name + ".combo.e").GetValue<bool>() && E.IsReady();
-            var useR = UltimateManager.Combo() && R.IsReady();
+            var useR = _ultimate.IsActive(UltimateModeType.Combo) && R.IsReady();
 
-            if (useQ)
+            if (useR)
             {
-                Casting.SkillShot(Q, Q.GetHitChance("combo"));
-            }
-            if (useW)
-            {
-                var target = TargetSelector.GetTarget(W);
-                var best = CPrediction.Circle(W, target, W.GetHitChance("combo"));
-                if (best.TotalHits > 0 && !best.CastPosition.Equals(Vector3.Zero))
+                var target = TargetSelector.GetTarget(R.Range + R2.Range, R.DamageType);
+                if (target != null)
                 {
-                    W.Cast(best.CastPosition);
+                    if (!RLogic(UltimateModeType.Combo, target))
+                    {
+                        RLogicSingle(UltimateModeType.Combo);
+                    }
                 }
             }
             if (useE)
@@ -223,33 +263,34 @@ namespace SFXChallenger.Champions
                     }
                 }
             }
-            if (useR)
+            if (useQ)
             {
-                var target = TargetSelector.GetTarget(R);
-                if (target != null && Orbwalking.InAutoAttackRange(target))
+                Casting.SkillShot(Q, Q.GetHitChance("combo"));
+            }
+            if (useW)
+            {
+                var target = TargetSelector.GetTarget(W);
+                var best = CPrediction.Circle(W, target, W.GetHitChance("combo"));
+                if (best.TotalHits > 0 && !best.CastPosition.Equals(Vector3.Zero))
                 {
-                    if (!RLogic(target, Menu.Item(Menu.Name + ".ultimate.combo.min").GetValue<Slider>().Value, useQ))
-                    {
-                        if (Menu.Item(Menu.Name + ".ultimate.combo.single").GetValue<bool>())
-                        {
-                            RLogicSingle(useQ);
-                        }
-                    }
+                    W.Cast(best.CastPosition);
                 }
             }
         }
 
-        private bool RLogic(Obj_AI_Hero target, int min, bool q, UltimateModeType mode = UltimateModeType.Combo)
+        private bool RLogic(UltimateModeType mode, Obj_AI_Hero target)
         {
             try
             {
-                var hits = GetRHits(target);
-                if (UltimateManager.Check(mode, min, hits.Item2, hero => CalcComboDamage(hero, q, true)))
+                if (_ultimate.IsActive(mode))
                 {
-                    R.Cast(hits.Item3);
-                    return true;
+                    var hits = GetRHits(target);
+                    if (_ultimate.Check(mode, hits.Item2))
+                    {
+                        R.Cast(hits.Item3);
+                        return true;
+                    }
                 }
-                return false;
             }
             catch (Exception ex)
             {
@@ -258,16 +299,18 @@ namespace SFXChallenger.Champions
             return false;
         }
 
-        private void RLogicSingle(bool q)
+        private void RLogicSingle(UltimateModeType mode)
         {
             try
             {
-                foreach (var t in GameObjects.EnemyHeroes)
+                if (_ultimate.ShouldSingle(mode))
                 {
-                    if (UltimateManager.CheckSingle(t, CalcComboDamage(t, q, true)))
+                    foreach (var target in GameObjects.EnemyHeroes.Where(t => _ultimate.CheckSingle(mode, t)))
                     {
-                        if (RLogic(t, 1, q))
+                        var hits = GetRHits(target);
+                        if (hits.Item1 > 0)
                         {
+                            R.Cast(hits.Item3);
                             break;
                         }
                     }
@@ -287,16 +330,32 @@ namespace SFXChallenger.Champions
                 {
                     return 0;
                 }
-                float damage = 0;
-                if (q && (Q.IsReady() || Q.Instance.CooldownExpires - Game.Time <= 1))
+
+                var damage = 0f;
+                var totalMana = 0f;
+                var manaMulti = _ultimate.DamagePercent / 100f;
+
+                if (r && R.IsReady() && R.IsInRange(target, R.Range + R2.Range))
                 {
-                    damage += Q.GetDamage(target);
+                    var rMana = R.ManaCost * manaMulti;
+                    if (totalMana + rMana <= Player.Mana)
+                    {
+                        totalMana += rMana;
+                        damage += R.GetDamage(target);
+                    }
                 }
-                if (r && R.IsReady())
+                if (q && Q.IsReady() && Q.IsInRange(target))
                 {
-                    damage += R.GetDamage(target);
+                    var qMana = Q.ManaCost * manaMulti;
+                    if (totalMana + qMana <= Player.Mana)
+                    {
+                        damage += Q.GetDamage(target);
+                    }
                 }
-                damage += 3 * (float) Player.GetAutoAttackDamage(target, true);
+                if (target.Distance(Player) <= Orbwalking.GetRealAutoAttackRange(target) * 0.85f)
+                {
+                    damage += 2 * (float) Player.GetAutoAttackDamage(target, true);
+                }
                 damage += ItemManager.CalculateComboDamage(target);
                 damage += SummonerManager.CalculateComboDamage(target);
                 return damage;
@@ -341,7 +400,7 @@ namespace SFXChallenger.Champions
 
         protected override void Harass()
         {
-            if (!ManaManager.Check("harass"))
+            if (!ResourceManager.Check("harass"))
             {
                 return;
             }
@@ -354,7 +413,7 @@ namespace SFXChallenger.Champions
 
         protected override void LaneClear()
         {
-            if (!ManaManager.Check("lane-clear"))
+            if (!ResourceManager.Check("lane-clear"))
             {
                 return;
             }

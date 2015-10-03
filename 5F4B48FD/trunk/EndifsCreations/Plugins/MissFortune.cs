@@ -42,14 +42,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.MissFortune.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.MissFortune.Combo.E", "Use E").SetValue(true));
                 //combomenu.AddItem(new MenuItem("EC.MissFortune.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.MissFortune.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.MissFortune.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.MissFortune.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -57,8 +57,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.MissFortune.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.MissFortune.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.MissFortune.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.MissFortune.Combo.E").GetValue<bool>();
 
             if (Target.IsValidTarget())
             {
@@ -71,7 +71,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, E, HitChance.High);
+                        mySpellcast.CircularAoe(Target, E, HitChance.High, E.Range, 100);
                     } 
                 }
                 catch { }
@@ -128,17 +128,11 @@ namespace EndifsCreations.Plugins
                 {
                     LastSpell = myUtility.TickCount;
                 }
-                /*
-                if (spell.SData.Name.ToLower() == "missfortunebullettime")
-                {
-                    LastR = myUtility.TickCount;
-                    mySpellcast.Pause(2000 + Game.Ping);
-                }*/
             }
         }
         protected override void OnBeforeAttack(myOrbwalker.BeforeAttackEventArgs args)
         {
-            if (Player.IsChannelingImportantSpell() || myUtility.TickCount - LastR <= 0.25f) 
+            if (Player.IsChannelingImportantSpell() || myUtility.TickCount - LastR <= 0.5f) 
             {
                 args.Process = false;
             }
@@ -146,25 +140,25 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.MissFortune.Combo.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.MissFortune.Combo.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }
                 }
             }
-        }
+        }        
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.MissFortune.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.MissFortune.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.MissFortune.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.MissFortune.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.MissFortune.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.MissFortune.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));

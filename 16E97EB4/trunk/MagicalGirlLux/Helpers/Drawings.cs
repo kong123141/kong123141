@@ -12,10 +12,25 @@ namespace MagicalGirlLux.Helpers
         public static void DrawEvent()
         {
             Drawing.OnDraw += DamageIndicator;
-            Drawing.OnDraw += HuDisplay;
             Drawing.OnDraw += Indicator;
             Drawing.OnEndScene += MiniMapDraw;
+            Drawing.OnDraw += Eobject;
         }
+
+        private static void Eobject(EventArgs args)
+        {
+            if (LuxEGameObject != null && Config.Item("LuxE.Indicator").GetValue<bool>())
+            {
+                if (LuxEGameObject == null) return;
+                var pos1 = Drawing.WorldToScreen(player.Position);
+                var pos2 = Drawing.WorldToScreen(LuxEGameObject.Position);
+
+
+                Drawing.DrawLine(pos1, pos2, 1, System.Drawing.Color.LightBlue);
+                Drawing.DrawCircle(LuxEGameObject.Position, 100, System.Drawing.Color.Gray);
+            }
+        }
+
         static void MiniMapDraw (EventArgs args)
         {
             bool drawMinimapR = Config.Item("drawMinimapR").GetValue<bool>();
@@ -59,42 +74,7 @@ namespace MagicalGirlLux.Helpers
                     }
                 }
             }
-        
-
-
-        public static void HuDisplay(EventArgs args)
-        {
-            if (Config.Item("Draw_Disabled").GetValue<bool>())
-                return;
-
-            if (Config.Item("HUD").GetValue<bool>())
-            {
-                var moveY = Config.Item("sliderY").GetValue<Slider>().Value*10;
-                var moveX = Config.Item("sliderX").GetValue<Slider>().Value*10;
-                    
-                //if you see this, you might think I'm crazy. You're probably right. 
-                if (Config.Item("HUD").GetValue<bool>())
-                    Drawing.DrawText(Drawing.Width - moveY - 190 + 400, Drawing.Height - moveX - 296 + 400, System.Drawing.Color.Yellow, "Minions Killed: " + player.MinionsKilled);
-
-                if (Config.Item("HUD").GetValue<bool>())
-                    Drawing.DrawText(Drawing.Width - moveY - 190 + 400, Drawing.Height - moveX - 278 + 400, System.Drawing.Color.Yellow, "Total Kills: " + player.ChampionsKilled);
-
-                if (Config.Item("HUD").GetValue<bool>())
-                    Drawing.DrawText(Drawing.Width - moveY - 190 + 400, Drawing.Height - moveX - 336 + 400, System.Drawing.Color.Pink, "     [Magical Girl Lux]");
-
-                if (Config.Item("HUD").GetValue<bool>())
-                    Drawing.DrawText(Drawing.Width - moveY - 190 + 400, Drawing.Height - moveX - 260 + 400, System.Drawing.Color.Yellow, "Total Gold: " + player.GoldTotal.ToString("#.##"));
-
-
-                if (Config.Item("SmartKS").GetValue<bool>())
-                    Drawing.DrawText(Drawing.Width - moveY - 190 + 400, Drawing.Height - moveX - 314 + 400, System.Drawing.Color.Yellow,
-                        "Smart Killsteal: On");
-                else
-                    Drawing.DrawText(Drawing.Width - moveY - 190 + 40, Drawing.Height - moveX - 314 + 400, System.Drawing.Color.Tomato,
-                        "Smart Killsteal: Off");
-            }
-
-        }
+       
 
         public static void DamageIndicator(EventArgs args)
         {

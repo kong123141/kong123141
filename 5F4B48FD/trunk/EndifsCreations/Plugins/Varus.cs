@@ -43,23 +43,23 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Varus.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Varus.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Varus.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
                 laneclearmenu.AddItem(new MenuItem("EC.Varus.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
                 laneclearmenu.AddItem(new MenuItem("EC.Varus.Farm.Q", "Use Q").SetValue(true));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Varus.Muramana", "Muramana").SetValue(new Slider(50)));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Varus.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -67,9 +67,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(1600, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Varus.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Varus.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Varus.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Varus.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Varus.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Varus.Combo.Items").GetValue<bool>();
             if (UseQ && Q.IsReady() && Q.IsCharging)
             {
                 if (Target != null && Target.IsValidTarget())
@@ -132,7 +132,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseE && E.IsReady())
                     {
-                        mySpellcast.CircularAoe(Target, E, HitChance.High);
+                        mySpellcast.CircularAoe(Target, E, HitChance.High, E.Range, 250);
                     }
                 }
                 catch { }
@@ -175,7 +175,7 @@ namespace EndifsCreations.Plugins
             {
                 case myOrbwalker.OrbwalkingMode.None:
                     myUtility.Reset();
-                    if (Player.HasBuff("Muramana") || (myUtility.PlayerManaPercentage < config.Item("EC.Varus.Muramana").GetValue<Slider>().Value))
+                    if (Player.HasBuff("Muramana") || (myUtility.PlayerManaPercentage < Root.Item("EC.Varus.Muramana").GetValue<Slider>().Value))
                     {
                         if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                     }
@@ -184,7 +184,7 @@ namespace EndifsCreations.Plugins
                     Combo();
                     break;
                 case myOrbwalker.OrbwalkingMode.LaneClear:
-                    if (config.Item("EC.Varus.Farm.Q").GetValue<bool>())
+                    if (Root.Item("EC.Varus.Farm.Q").GetValue<bool>())
                     {
                         var minion = MinionManager.GetMinions(Player.ServerPosition, Q.ChargedMaxRange);
                         if (minion.Count() >= 3)
@@ -193,10 +193,10 @@ namespace EndifsCreations.Plugins
                             {
                                 if (Q.Range >= Q.ChargedMaxRange)
                                 {
-                                    myFarmManager.LaneLinear(Q, Q.Range, minion.Count() >= 6);
+                                    myFarmManager.LaneLinear(Q, Q.Range, true);
                                 }
                             }
-                            if (myUtility.EnoughMana(config.Item("EC.Varus.Farm.ManaPercent").GetValue<Slider>().Value))
+                            if (myUtility.EnoughMana(Root.Item("EC.Varus.Farm.ManaPercent").GetValue<Slider>().Value))
                             {
                                 Q.StartCharging();
                             }
@@ -216,7 +216,7 @@ namespace EndifsCreations.Plugins
             {
                 if (args.Slot == SpellSlot.R)
                 {
-                    if (ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > config.Item("EC.Varus.Muramana").GetValue<Slider>().Value)
+                    if (ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > Root.Item("EC.Varus.Muramana").GetValue<Slider>().Value)
                     {
                         if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                     }                    
@@ -229,7 +229,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > config.Item("EC.Varus.Muramana").GetValue<Slider>().Value)
+                    if (ItemData.Muramana.GetItem().IsReady() && !Player.HasBuff("Muramana") && myUtility.PlayerManaPercentage > Root.Item("EC.Varus.Muramana").GetValue<Slider>().Value)
                     {
                         if (Items.HasItem(3042) && Items.CanUseItem(3042)) Items.UseItem(3042);
                     }
@@ -239,7 +239,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Varus.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Varus.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 if (Player.HasBuff("Muramana"))
                 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using Activator.Summoners.Hero;
+using Activator.Summoners;
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -9,7 +9,7 @@ namespace Activator.Base
 {
     class Drawings
     {
-        public static void Load()
+        public static void Init()
         {
             Drawing.OnDraw += args =>
             {

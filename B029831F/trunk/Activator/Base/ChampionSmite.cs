@@ -1,5 +1,15 @@
-using System.Collections.Generic;
+#region Copyright © 2015 Kurisu Solutions
+// All rights are reserved. Transmission or reproduction in part or whole,
+// any form or by any means, mechanical, electronical or otherwise, is prohibited
+// without the prior written consent of the copyright owner.
+// 
+// Document:	Base/ChampionSmite.cs
+// Date:		22/09/2015
+// Author:		Robin Kurisu
+#endregion
+
 using LeagueSharp;
+using System.Collections.Generic;
 
 namespace Activator.Base
 {

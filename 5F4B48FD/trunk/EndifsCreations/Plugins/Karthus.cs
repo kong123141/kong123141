@@ -41,12 +41,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Karthus.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Karthus.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Karthus.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Karthus.Misc.W", "W Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -54,7 +54,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Karthus.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Karthus.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Karthus.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -62,21 +62,14 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Karthus.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Karthus.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Karthus.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Karthus.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Karthus.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Karthus.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Karthus.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Karthus.Combo.R").GetValue<bool>();
 
             if (UseE && myUtility.TickCount - LastSpell > (myHumazier.SpellDelay * 2))
             {
-                if (E.IsReady() && Player.Spellbook.GetSpell(SpellSlot.E).ToggleState == 1 && !EActive && Player.CountEnemiesInRange(400) > 0)
-                {
-                    E.Cast();
-                }
-                else if (E.IsReady() && Player.Spellbook.GetSpell(SpellSlot.E).ToggleState != 1 && EActive && Player.CountEnemiesInRange(400) <= 0)
-                {
-                    E.Cast();
-                }
+                mySpellcast.Toggle(null, E, SpellSlot.E, 0, 400);  
             }
             if (UseR && R.IsReady())
             {
@@ -96,11 +89,11 @@ namespace EndifsCreations.Plugins
                     if (myUtility.ImmuneToMagic(Target)) return;
                     if (UseQ && Q.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularPrecise(Target, Q, HitChance.High);
+                        mySpellcast.CircularPrecise(Target, Q, HitChance.High, Q.Range, 100);
                     }
                     if (UseW && W.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, W, HitChance.High);
+                        mySpellcast.CircularAoe(Target, W, HitChance.High, W.Range);
                     }
                 }
                 catch { }
@@ -145,7 +138,7 @@ namespace EndifsCreations.Plugins
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable);
                 foreach (var q in EnemyList.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= Q.Range + 100))
                 {
-                    mySpellcast.CircularPrecise(q, Q, HitChance.High);
+                    mySpellcast.CircularPrecise(q, Q, HitChance.High, Q.Range, 100);
                 }
             }
             switch (myOrbwalker.ActiveMode)
@@ -209,7 +202,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Karthus.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.Karthus.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= W.Range)
                 {
@@ -221,19 +214,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Karthus.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Karthus.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Karthus.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Karthus.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Karthus.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Karthus.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Karthus.Draw.R").GetValue<bool>() && R.IsReady())
+            if (Root.Item("EC.Karthus.Draw.R").GetValue<bool>() && R.IsReady())
             {
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
                 var rtarget = EnemyList.Where(x => R.IsKillable(x)).ToList();

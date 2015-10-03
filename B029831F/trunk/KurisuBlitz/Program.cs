@@ -2,6 +2,7 @@
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SPrediction;
 using Color = System.Drawing.Color;
 
 namespace KurisuBlitz
@@ -16,7 +17,6 @@ namespace KurisuBlitz
     {
         private static Menu _menu;
         private static Spell _q, _e, _r;
-        private static Orbwalking.Orbwalker _orbwalker;
         private static readonly Obj_AI_Hero Me = ObjectManager.Player;
 
         static void Main(string[] args)
@@ -31,7 +31,7 @@ namespace KurisuBlitz
                 return;
 
             // Set spells      
-            _q = new Spell(SpellSlot.Q, 1000f);
+            _q = new Spell(SpellSlot.Q, 950f);
             _q.SetSkillshot(0.25f, 70f, 1800f, true, SkillshotType.SkillshotLine);
 
             _e = new Spell(SpellSlot.E, 150f);
@@ -40,21 +40,35 @@ namespace KurisuBlitz
             // Load Menu
             _menu = new Menu("Kurisu's Blitz", "blitz", true);
 
-            var blitzTs = new Menu("Selector", "tselect");
+            var blitzTs = new Menu(":: Selector", "tmenu");
             TargetSelector.AddToMenu(blitzTs);
             _menu.AddSubMenu(blitzTs);
 
-            var blitzOrb = new Menu("Orbwalker", "orbwalker");
-            _orbwalker = new Orbwalking.Orbwalker(blitzOrb);
+            var blitzOrb = new Menu(":: Orbwalker", "omenu");
+            var orbwalker = new Orbwalking.Orbwalker(blitzOrb);
             _menu.AddSubMenu(blitzOrb);
 
-            var menuD = new Menu("Drawings", "drawings");
+            var menuK = new Menu(":: Keybinds", "kmenu");
+            menuK.AddItem(new MenuItem("grabkey", "Grab Key (active)")).SetValue(new KeyBind('T', KeyBindType.Press));
+            menuK.AddItem(new MenuItem("combokey", "Combo (active)")).SetValue(new KeyBind(32, KeyBindType.Press));
+            _menu.AddSubMenu(menuK);
+
+            var menuD = new Menu(":: Drawings", "dmenu");
             menuD.AddItem(new MenuItem("drawQ", "Draw Q")).SetValue(new Circle(true, Color.FromArgb(150, Color.White)));
             menuD.AddItem(new MenuItem("drawR", "Draw R")).SetValue(new Circle(true, Color.FromArgb(150, Color.White)));
-            menuD.AddItem(new MenuItem("drawT", "Draw Target")).SetValue(true);
             _menu.AddSubMenu(menuD);
 
-            var spellmenu = new Menu("Spells", "smenu");
+            var menuH = new Menu(":: Hero Config", "enemies");
+            foreach (var obj in ObjectManager.Get<Obj_AI_Hero>().Where(obj => obj.Team != Me.Team))
+            {
+                menuH.AddItem(new MenuItem("dograb" + obj.ChampionName, obj.ChampionName))
+                    .SetValue(new StringList(new[] { "Dont Grab ", "Normal Grab ", "Auto Grab!" },
+                        TargetSelector.GetPriority(obj) >= 4 ? 2 : 1));
+            }
+
+            _menu.AddSubMenu(menuH);
+
+            var spellmenu = new Menu(":: Main Settings", "mmenu");
 
             var menuQ = new Menu("Q Menu", "qmenu");
             menuQ.AddItem(new MenuItem("usecomboq", "Use in Combo")).SetValue(true);
@@ -76,64 +90,57 @@ namespace KurisuBlitz
             menuR.AddItem(new MenuItem("securer", "Use for Killsteal")).SetValue(false);
             spellmenu.AddSubMenu(menuR);
 
-
             _menu.AddSubMenu(spellmenu);
 
-            var menuM = new Menu("Misc", "bmisc");
-            menuM.AddItem(new MenuItem("hitchanceq", "Q Hitchance 1-Low, 4-Very High")).SetValue(new Slider(4, 1, 4));
-            menuM.AddItem(new MenuItem("mindist", "Mininum Distance to Q")).SetValue(new Slider(255, 0, (int)_q.Range));
+            var menuM = new Menu(":: Other/Misc", "bmisc");
+            menuM.AddItem(new MenuItem("hitchanceq", "Q Hitchance 1-Low, 4-Very High")).SetValue(new Slider(3, 1, 4));
+            menuM.AddItem(new MenuItem("mindist", "Mininum Distance to Q")).SetValue(new Slider((int)_r.Range - 100, 0, (int)_q.Range));
             menuM.AddItem(new MenuItem("maxdist", "Maximum Distance to Q")).SetValue(new Slider((int)_q.Range, 0, (int)_q.Range));
             menuM.AddItem(new MenuItem("hnd", "Dont grab if below health %")).SetValue(new Slider(0));
-            foreach (var obj in ObjectManager.Get<Obj_AI_Hero>().Where(obj => obj.Team != Me.Team))
-            {
-                menuM.AddItem(new MenuItem("dograb" + obj.ChampionName, obj.ChampionName))
-                    .SetValue(new StringList(new[] { "Dont Grab ", "Normal Grab ", "Auto Grab" }, 1));
-            }
+
 
             _menu.AddSubMenu(menuM);
-            _menu.AddItem(new MenuItem("combokey", "Combo (active)")).SetValue(new KeyBind(32, KeyBindType.Press));
-            _menu.AddItem(new MenuItem("grabkey", "Grab (active)")).SetValue(new KeyBind('T', KeyBindType.Press));
-
             _menu.AddToMainMenu();
+
+            SPrediction.Prediction.Initialize(_menu);
+
+            // Change menu name
+            if (_menu.SubMenu("SPRED") != null)
+            {   
+                _menu.SubMenu("SPRED").DisplayName = ":: SPrediction";
+                _menu.Item("SPREDREACTIONDELAY").SetValue(new Slider(0, 0, 200));
+            }
 
             // events
             Drawing.OnDraw += BlitzOnDraw;
             Game.OnUpdate += BlitzOnUpdate;
-            Interrupter.OnPossibleToInterrupt += BlitzOnInterruptableSpell;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
 
             Game.PrintChat("<font color=\"#FF9900\"><b>KurisuBlitz:</b></font> Loaded");
 
         }
 
-        private static void BlitzOnInterruptableSpell(Obj_AI_Base unit, InterruptableSpell spell)
+        static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
+            if (!sender.IsEnemy || !sender.IsValid<Obj_AI_Hero>())
+                return;
+
             if (_menu.Item("interruptq").GetValue<bool>() && _q.IsReady())
             {
-                if (unit.Distance(Me.ServerPosition, true) <= _q.RangeSqr)
-                {
-                    var prediction = _q.GetPrediction(unit);
-                    if (prediction.Hitchance >= HitChance.Low)
-                    {
-                        _q.Cast(prediction.CastPosition);
-                    }
-                }
+                if (sender.Distance(Me.ServerPosition, true) <= _q.RangeSqr)
+                    _q.SPredictionCast(sender, HitChance.High);
             }
 
             if (_menu.Item("interruptr").GetValue<bool>() && _r.IsReady())
             {
-                if (unit.Distance(Me.ServerPosition, true) <= _r.RangeSqr)
-                {
+                if (sender.Distance(Me.ServerPosition, true) <= _r.RangeSqr)
                     _r.Cast();
-                }
             }
 
             if (_menu.Item("interrupte").GetValue<bool>() && _e.IsReady())
             {
-                if (unit.Distance(Me.ServerPosition, true) <= _e.RangeSqr)
-                {
+                if (sender.Distance(Me.ServerPosition, true) <= _e.RangeSqr)
                     _e.CastOnUnit(Me);
-                    Me.IssueOrder(GameObjectOrder.AttackUnit, unit);
-                }
             }
         }
 
@@ -147,28 +154,24 @@ namespace KurisuBlitz
                 var qcircle = _menu.Item("drawQ").GetValue<Circle>();
 
                 if (qcircle.Active)
-                    Render.Circle.DrawCircle(Me.Position, _q.Range, qcircle.Color);
+                    Render.Circle.DrawCircle(Me.Position, _q.Range, qcircle.Color, 2);
 
                 if (rcircle.Active)
-                    Render.Circle.DrawCircle(Me.Position, _r.Range, qcircle.Color);
-
-                if (target.IsValidTarget(_q.Range * 2) && _menu.Item("drawT").GetValue<bool>())
-                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius - 30, Color.Yellow, 3);
+                    Render.Circle.DrawCircle(Me.Position, _r.Range, qcircle.Color, 2);
             }
         }
 
         private static void BlitzOnUpdate(EventArgs args)
         {
-            Secure(_menu.Item("secureq").GetValue<bool>(),
+            Secure(_menu.Item("secureq").GetValue<bool>(), 
                    _menu.Item("securee").GetValue<bool>(),
                    _menu.Item("securer").GetValue<bool>());
 
-            AutoCast(_menu.Item("qdashing").GetValue<bool>(),
-                     _menu.Item("qimmobil").GetValue<bool>());
-
-            var aHealthPercent = (int) (Me.Health/Me.MaxHealth * 100);
-            if (aHealthPercent >= _menu.Item("hnd").GetValue<Slider>().Value)
+            if (Me.HealthPercent >= _menu.Item("hnd").GetValue<Slider>().Value)
             {
+                AutoCast(_menu.Item("qdashing").GetValue<bool>(),
+                         _menu.Item("qimmobil").GetValue<bool>());
+
                 if (_menu.Item("combokey").GetValue<KeyBind>().Active)
                 {
                     Combo(_menu.Item("usecomboq").GetValue<bool>(),
@@ -192,15 +195,17 @@ namespace KurisuBlitz
                         ObjectManager.Get<Obj_AI_Hero>()
                             .Where(x => x.IsValidTarget(_menu.Item("maxdist").GetValue<Slider>().Value)))
                 {
-                    if (dashing &&
-                        _menu.Item("dograb" + ii.ChampionName).GetValue<StringList>().SelectedIndex == 2)
+                    if (dashing && _menu.Item("dograb" + ii.ChampionName).GetValue<StringList>().SelectedIndex == 2)
+                    {
                         if (ii.Distance(Me.ServerPosition) > _menu.Item("mindist").GetValue<Slider>().Value)
-                            _q.CastIfHitchanceEquals(ii, HitChance.Dashing);
+                            _q.SPredictionCast(ii, HitChance.Dashing);
+                    }
 
-                    if (immobile &&
-                        _menu.Item("dograb" + ii.ChampionName).GetValue<StringList>().SelectedIndex == 2)
-                        if (ii.Distance(Me.ServerPosition) > _menu.Item("mindist").GetValue<Slider>().Value)
-                            _q.CastIfHitchanceEquals(ii, HitChance.Immobile);
+                    if (immobile && _menu.Item("dograb" + ii.ChampionName).GetValue<StringList>().SelectedIndex == 2)
+                    {
+                        if (ii.Distance(Me.ServerPosition) > _menu.Item("mindist").GetValue<Slider>().Value + 100)
+                            _q.SPredictionCast(ii, HitChance.Immobile);
+                    }
                 }
             }
         }
@@ -212,13 +217,12 @@ namespace KurisuBlitz
                 var qtarget = TargetSelector.GetTarget(_q.Range, TargetSelector.DamageType.Magical);
                 if (qtarget.IsValidTarget(_menu.Item("maxdist").GetValue<Slider>().Value))
                 {
-                    var poutput = _q.GetPrediction(qtarget);
-                    if (poutput.Hitchance >= (HitChance) _menu.Item("hitchanceq").GetValue<Slider>().Value + 2)
+                    if (qtarget.Distance(Me.ServerPosition) > _menu.Item("mindist").GetValue<Slider>().Value)
                     {
-                        if (qtarget.Distance(Me.ServerPosition) > _menu.Item("mindist").GetValue<Slider>().Value)
+                        if (_menu.Item("dograb" + qtarget.ChampionName).GetValue<StringList>().SelectedIndex != 0)
                         {
-                            if (_menu.Item("dograb" + qtarget.ChampionName).GetValue<StringList>().SelectedIndex != 0)
-                                _q.Cast(poutput.CastPosition);
+                            _q.SPredictionCast(qtarget,
+                                (HitChance) _menu.Item("hitchanceq").GetValue<Slider>().Value + 2);
                         }
                     }
                 }
@@ -226,8 +230,8 @@ namespace KurisuBlitz
 
             if (usee && _e.IsReady())
             {
-                var etarget = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Physical);
-                if (etarget.IsValidTarget(_menu.Item("mindist").GetValue<Slider>().Value + etarget.BoundingRadius))
+                var etarget = TargetSelector.GetTarget(350, TargetSelector.DamageType.Physical);
+                if (etarget.IsValidTarget())
                 {
                     _e.CastOnUnit(Me);
                 }
@@ -235,7 +239,7 @@ namespace KurisuBlitz
                 var qtarget = TargetSelector.GetTarget(_q.Range, TargetSelector.DamageType.Magical);
                 if (qtarget.IsValidTarget(_menu.Item("maxdist").GetValue<Slider>().Value))
                 {
-                    if (qtarget.HasBuff("rocketgrab2", true))
+                    if (qtarget.HasBuff("rocketgrab2"))
                     {
                         _e.CastOnUnit(Me);
                     }
@@ -287,15 +291,7 @@ namespace KurisuBlitz
                 {
                     if (Me.GetSpellDamage(qtarget, SpellSlot.Q) >= qtarget.Health)
                     {
-                        var poutput = _q.GetPrediction(qtarget);
-                        if (poutput.Hitchance >= HitChance.Medium)
-                        {
-                            if (qtarget.Distance(Me.ServerPosition) > 
-                                _menu.Item("mindist").GetValue<Slider>().Value)
-                            {
-                                _q.Cast(poutput.CastPosition);
-                            }
-                        }
+                        _q.SPredictionCast(qtarget, HitChance.High);
                     }
                 }
             }

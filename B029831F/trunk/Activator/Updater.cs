@@ -22,6 +22,10 @@ namespace Activator
                                 c.DownloadString(
                                     "https://raw.githubusercontent.com/xKurisu/KurisuSolutions/master/Activator/Properties/AssemblyInfo.cs");
 
+                            var rawLog =
+                                c.DownloadString(
+                                    "https://raw.githubusercontent.com/xKurisu/KurisuSolutions/master/Activator/Changelog.txt");
+                                
                             var match =
                                 new Regex(
                                     @"\[assembly\: AssemblyVersion\(""(\d{1,})\.(\d{1,})\.(\d{1,})\.(\d{1,})""\)\]")
@@ -40,7 +44,9 @@ namespace Activator
 
                                 if (gitVersion != Activator.Version)
                                 {
-                                    Game.PrintChat("<b>Activator#</b> - <font color=\"#FF6666\">Outdated & newer version available!</font>");
+                                    Game.PrintChat(
+                                        "<font color=\"#FF6666\"><b>Activator#</b> - Outdated & newer version available!</font> (" + gitVersion + ")");
+                                    Game.PrintChat("<font color=\"#FF6666\">" + rawLog + "</font>");
                                 }
                             }
                         }

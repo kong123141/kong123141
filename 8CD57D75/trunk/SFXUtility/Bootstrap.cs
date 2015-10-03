@@ -96,6 +96,8 @@ namespace SFXUtility
                         {
                             #region Features
 
+                            new AntiRengar(activators),
+                            new AutoJump(activators),
                             new KillSteal(activators),
                             new Potion(activators),
                             new Revealer(activators),
@@ -107,6 +109,7 @@ namespace SFXUtility
                             new Clone(drawings),
                             new DamageIndicator(drawings),
                             new Health(drawings),
+                            new LaneMomentum(drawings),
                             new LasthitMarker(drawings),
                             new PerfectWard(drawings),
                             new Range(drawings),
@@ -126,11 +129,11 @@ namespace SFXUtility
                             new Ability(timers),
                             new Altar(timers),
                             new Cooldown(timers),
-                            new Relic(timers),
                             new Inhibitor(timers),
                             new Jungle(timers),
-                            new GoldEfficiency(trackers),
+                            new Relic(timers),
                             new Destination(trackers),
+                            new GoldEfficiency(trackers),
                             new LastPosition(trackers),
                             new Sidebar(trackers),
                             new Ward(trackers)

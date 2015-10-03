@@ -32,7 +32,8 @@
                 comboMenu.SubMenu("Combo")
                     .AddItem(new MenuItem("Combo.Use.E.OutOfRange", "Use E when out of range").SetValue(false));
                 comboMenu.SubMenu("Combo")
-                    .AddItem(new MenuItem("Combo.Prio", "Prioritize").SetValue(new StringList(new[] { "E", "W", "Q" }, 2)));
+                    .AddItem(
+                        new MenuItem("Combo.Prio", "Prioritize").SetValue(new StringList(new[] { "E", "W", "Q" }, 2)));
                 comboMenu.SubMenu("Combo")
                     .AddItem(
                         new MenuItem("Combo.Switch", "Switch priority").SetValue(
@@ -57,6 +58,8 @@
                 clearMenu.SubMenu("Jungleclear").AddItem(new MenuItem("Jungle.Use.W", "Use W").SetValue(true));
                 clearMenu.SubMenu("Jungleclear").AddItem(new MenuItem("Jungle.Use.E", "Use E").SetValue(true));
                 clearMenu.SubMenu("Jungleclear")
+                    .AddItem(new MenuItem("Jungle.Movement2", "Movement in jungle off").SetValue(false));
+                clearMenu.SubMenu("Jungleclear")
                     .AddItem(new MenuItem("Jungle.Save.Ferocity", "Save ferocity").SetValue(false));
             }
 
@@ -64,6 +67,26 @@
             {
                 healMenu.AddItem(new MenuItem("Heal.AutoHeal", "Auto heal yourself").SetValue(true));
                 healMenu.AddItem(new MenuItem("Heal.HP", "Self heal at >= ").SetValue(new Slider(25, 1, 100)));
+            }
+
+            var betaMenu = Menu.AddSubMenu(new Menu("Beta options", "BetaOptions"));
+            {
+                betaMenu.AddItem(new MenuItem("Beta.Cast.Q", "Use beta Q").SetValue(false));
+                betaMenu.AddItem(new MenuItem("Beta.Cast.Youmuu", "Youmuu's required").SetValue(true));
+                betaMenu.AddItem(new MenuItem("Beta.Cast.Q.Delay", "Cast Q delay").SetValue(new Slider(500, 100, 2000)));
+                /*betaMenu.AddItem(
+                    new MenuItem("Beta.Ferocity", "Minimum Ferocity").SetValue(new Slider(1, 5, 5)));*/
+
+                betaMenu.AddItem(new MenuItem("Assassin.searchrange", "Assassin search range"));
+
+                betaMenu.AddItem(
+                    new MenuItem("Beta.searchrange", "Search range").SetValue(new Slider(2000, 1000, 2500)));
+
+                betaMenu.AddItem(
+                    new MenuItem("Beta.searchrange.Q", "Q cast range").SetValue(new Slider(1000, 500, 1500)));
+
+                betaMenu.AddItem(new MenuItem("Beta.Search.Range", "Draw search range").SetValue(new Circle()));
+                betaMenu.AddItem(new MenuItem("Beta.Search.QCastRange", "Draw Q cast range").SetValue(new Circle()));
             }
 
             var miscMenu = Menu.AddSubMenu(new Menu("Misc", "Misc"));
@@ -94,7 +117,7 @@
 
         private static Menu OrbwalkingMenu()
         {
-            return Menu.AddSubMenu(new Menu("Swagwalker", "Orbwalker"));
+            return Menu.AddSubMenu(new Menu("jQuery Orbwalker", "Orbwalker"));
         }
 
         private static Menu TargetSelectorMenu()

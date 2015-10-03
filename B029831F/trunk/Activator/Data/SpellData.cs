@@ -3,16 +3,16 @@
 // any form or by any means, mechanical, electronical or otherwise, is prohibited
 // without the prior written consent of the copyright owner.
 // 
-// Document:	activator/spelldata.cs
-// Date:		01/07/2015
+// Document:	Data/SpellData.cs
+// Date:		22/09/2015
 // Author:		Robin Kurisu
 #endregion
 
-using System.Collections.Generic;
 using System.Linq;
-using Activator.Base;
 using LeagueSharp;
+using Activator.Base;
 using LeagueSharp.Common;
+using System.Collections.Generic;
 
 namespace Activator.Data
 {
@@ -27,6 +27,7 @@ namespace Activator.Data
         public string MissileName { get; set; }
         public string[] ExtraMissileNames { get; set; }
         public int MissileSpeed { get; set; }
+        public int Priority { get; set; }
         public string[] FromObject { get; set; }
         public HitType[] HitType { get; set; }
 
@@ -43,6 +44,7 @@ namespace Activator.Data
                 Slot = SpellSlot.Q,
                 CastRange = 650f,
                 Delay = 250f,
+                Priority = 3,
                 HitType = new[] { Base.HitType.Danger, Base.HitType.CrowdControl },
                 MissileName = "",
                 MissileSpeed = 2000
@@ -77,6 +79,7 @@ namespace Activator.Data
                 Slot = SpellSlot.E,
                 CastRange = 1025f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new[] { Base.HitType.CrowdControl },
                 MissileName = "aatroxeconemissile",
                 MissileSpeed = 1250
@@ -100,6 +103,7 @@ namespace Activator.Data
                 Slot = SpellSlot.Q,
                 CastRange = 880f,
                 Delay = 250f,
+                Priority = 3,
                 HitType = new HitType[] { },
                 MissileName = "ahriorbmissile",
                 ExtraMissileNames = new [] { "ahriorbreturn" },
@@ -113,6 +117,7 @@ namespace Activator.Data
                 Slot = SpellSlot.W,
                 CastRange = 550f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new HitType[] { },
                 MissileSpeed = 1800
             });
@@ -124,6 +129,7 @@ namespace Activator.Data
                 Slot = SpellSlot.E,
                 CastRange = 975f,
                 Delay = 250f,
+                Priority = 3,
                 HitType = new[] { Base.HitType.Danger, Base.HitType.CrowdControl },
                 MissileName = "ahriseducemissile",
                 MissileSpeed = 1550
@@ -136,6 +142,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 600f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new HitType[] { },
                 MissileSpeed = 2200
             });
@@ -147,6 +154,7 @@ namespace Activator.Data
                 Slot = SpellSlot.Q,
                 CastRange = 600f,
                 Delay = 650f,
+                Priority = 2,
                 HitType = new HitType[] { },
                 MissileSpeed = 1000
             });
@@ -158,6 +166,7 @@ namespace Activator.Data
                 Slot = SpellSlot.W,
                 CastRange = 1000f, // Range: 700 + additional for stealth detection
                 Delay = 250f,
+                Priority = 2,
                 HitType = new[] { Base.HitType.Stealth },
                 MissileSpeed = int.MaxValue
             });
@@ -169,6 +178,7 @@ namespace Activator.Data
                 Slot = SpellSlot.E,
                 CastRange = 325f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new HitType[] { },
                 MissileSpeed = int.MaxValue
             });
@@ -180,6 +190,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 710f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new HitType[] { },
                 MissileSpeed = 2200
             });
@@ -191,6 +202,7 @@ namespace Activator.Data
                 Slot = SpellSlot.Q,
                 CastRange = 365f,
                 Delay = 250f,
+                Priority = 3,
                 HitType = new[] { Base.HitType.Danger, Base.HitType.CrowdControl },
                 MissileSpeed = int.MaxValue
             });
@@ -202,6 +214,7 @@ namespace Activator.Data
                 Slot = SpellSlot.W,
                 CastRange = 650f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new HitType[] { },
                 MissileSpeed = int.MaxValue
             });
@@ -235,6 +248,7 @@ namespace Activator.Data
                 Slot = SpellSlot.Q,
                 CastRange = 1100f,
                 Delay = 250f,
+                Priority = 3,
                 HitType = new[] { Base.HitType.Danger, Base.HitType.CrowdControl },
                 MissileName = "sadmummybandagetoss",
                 MissileSpeed = 2000
@@ -269,6 +283,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 550f,
                 Delay = 150f,
+                Priority = 5,
                 HitType =
                     new[]
                     {
@@ -286,6 +301,7 @@ namespace Activator.Data
                 Slot = SpellSlot.Q,
                 CastRange = 1150f, // 1075 + Shatter Radius
                 Delay = 250f,
+                Priority = 2,
                 HitType = new[] { Base.HitType.CrowdControl },
                 MissileName = "flashfrostspell",
                 MissileSpeed = 850
@@ -309,6 +325,7 @@ namespace Activator.Data
                 Slot = SpellSlot.E,
                 CastRange = 650f,
                 Delay = 250f,
+                Priority = 3,
                 HitType = new[] { Base.HitType.Danger },
                 MissileSpeed = 1450
             });
@@ -320,6 +337,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 625f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new HitType[] { },
                 MissileSpeed = int.MaxValue
             });
@@ -331,6 +349,7 @@ namespace Activator.Data
                 Slot = SpellSlot.Q,
                 CastRange = 625f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new [] { Base.HitType.Danger },
                 MissileSpeed = 1400
             });
@@ -342,6 +361,7 @@ namespace Activator.Data
                 Slot = SpellSlot.W,
                 CastRange = 625f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new[] { Base.HitType.Danger },
                 MissileName = "",
                 MissileSpeed = int.MaxValue
@@ -365,6 +385,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 890f, // 600 + Cast Radius
                 Delay = 0f,
+                Priority = 5,
                 HitType =
                     new[]
                     {
@@ -404,6 +425,7 @@ namespace Activator.Data
                 Slot = SpellSlot.W,
                 CastRange = 1200f,
                 Delay = 250f,
+                Priority = 3,
                 HitType = new[] { Base.HitType.CrowdControl },
                 MissileName = "volleyattack",
                 MissileSpeed = 1500
@@ -428,6 +450,7 @@ namespace Activator.Data
                 CastRange = 20000f,
                 Global = true,
                 Delay = 250f,
+                Priority = 3,
                 HitType =
                     new[]
                     {
@@ -445,6 +468,7 @@ namespace Activator.Data
                 Slot = SpellSlot.Q,
                 CastRange = 875f,
                 Delay = 250f,
+                Priority = 2,
                 HitType = new[] {Base.HitType.CrowdControl },
                 MissileName = "azirsoldiermissile",
                 FromObject = new []{ "AzirSoldier" },
@@ -2448,7 +2472,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 550f,
                 Delay = 500f,
-                HitType = new[] { Base.HitType.Danger, Base.HitType.Ultimate },
+                HitType = new[] { Base.HitType.Danger },
                 MissileSpeed = int.MaxValue
             });
 
@@ -2641,7 +2665,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 700f,
                 Delay = 250f,
-                HitType = new[] { Base.HitType.Danger, Base.HitType.Ultimate },
+                HitType = new[] { Base.HitType.Danger },
                 MissileSpeed = 2000
             });
 
@@ -2804,12 +2828,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 1200f,
                 Delay = 550f,
-                HitType =
-                    new[]
-                    {
-                        Base.HitType.Danger, Base.HitType.Ultimate,
-                        Base.HitType.CrowdControl
-                    },
+                HitType = new[] { Base.HitType.Danger, Base.HitType.CrowdControl  },
                 MissileName = "leonasolarflare",
                 MissileSpeed = int.MaxValue
             });
@@ -3389,7 +3408,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 850f,
                 Delay = 250f,
-                HitType = new[] { Base.HitType.Danger, Base.HitType.Ultimate },
+                HitType = new[] { Base.HitType.Danger },
                 MissileSpeed = int.MaxValue
             });
 
@@ -4940,7 +4959,7 @@ namespace Activator.Data
                 ChampionName = "syndra",
                 Slot = SpellSlot.R,
                 CastRange = 675f,
-                Delay = 250f,
+                Delay = 450f,
                 HitType = new[] { Base.HitType.Danger, Base.HitType.Ultimate },
                 MissileSpeed = 1250
             });
@@ -5030,7 +5049,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 400f,
                 Delay = 250f,
-                HitType = new[] { Base.HitType.Danger, Base.HitType.Ultimate },
+                HitType = new[] { Base.HitType.Danger },
                 MissileSpeed = int.MaxValue
             });
 
@@ -5710,7 +5729,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 CastRange = 1575f,
                 Delay = 0f,
-                HitType = new[] { Base.HitType.Ultimate },
+                HitType = new[] { Base.HitType.Danger },
                 MissileSpeed = 1500
             });
 
@@ -6400,7 +6419,7 @@ namespace Activator.Data
                 ChampionName = "zyra",
                 Slot = SpellSlot.R,
                 CastRange = 700f,
-                Delay = 250f,
+                Delay = 500f,
                 HitType =
                     new[]
                     {

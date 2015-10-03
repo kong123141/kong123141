@@ -41,13 +41,13 @@ namespace Activator.Summoners
             {
                 if (hero.Player.NetworkId == Player.NetworkId)
                 {
-                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                         return;
 
                     if (hero.Player.Distance(Player.ServerPosition) > Range)
                         return;
 
-                    Auras.CheckCleanse(hero.Player);
+                    Buffs.CheckCleanse(hero.Player);
 
                     if (hero.CleanseBuffCount >= Menu.Item("use" + Name + "number").GetValue<Slider>().Value &&
                         hero.CleanseHighestBuffTime >= Menu.Item("use" + Name + "time").GetValue<Slider>().Value)

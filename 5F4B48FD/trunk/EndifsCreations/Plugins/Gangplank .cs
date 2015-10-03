@@ -35,13 +35,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Gangplank.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Gangplank.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Gangplank.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Gangplank.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Gangplank.DrawBarrels", "Barrels").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -49,9 +49,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Gangplank.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Gangplank.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Gangplank.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Gangplank.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Gangplank.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Gangplank.Combo.E").GetValue<bool>();
 
             if (UseQ && Q.IsReady())
             {
@@ -61,7 +61,7 @@ namespace EndifsCreations.Plugins
                 }
                 else
                 {
-                    foreach (var x in AllBarrels.Where(o => Vector3.Distance(Player.ServerPosition, o.ServerPosition) <= Q.Range))
+                    foreach (var x in AllBarrels.Where(o => !o.IsDead && o.IsValidTarget() && Vector3.Distance(Player.ServerPosition, o.ServerPosition) <= Q.Range))
                     {
                         if (x.Health <= 1 && x.CountEnemiesInRange(400) > 0)
                         {
@@ -187,11 +187,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Gangplank.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Gangplank.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Gangplank.DrawBarrels").GetValue<bool>())
+            if (Root.Item("EC.Gangplank.DrawBarrels").GetValue<bool>())
             {
                 foreach (var barrel in Barrels.Where(s => s.IsValid))
                 {

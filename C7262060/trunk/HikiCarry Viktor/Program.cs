@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp.Common;
 using LeagueSharp;
-using HikiCarry_Viktor.SPrediction;
+using SPrediction;
 using SharpDX;
 using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
@@ -42,8 +42,6 @@ namespace HikiCarry_Viktor
             {
                 return;
             }
-            Activator.Potion.hikiPotion = true;
-            Activator.Zhonya.hikiZhonya = true;
 
             Q = new Spell(SpellSlot.Q, 600);
             W = new Spell(SpellSlot.W, 700);
@@ -103,29 +101,6 @@ namespace HikiCarry_Viktor
                 Config.AddSubMenu(lastMenu);
             }
 
-            var itemMenu = new Menu("Item Settings", "Item Settings");
-            {
-                var zhonyaMenu = new Menu("Zhonya Settings", "Zhonya Settings");
-                {
-                    zhonyaMenu.AddItem(new MenuItem("useZhonya", "Use Zhonya").SetValue(true));
-                    zhonyaMenu.AddItem(new MenuItem("zhonyaHP", "Use if my HP < %").SetValue(new Slider(20, 0, 100)));
-                    itemMenu.AddSubMenu(zhonyaMenu);
-                }
-                var health = new Menu("Health Potion Settings", "Health Potion Settings");
-                {
-                    health.AddItem(new MenuItem("useHealth", "Use Health Potion").SetValue(true));
-                    health.AddItem(new MenuItem("myhp", "Use if my HP < %").SetValue(new Slider(20, 0, 100)));
-                    itemMenu.AddSubMenu(health);
-                }
-                var mana = new Menu("Mana Potion Settings", "Mana Potion Settings");
-                {
-                    mana.AddItem(new MenuItem("useMana", "Use Mana Potion").SetValue(true));
-                    mana.AddItem(new MenuItem("mymana", "Use if my mana < %").SetValue(new Slider(20, 0, 100)));
-                    itemMenu.AddSubMenu(mana);
-                }
-                Config.AddSubMenu(itemMenu);
-            }
-
             var miscMenu = new Menu("Misc Settings", "Misc Settings");
             {
                 miscMenu.AddItem(new MenuItem("aGapcloser", "AntiGapcloser[W]").SetValue(true));
@@ -144,8 +119,8 @@ namespace HikiCarry_Viktor
             }
             Config.AddItem(new MenuItem("useIgnite", "Smart Ignite").SetValue(true));
             Config.AddItem(new MenuItem("hChance", "Hit Chance").SetValue<StringList>(new StringList(HitchanceNameArray, 2)));
-            var drawDamageMenu = new MenuItem("RushDrawEDamage", "E Damage").SetValue(true);
-            var drawFill = new MenuItem("RushDrawEDamageFill", "E Damage Fill").SetValue(new Circle(true, Color.Gold));
+            var drawDamageMenu = new MenuItem("RushDrawEDamage", "Combo Damage").SetValue(true);
+            var drawFill = new MenuItem("RushDrawEDamageFill", "Combo Damage Fill").SetValue(new Circle(true, Color.Gold));
 
             drawMenu.SubMenu("Damage Draws").AddItem(drawDamageMenu);
             drawMenu.SubMenu("Damage Draws").AddItem(drawFill);
@@ -186,9 +161,9 @@ namespace HikiCarry_Viktor
                     Render.Circle.DrawCircle(gapcloser.Sender.Position, gapcloser.Sender.BoundingRadius, Color.Gold, 5);
                     var targetpos = Drawing.WorldToScreen(gapcloser.Sender.Position);
                 }
-                if (E.CanCast(gapcloser.Sender))
+                if (W.CanCast(gapcloser.Sender))
                 {
-                    E.Cast(gapcloser.Sender);
+                    W.Cast(gapcloser.Sender);
                 }
             }
         }
@@ -202,9 +177,9 @@ namespace HikiCarry_Viktor
                     var targetpos = Drawing.WorldToScreen(sender.Position);
                     Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.Gold, "Interrupt");
                 }
-                if (E.CanCast(sender))
+                if (W.CanCast(sender))
                 {
-                    E.Cast(sender);
+                    W.Cast(sender);
                 }
             }
         }
@@ -275,7 +250,7 @@ namespace HikiCarry_Viktor
                     
                     if (Player.Distance(enemy.Position) < 550)
                     {
-                        E.SPredictionCast(enemy, hCance);
+                        E.SPredictionCastVector(enemy, 550, hCance);
                     }
                 }
             }
@@ -367,7 +342,7 @@ namespace HikiCarry_Viktor
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && !x.IsDead && !x.IsZombie && x.IsValidTarget(E.Range)))
                     {
-                        E.SPredictionCast(enemy, hCance);
+                        E.SPredictionCastVector(enemy, 550, hCance);
                     }
                 }
             }
@@ -384,7 +359,7 @@ namespace HikiCarry_Viktor
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && !x.IsDead && !x.IsZombie && x.IsValidTarget(E.Range)))
                     {
-                        E.SPredictionCast(enemy, tChance);
+                        E.SPredictionCastVector(enemy, 550, tChance);
                     }
                 }
             }
@@ -416,7 +391,7 @@ namespace HikiCarry_Viktor
                     && x.IsValidTarget(E.Range) && E.GetDamage(x) > x.Health))
                 {
                     HitChance hCance = HitchanceArray[Config.Item("hChance").GetValue<StringList>().SelectedIndex];
-                    E.SPredictionCast(enemy, hCance);
+                    E.SPredictionCastVector(enemy, 550, hCance);
                 }
             }
         }
@@ -458,7 +433,7 @@ namespace HikiCarry_Viktor
                    && x.IsValidTarget(E.Range) && CanMove(x)))
                 {
                     HitChance hCance = HitchanceArray[Config.Item("hChance").GetValue<StringList>().SelectedIndex];
-                    E.SPredictionCast(enemy, hCance);
+                    E.SPredictionCastVector(enemy, 550, hCance);
                 }
             }
 
@@ -491,7 +466,7 @@ namespace HikiCarry_Viktor
             var menuItem2 = Config.Item("wDraw").GetValue<Circle>();
             var menuItem3 = Config.Item("eDraw").GetValue<Circle>();
             var menuItem4 = Config.Item("rDraw").GetValue<Circle>();
-            var killableDraws = Config.Item("killableDrew").GetValue<bool>();
+            
 
             if (menuItem1.Active && Q.IsReady())
             {

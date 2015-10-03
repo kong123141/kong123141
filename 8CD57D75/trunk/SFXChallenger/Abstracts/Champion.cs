@@ -29,7 +29,6 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SFXChallenger.Enumerations;
 using SFXChallenger.Interfaces;
-using SFXChallenger.Library;
 using SFXChallenger.Library.Logger;
 using SFXChallenger.Managers;
 using SFXChallenger.Menus;
@@ -46,6 +45,7 @@ namespace SFXChallenger.Abstracts
     {
         protected readonly Obj_AI_Hero Player = ObjectManager.Player;
         private List<Spell> _spells;
+        private bool _useMuramana;
         protected Spell E;
         protected Spell Q;
         protected Spell R;
@@ -55,8 +55,6 @@ namespace SFXChallenger.Abstracts
         {
             Core.OnBoot += OnCoreBoot;
             Core.OnShutdown += OnCoreShutdown;
-            Core.OnPreUpdate += OnCorePreUpdate;
-            Core.OnPostUpdate += OnCorePostUpdate;
         }
 
         protected abstract ItemFlags ItemFlags { get; }
@@ -150,10 +148,19 @@ namespace SFXChallenger.Abstracts
             }
         }
 
-        protected void OnCorePreUpdate(EventArgs args)
+        protected virtual void OnCorePreUpdate(EventArgs args)
         {
             try
             {
+                if (!_useMuramana)
+                {
+                    ItemManager.Muramana(null, false);
+                }
+                if (_useMuramana && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                {
+                    ItemManager.Muramana(null, true, float.MaxValue);
+                    Utility.DelayAction.Add(1000 + Game.Ping, () => _useMuramana = false);
+                }
                 OnPreUpdate();
             }
             catch (Exception ex)
@@ -162,7 +169,7 @@ namespace SFXChallenger.Abstracts
             }
         }
 
-        protected void OnCorePostUpdate(EventArgs args)
+        protected virtual void OnCorePostUpdate(EventArgs args)
         {
             try
             {
@@ -174,22 +181,9 @@ namespace SFXChallenger.Abstracts
             }
         }
 
-        protected abstract void SetupSpells();
         protected abstract void OnLoad();
+        protected abstract void SetupSpells();
         protected abstract void AddToMenu();
-
-        protected void DrawingOnDraw(EventArgs args)
-        {
-            try
-            {
-                DrawingManager.Draw();
-            }
-            catch (Exception ex)
-            {
-                Global.Logger.AddItem(new LogItem(ex));
-            }
-        }
-
         protected abstract void OnPreUpdate();
         protected abstract void OnPostUpdate();
         protected abstract void Combo();
@@ -211,10 +205,12 @@ namespace SFXChallenger.Abstracts
                 if (ItemUsage == ItemUsageType.AfterAttack)
                 {
                     Orbwalking.AfterAttack += OnOrbwalkingAfterAttack;
-                    Spellbook.OnCastSpell += OnSpellbookCastSpell;
                 }
 
-                Drawing.OnDraw += DrawingOnDraw;
+                Core.OnPreUpdate += OnCorePreUpdate;
+                Core.OnPostUpdate += OnCorePostUpdate;
+                Obj_AI_Base.OnProcessSpellCast += OnObjAiBaseProcessSpellCast;
+                Drawing.OnDraw += OnDrawingDraw;
             }
             catch (Exception ex)
             {
@@ -222,43 +218,25 @@ namespace SFXChallenger.Abstracts
             }
         }
 
-        private void OnSpellbookCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        private void OnCoreShutdown(EventArgs args)
         {
             try
             {
-                if (sender.Owner != null && sender.Owner.IsMe)
-                {
-                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                    {
-                        var endPos = args.EndPosition;
-                        var spell = Spells.FirstOrDefault(s => s.Slot == args.Slot);
-                        if (spell != null)
-                        {
-                            var enemy1 =
-                                GameObjects.EnemyHeroes.FirstOrDefault(
-                                    e => e.IsValidTarget() && e.Distance(endPos) < spell.Range / 2f);
-                            var enemy2 =
-                                GameObjects.EnemyHeroes.FirstOrDefault(
-                                    e => e.IsValidTarget() && e.Distance(Player) < spell.Range / 2f);
-                            if (enemy1 != null)
-                            {
-                                ItemManager.Muramana(
-                                    enemy1, true,
-                                    spell.Range + spell.Width + enemy1.BoundingRadius + Player.BoundingRadius);
-                            }
-                            if (enemy2 != null)
-                            {
-                                ItemManager.Muramana(
-                                    enemy2, true,
-                                    spell.Range + spell.Width + enemy2.BoundingRadius + Player.BoundingRadius);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ItemManager.Muramana(null, false);
-                    }
-                }
+                Core.OnPreUpdate -= OnCorePreUpdate;
+                Core.OnPostUpdate -= OnCorePostUpdate;
+                Drawing.OnDraw -= OnDrawingDraw;
+            }
+            catch (Exception ex)
+            {
+                Global.Logger.AddItem(new LogItem(ex));
+            }
+        }
+
+        private void OnDrawingDraw(EventArgs args)
+        {
+            try
+            {
+                DrawingManager.Draw();
             }
             catch (Exception ex)
             {
@@ -295,11 +273,19 @@ namespace SFXChallenger.Abstracts
             }
         }
 
-        private void OnCoreShutdown(EventArgs args)
+        private void OnObjAiBaseProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             try
             {
-                Drawing.OnDraw -= DrawingOnDraw;
+                if (sender.IsMe && !args.SData.IsAutoAttack())
+                {
+                    var slot = Player.GetSpellSlot(args.SData.Name);
+                    if (args.Target is Obj_AI_Hero || slot == SpellSlot.Q || slot == SpellSlot.W || slot == SpellSlot.E ||
+                        slot == SpellSlot.R)
+                    {
+                        _useMuramana = true;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -313,7 +299,7 @@ namespace SFXChallenger.Abstracts
             {
                 SFXMenu = new Menu(Global.Name, "sfx", true);
 
-                Menu = SFXMenu.AddSubMenu(new Menu(Player.ChampionName, SFXMenu.Name + "." + Player.ChampionName));
+                Menu = new Menu(Global.Prefix + Player.ChampionName, SFXMenu.Name + "." + Player.ChampionName, true);
 
                 DrawingManager.AddToMenu(Menu.AddSubMenu(new Menu("Drawings", Menu.Name + ".drawing")), this);
 
@@ -328,6 +314,7 @@ namespace SFXChallenger.Abstracts
 
                 DebugMenu.AddToMenu(SFXMenu, Spells);
 
+                Menu.AddToMainMenu();
                 SFXMenu.AddToMainMenu();
 
                 try

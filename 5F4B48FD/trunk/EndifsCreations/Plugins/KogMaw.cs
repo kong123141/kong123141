@@ -36,12 +36,12 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Living Artillery ", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.KogMaw.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T                
+                custommenu.AddItem(new MenuItem("EC.KogMaw.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T                
                 custommenu.AddItem(new MenuItem("EC.KogMaw.UseRConserve", "Conserve Mana").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.KogMaw.UseRConserveValue", "Up to x stacks").SetValue(new Slider(1, 1, 10)));
                 custommenu.AddItem(new MenuItem("EC.KogMaw.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.KogMaw.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -51,14 +51,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.KogMaw.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.KogMaw.Combo.RBool", "(R) Conserve Mana").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.KogMaw.Combo.RValue", "Up to x stacks").SetValue(new Slider(1, 1, 10)));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {               
                 harassmenu.AddItem(new MenuItem("EC.KogMaw.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.KogMaw.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.KogMaw.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -69,7 +69,7 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.KogMaw.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.KogMaw.RFarmValue", "R More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.KogMaw.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
@@ -77,19 +77,19 @@ namespace EndifsCreations.Plugins
                 junglemenu.AddItem(new MenuItem("EC.KogMaw.Jungle.W", "Use W").SetValue(true));          
                 junglemenu.AddItem(new MenuItem("EC.KogMaw.Jungle.E", "Use E").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.KogMaw.UseRJFarm", "Use R").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }  
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.KogMaw.KPredHitchance", "Spells Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.KogMaw.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.KogMaw.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.KogMaw.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -97,11 +97,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.KogMaw.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.KogMaw.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.KogMaw.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.KogMaw.Combo.R").GetValue<bool>();
-            var Conserve = config.Item("EC.KogMaw.Combo.RBool").GetValue<bool>();
+            var UseQ = Root.Item("EC.KogMaw.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.KogMaw.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.KogMaw.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.KogMaw.Combo.R").GetValue<bool>();
+            var Conserve = Root.Item("EC.KogMaw.Combo.RBool").GetValue<bool>();
             if (UseR) Custom(Conserve, Target);
             if (UseW && W.IsReady() && Player.CountEnemiesInRange(W.Range) >  0)
             {
@@ -127,9 +127,9 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.KogMaw.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.KogMaw.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.KogMaw.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.KogMaw.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.KogMaw.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.KogMaw.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (target.IsValidTarget())
             {
@@ -150,8 +150,8 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.KogMaw.Farm.ManaPercent").GetValue<Slider>().Value) return;            
-            if (config.Item("EC.KogMaw.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && !myOrbwalker.IsWaiting())
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.KogMaw.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.KogMaw.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && !myOrbwalker.Waiting)
             {
                 if (Player.UnderTurret(true)) return;
                 var minionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
@@ -163,26 +163,26 @@ namespace EndifsCreations.Plugins
                 }
 
             }
-            if (config.Item("EC.KogMaw.Farm.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.KogMaw.Farm.E").GetValue<bool>() && E.IsReady())
             {
                 if (Player.UnderTurret(true)) return;
                 var MinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 var ELine = E.GetLineFarmLocation(MinionsE);
                 if (ELine.Position.IsValid() && Vector3.Distance(Player.ServerPosition, ELine.Position.To3D()) > Player.AttackRange)
                 {
-                    if (ELine.MinionsHit > config.Item("EC.KogMaw.Farm.E.Value").GetValue<Slider>().Value)
+                    if (ELine.MinionsHit > Root.Item("EC.KogMaw.Farm.E.Value").GetValue<Slider>().Value)
                     {
                         if (myUtility.IsFacing(Player, ELine.Position.To3D())) E.Cast(ELine.Position);
                     }
                 }
             }
-            if (config.Item("EC.KogMaw.UseRFarm").GetValue<bool>() && R.IsReady() && !Player.IsWindingUp && R.Instance.ManaCost <= 40)
+            if (Root.Item("EC.KogMaw.UseRFarm").GetValue<bool>() && R.IsReady() && !Player.IsWindingUp && R.Instance.ManaCost <= 40)
             {
                 if (Player.UnderTurret(true)) return;
                 var minionR = MinionManager.GetMinions(Player.ServerPosition, R.Range);
                 if (minionR == null) return;
                 var rpred = R.GetCircularFarmLocation(minionR);
-                if (rpred.MinionsHit > config.Item("EC.KogMaw.RFarmValue").GetValue<Slider>().Value)
+                if (rpred.MinionsHit > Root.Item("EC.KogMaw.RFarmValue").GetValue<Slider>().Value)
                 {
                     R.Cast(rpred.Position);
                 }
@@ -196,7 +196,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.KogMaw.Jungle.Q").GetValue<bool>() && Q.IsReady())
+                if (Root.Item("EC.KogMaw.Jungle.Q").GetValue<bool>() && Q.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -204,7 +204,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (myUtility.IsFacing(Player, mob.ServerPosition, 70)) Q.Cast(mob);
                 }
-                if (config.Item("EC.KogMaw.Jungle.E").GetValue<bool>() && E.IsReady())
+                if (Root.Item("EC.KogMaw.Jungle.E").GetValue<bool>() && E.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -216,7 +216,7 @@ namespace EndifsCreations.Plugins
                         if (myUtility.IsFacing(Player, ELine.Position.To3D(), 70)) E.Cast(ELine.Position);
                     }
                 }
-                if (config.Item("EC.KogMaw.UseRJFarm").GetValue<bool>() && R.IsReady() && R.Instance.ManaCost <= 40)
+                if (Root.Item("EC.KogMaw.UseRJFarm").GetValue<bool>() && R.IsReady() && R.Instance.ManaCost <= 40)
                 {
                     var MobsR = MinionManager.GetMinions(Player.ServerPosition, R.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
                     MinionManager.FarmLocation RCircular = R.GetCircularFarmLocation(MobsR);
@@ -232,8 +232,8 @@ namespace EndifsCreations.Plugins
             if (R.IsReady())
             {
                 Obj_AI_Hero target;
-                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && conserve && R.Instance.ManaCost > (40 * config.Item("EC.KogMaw.Combo.RValue").GetValue<Slider>().Value)) return;
-                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && config.Item("EC.KogMaw.UseRConserve").GetValue<bool>() && R.Instance.ManaCost > (40 * config.Item("EC.KogMaw.UseRConserveValue").GetValue<Slider>().Value)) return;
+                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && conserve && R.Instance.ManaCost > (40 * Root.Item("EC.KogMaw.Combo.RValue").GetValue<Slider>().Value)) return;
+                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && Root.Item("EC.KogMaw.UseRConserve").GetValue<bool>() && R.Instance.ManaCost > (40 * Root.Item("EC.KogMaw.UseRConserveValue").GetValue<Slider>().Value)) return;
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToMagic(x) && !myUtility.ImmuneToDeath(x));
                 if (selected != null && selected.IsValid<Obj_AI_Hero>())
                 {
@@ -241,12 +241,12 @@ namespace EndifsCreations.Plugins
                 }
                 else
                 {
-                    target = TargetSelector.GetSelectedTarget() != null && TargetSelector.GetSelectedTarget().IsValidTarget() ? 
+                    target = TargetSelector.GetSelectedTarget() != null && TargetSelector.GetSelectedTarget().IsValidTarget() ?
                         TargetSelector.GetSelectedTarget() :
                         EnemyList.Where(x => !x.InFountain() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= R.Range).OrderByDescending(z => myRePriority.ResortDB(z.ChampionName)).ThenBy(i => i.Health).FirstOrDefault();
                 }
                 if (target == null) return;
-                mySpellcast.CircularPrecise(target, R, KHitChance);
+                mySpellcast.CircularPrecise(target, R, KHitChance, R.Range, 100);
             }
         }
      
@@ -274,7 +274,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetKHitChance()
         {
-            switch (config.Item("EC.KogMaw.KPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.KogMaw.KPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -328,7 +328,7 @@ namespace EndifsCreations.Plugins
             if (args.Target is Obj_AI_Minion)
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear &&
-                    config.Item("EC.KogMaw.Farm.W").GetValue<bool>() &&
+                    Root.Item("EC.KogMaw.Farm.W").GetValue<bool>() &&
                     !Player.IsWindingUp &&
                     W.IsReady())
                 {
@@ -338,7 +338,7 @@ namespace EndifsCreations.Plugins
             if (args.Target is Obj_AI_Minion && args.Target.Team == GameObjectTeam.Neutral)
             {
                 if (!args.Target.Name.Contains("Mini") &&
-                    config.Item("EC.KogMaw.Jungle.W").GetValue<bool>() &&
+                    Root.Item("EC.KogMaw.Jungle.W").GetValue<bool>() &&
                     !Player.IsWindingUp &&
                     W.IsReady())
                 {
@@ -349,25 +349,25 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.KogMaw.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.KogMaw.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.KogMaw.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.KogMaw.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.KogMaw.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.KogMaw.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
             if (R.Level > 0)
             {
-                if (config.Item("EC.KogMaw.UseRDrawDistance").GetValue<bool>())
+                if (Root.Item("EC.KogMaw.UseRDrawDistance").GetValue<bool>())
                 {
                     Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                 }
-                if (config.Item("EC.KogMaw.UseRDrawTarget").GetValue<bool>())
+                if (Root.Item("EC.KogMaw.UseRDrawTarget").GetValue<bool>())
                 {
                     var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToMagic(x) && !myUtility.ImmuneToDeath(x));
                     var target = EnemyList.Where(x => !x.InFountain() && Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= R.Range).OrderByDescending(z => myRePriority.ResortDB(z.ChampionName)).ThenBy(i => i.Health).FirstOrDefault();

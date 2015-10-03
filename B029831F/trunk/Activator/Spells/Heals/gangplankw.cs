@@ -50,7 +50,7 @@ namespace Activator.Spells.Heals
                 if (hero.Player.NetworkId != Player.NetworkId)
                     return;
 
-                if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                     continue; 
 
                 if (hero.Player.Distance(Player.ServerPosition) <= Range)

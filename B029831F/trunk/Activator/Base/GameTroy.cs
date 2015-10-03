@@ -3,17 +3,17 @@
 // any form or by any means, mechanical, electronical or otherwise, is prohibited
 // without the prior written consent of the copyright owner.
 // 
-// Document:	activator/gametroy.cs
-// Date:		01/07/2015
+// Document:	Base/GameTroy.cs
+// Date:		22/09/2015
 // Author:		Robin Kurisu
 #endregion
 
-using System.Collections.Generic;
 using LeagueSharp;
+using System.Collections.Generic;
 
 namespace Activator.Base
 {
-    public class Gametroy
+    public class GameTroy
     {
         public int Damage;
         public bool Included;
@@ -23,7 +23,7 @@ namespace Activator.Base
         public SpellSlot Slot;
         public int Start;
 
-        public Gametroy(
+        public GameTroy(
             Obj_AI_Hero owner, 
             SpellSlot slot, 
             string name, 
@@ -41,9 +41,9 @@ namespace Activator.Base
             Damage = incdmg;
         }
 
-        public static List<Gametroy> Troys = new List<Gametroy>(); 
+        public static List<GameTroy> Troys = new List<GameTroy>(); 
 
-        static Gametroy()
+        static GameTroy()
         {
             
         }

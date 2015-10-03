@@ -50,30 +50,27 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Rengar.Combo.E", "Use E").SetValue(true));
                 //combomenu.AddItem(new MenuItem("EC.Rengar.Combo.Dive", "Turret Dive").SetValue(false));
                 //combomenu.AddItem(new MenuItem("EC.Rengar.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Rengar.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Rengar.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Rengar.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         private void Combo()
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
-            var UseW = config.Item("EC.Rengar.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Rengar.Combo.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Rengar.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Rengar.Combo.E").GetValue<bool>();
             if (!Player.IsDashing() && !Player.HasBuff("rengarr"))
             {
                 if (UseW && W.IsReady())
                 {
-                    if (Player.CountEnemiesInRange(W.Range) > 0)
-                    {
-                        W.Cast();
-                    }
+                    mySpellcast.PointBlank(null, W, 400);
                 }
                 if (Target.IsValidTarget())
                 {
@@ -87,10 +84,9 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            var allMinionsW = MinionManager.GetMinions(Player.ServerPosition,W.Range);
-            if (allMinionsW.Count >= 5)
+            if (W.IsReady())
             {
-                W.Cast();
+                myFarmManager.LanePointBlank(W, W.Range, false, Ferocity >= 5);
             }
         }
         private float GetDamage(Obj_AI_Hero target)
@@ -152,8 +148,17 @@ namespace EndifsCreations.Plugins
                     {
                         if (E.IsReady())
                         {
-                            mySpellcast.LinearVector(Target.Position, E, Target.BoundingRadius);
+                            mySpellcast.PointVector(Target.Position, E, Target.BoundingRadius);
                         }
+                    }
+                    break;
+                case myOrbwalker.OrbwalkingMode.JungleClear:
+
+                    if (E.IsReady() && Ferocity != 5)
+                    {
+   
+                            myFarmManager.JungleLinear(E, E.Range);
+                        
                     }
                     break;
             }
@@ -171,7 +176,7 @@ namespace EndifsCreations.Plugins
                         var x = (int)(Vector3.Distance(Player.ServerPosition, Target.ServerPosition) / 2f);                              
                         Utility.DelayAction.Add(x, () =>
                         {
-                            mySpellcast.LinearVector(Target.ServerPosition, E);               
+                            mySpellcast.PointVector(Target.ServerPosition, E);               
                             W.Cast();
                             myItemManager.UseItems(1, Target);
                             myItemManager.UseItems(2, null);
@@ -198,7 +203,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Rengar.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Rengar.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
@@ -211,9 +216,9 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Rengar.Combo.E").GetValue<bool>() && E.IsReady() && Orbwalking.InAutoAttackRange(target) && !Player.IsDashing())
+                    if (Root.Item("EC.Rengar.Combo.E").GetValue<bool>() && E.IsReady() && Orbwalking.InAutoAttackRange(target) && !Player.IsDashing())
                     {
-                        mySpellcast.LinearVector(target.Position, E, target.BoundingRadius);
+                        mySpellcast.PointVector(target.Position, E, target.BoundingRadius);
                     }
                 }
             }
@@ -222,11 +227,11 @@ namespace EndifsCreations.Plugins
         {
             if (Player.IsDead) return;
             var color = Ferocity == 5 ? Color.Yellow : Color.White;
-            if (config.Item("EC.Rengar.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Rengar.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, color);
             }
-            if (config.Item("EC.Rengar.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Rengar.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, color);
             }

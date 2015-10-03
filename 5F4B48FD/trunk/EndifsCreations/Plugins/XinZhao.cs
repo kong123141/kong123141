@@ -37,12 +37,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.XinZhao.Combo.E", "Use E").SetValue(true));
                 //combomenu.AddItem(new MenuItem("EC.XinZhao.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.XinZhao.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.XinZhao.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -50,8 +50,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
 
-            var UseE = config.Item("EC.XinZhao.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.XinZhao.Combo.Items").GetValue<bool>();
+            var UseE = Root.Item("EC.XinZhao.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.XinZhao.Combo.Items").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;                
@@ -102,11 +102,11 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.XinZhao.Combo.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.XinZhao.Combo.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }
-                    if (config.Item("EC.XinZhao.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.XinZhao.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
@@ -156,7 +156,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.XinZhao.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.XinZhao.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

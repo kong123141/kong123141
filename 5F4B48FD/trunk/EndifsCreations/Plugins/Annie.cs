@@ -36,27 +36,27 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Summon: Tibbers ", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Annie.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Annie.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Annie.UseRType", "R").SetValue(new StringList(new[] { "Tibbers!", "Flash Tibbers!"  })));
                 custommenu.AddItem(new MenuItem("EC.Annie.UseRHitChecks", "Only if hits").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Annie.UseRStun", "With Stun").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Annie.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Annie.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
                 combomenu.AddItem(new MenuItem("EC.Annie.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Annie.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Annie.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Annie.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Annie.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Annie.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -65,14 +65,14 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Annie.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Annie.Farm.W.Value", "W More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Annie.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Annie.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Annie.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Annie.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }  
             var miscmenu = new Menu("Misc", "Misc");
             {
@@ -80,13 +80,13 @@ namespace EndifsCreations.Plugins
                 miscmenu.AddItem(new MenuItem("EC.Annie.UseStunMisc", "Stun Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Annie.UseStun2Misc", "Stun Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Annie.Misc.E", "E Shields").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Annie.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Annie.Draw.W", "W").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -94,9 +94,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Annie.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Annie.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Annie.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Annie.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Annie.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Annie.Combo.E").GetValue<bool>();
             if (RPet)
             {                
                 if (Target.IsValidTarget() && Orbwalking.InAutoAttackRange(Target))
@@ -154,8 +154,8 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Annie.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Annie.Harass.W").GetValue<bool>();
+            var UseQ = Root.Item("EC.Annie.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Annie.Harass.W").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -199,13 +199,13 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.EnoughMana(config.Item("EC.Annie.Farm.ManaPercent").GetValue<Slider>().Value) && !Pyromania)
+            if (myUtility.EnoughMana(Root.Item("EC.Annie.Farm.ManaPercent").GetValue<Slider>().Value) && !Pyromania)
             {
-                if (config.Item("EC.Annie.Farm.Q").GetValue<bool>() && Q.IsReady() && myUtility.TickCount - LastAA > myHumazier.ReactionDelay)
+                if (Root.Item("EC.Annie.Farm.Q").GetValue<bool>() && Q.IsReady() && myUtility.TickCount - LastAA > myHumazier.ReactionDelay)
                 {
                     myFarmManager.LaneLastHit(Q, Q.Range, null, true);
                 }
-                if (config.Item("EC.Annie.Farm.W").GetValue<bool>() && W.IsReady() && myUtility.TickCount - LastAA > myHumazier.ReactionDelay)
+                if (Root.Item("EC.Annie.Farm.W").GetValue<bool>() && W.IsReady() && myUtility.TickCount - LastAA > myHumazier.ReactionDelay)
                 {
                     myFarmManager.LaneCircular(W, W.Range, W.Width / 2);
                 }
@@ -220,7 +220,7 @@ namespace EndifsCreations.Plugins
             if (mob != null)
             {
                 if (myUtility.TickCount - LastAA < myUtility.RandomDelay(300, 400)) return;
-                if (config.Item("EC.Annie.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob) && !Player.IsWindingUp && myUtility.TickCount - LastW > myUtility.RandomDelay(300, 400))
+                if (Root.Item("EC.Annie.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob) && !Player.IsWindingUp && myUtility.TickCount - LastW > myUtility.RandomDelay(300, 400))
                 {
                     if (largemobs != null)
                     {
@@ -231,7 +231,7 @@ namespace EndifsCreations.Plugins
                         Q.CastOnUnit(mob);
                     }
                 }
-                if (config.Item("EC.Annie.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp && myUtility.TickCount - LastQ > myUtility.RandomDelay(300,400))
+                if (Root.Item("EC.Annie.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp && myUtility.TickCount - LastQ > myUtility.RandomDelay(300,400))
                 {
                     if (largemobs != null)
                     {
@@ -242,7 +242,7 @@ namespace EndifsCreations.Plugins
                         if (myUtility.IsFacing(Player, mob.ServerPosition, 75)) W.Cast(mob.ServerPosition);
                     }
                 }
-                if (config.Item("EC.Annie.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Annie.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null)
                     {
@@ -255,10 +255,10 @@ namespace EndifsCreations.Plugins
         {
             if (R.IsReady())
             {
-                if (config.Item("EC.Annie.UseRStun").GetValue<bool>() && !Pyromania) return;
+                if (Root.Item("EC.Annie.UseRStun").GetValue<bool>() && !Pyromania) return;
                 Obj_AI_Hero target; 
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
-                switch (config.Item("EC.Annie.UseRType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Annie.UseRType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         if (TargetSelector.GetSelectedTarget() != null && TargetSelector.GetSelectedTarget().IsValidTarget())
@@ -328,7 +328,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetWHitChance()
         {
-            switch (config.Item("EC.Annie.WPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Annie.WPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -411,7 +411,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && (config.Item("EC.Annie.UseRHitChecks").GetValue<bool>()))
+            if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && (Root.Item("EC.Annie.UseRHitChecks").GetValue<bool>()))
             {
                 if (args.Slot == SpellSlot.R && myUtility.SpellHits(R).Item1 == 0)
                 {
@@ -434,14 +434,14 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Minion && unit.IsEnemy)
             {
-                if (config.Item("EC.Annie.Farm.E").GetValue<bool>() && myUtility.PlayerManaPercentage > config.Item("EC.Annie.Farm.ManaPercent").GetValue<Slider>().Value)
+                if (Root.Item("EC.Annie.Farm.E").GetValue<bool>() && myUtility.PlayerManaPercentage > Root.Item("EC.Annie.Farm.ManaPercent").GetValue<Slider>().Value)
                 {
                     E.CastOnUnit(Player);
                 }
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy)
             {
-                if (config.Item("EC.Annie.Misc.E").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Annie.Combo.E").GetValue<bool>()) && E.IsReady())
+                if (Root.Item("EC.Annie.Misc.E").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Annie.Combo.E").GetValue<bool>()) && E.IsReady())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -468,7 +468,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Annie.UseStunMisc").GetValue<bool>())
+            if (Root.Item("EC.Annie.UseStunMisc").GetValue<bool>())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) < 625)
                 {
@@ -490,7 +490,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Annie.UseStun2Misc").GetValue<bool>())
+            if (Root.Item("EC.Annie.UseStun2Misc").GetValue<bool>())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= 625)
                 {
@@ -512,27 +512,27 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Annie.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Annie.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Annie.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Annie.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
             
             if (R.Level > 0 && R.IsReady())
             {
-                if (config.Item("EC.Annie.UseRStun").GetValue<bool>() && !Pyromania) return;
+                if (Root.Item("EC.Annie.UseRStun").GetValue<bool>() && !Pyromania) return;
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
-                switch (config.Item("EC.Annie.UseRType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Annie.UseRType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
-                        if (config.Item("EC.Annie.UseRDrawDistance").GetValue<bool>())
+                        if (Root.Item("EC.Annie.UseRDrawDistance").GetValue<bool>())
                         {
                             Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                         }
-                        if (config.Item("EC.Annie.UseRDrawTarget").GetValue<bool>())
+                        if (Root.Item("EC.Annie.UseRDrawTarget").GetValue<bool>())
                         {
                             var target = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&
                                     Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= R.Range)
@@ -556,12 +556,12 @@ namespace EndifsCreations.Plugins
                     case 1:
                         if (FlashSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                         {
-                            if (config.Item("EC.Annie.UseRDrawDistance").GetValue<bool>())
+                            if (Root.Item("EC.Annie.UseRDrawDistance").GetValue<bool>())
                             {
                                 Render.Circle.DrawCircle(Player.Position, 425f, Color.Fuchsia, 7);
                                 Render.Circle.DrawCircle(Player.Position, R.Range + 425f, Color.Fuchsia, 7);
                             }
-                            if (config.Item("EC.Annie.UseRDrawTarget").GetValue<bool>())
+                            if (Root.Item("EC.Annie.UseRDrawTarget").GetValue<bool>())
                             {
                                 var target = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&
                                     Vector3.Distance(Player.ServerPosition, x.ServerPosition) > 425f &&

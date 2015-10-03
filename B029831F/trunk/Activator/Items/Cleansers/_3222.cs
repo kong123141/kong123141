@@ -65,32 +65,39 @@ namespace Activator.Items.Cleansers
 
             foreach (var hero in Activator.Allies())
             {
-                if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                     continue;
 
                 if (hero.Player.Distance(Player.ServerPosition) > Range)
                     continue;
 
-                Auras.CheckMikaels(hero.Player);
+                if (hero.ForceQSS)
+                {
+                    UseItem();
+                    hero.QSSBuffCount = 0;
+                    hero.QSSHighestBuffTime = 0;
+                }
+
+                Buffs.CheckMikaels(hero.Player);
 
                 if (hero.MikaelsBuffCount >= Menu.Item("use" + Name + "number").GetValue<Slider>().Value &&
                     hero.MikaelsHighestBuffTime >= Menu.Item("use" + Name + "time").GetValue<Slider>().Value)
                 {
-                    //if (!Menu.Item("use" + Name + "od").GetValue<bool>())
-                    //{
+                    if (!Menu.Item("use" + Name + "od").GetValue<bool>())
+                    {
                         Utility.DelayAction.Add(Game.Ping + Menu.Item("use" + Name + "delay").GetValue<Slider>().Value, delegate
                             {
                                 UseItem(hero.Player, Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                                 hero.MikaelsBuffCount = 0;
                                 hero.MikaelsHighestBuffTime = 0;
                             });
-                    //}
+                    }
                 }
 
                 if (hero.Player.Health / hero.Player.MaxHealth * 100 <=
                     Menu.Item("selflowhp" + Name + "pct").GetValue<Slider>().Value)
                 {
-                    if (hero.IncomeDamage > 0 && LeagueSharp.Common.Items.CanUseItem(Id))
+                    if (hero.IncomeDamage > 0)
                     {
                         UseItem(hero.Player, Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                         hero.MikaelsBuffCount = 0;

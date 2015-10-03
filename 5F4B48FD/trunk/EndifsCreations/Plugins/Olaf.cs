@@ -44,12 +44,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Olaf.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Olaf.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Olaf.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Olaf.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -57,11 +57,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Olaf.Combo.Q").GetValue<bool>();
-            //var UseW = config.Item("EC.Olaf.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Olaf.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Olaf.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Olaf.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Olaf.Combo.Q").GetValue<bool>();
+            //var UseW = Root.Item("EC.Olaf.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Olaf.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Olaf.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Olaf.Combo.Items").GetValue<bool>();
 
             if (Target.IsValidTarget())
             {
@@ -142,7 +142,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Olaf.Combo.W").GetValue<bool>() && W.IsReady() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.Olaf.Combo.W").GetValue<bool>() && W.IsReady() && Orbwalking.InAutoAttackRange(target))
                     {
                         W.Cast();
                     }
@@ -152,7 +152,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Olaf.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Olaf.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }

@@ -3,8 +3,8 @@
 // any form or by any means, mechanical, electronical or otherwise, is prohibited
 // without the prior written consent of the copyright owner.
 // 
-// Document:	activator/projectionhandler.cs
-// Date:		01/07/2015
+// Document:	Handlers/Projections.cs
+// Date:		22/09/2015
 // Author:		Robin Kurisu
 #endregion
 
@@ -13,16 +13,13 @@ using System.Linq;
 using Activator.Base;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SpellData = Activator.Data.SpellData;
 
 namespace Activator.Handlers
 {
     public class Projections
     {
-        public static Obj_AI_Hero Target;
-        public static int Casted;
-
-        public static void Load()
+        private static int _casted;
+        public static void Init()
         {
             GameObject.OnCreate += GameObject_OnCreate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast; 
@@ -44,7 +41,7 @@ namespace Activator.Handlers
             var startPos = missile.StartPosition.To2D();
             var endPos = missile.EndPosition.To2D();
 
-            var data = SpellData.GetByMissileName(missile.SData.Name.ToLower());
+            var data = Data.SpellData.GetByMissileName(missile.SData.Name.ToLower());
             if (data == null)
                 return;
 
@@ -110,7 +107,7 @@ namespace Activator.Handlers
                 if (Activator.Origin.Item(data.SDataName + "forceexhaust").GetValue<bool>())
                     hero.HitTypes.Add(HitType.ForceExhaust);
                 
-                Utility.DelayAction.Add((int) endtime + 100, () =>
+                Utility.DelayAction.Add(250, () =>
                 {
                     if (hero.IncomeDamage > 0)
                         hero.IncomeDamage -= 1;
@@ -138,7 +135,7 @@ namespace Activator.Handlers
 
             if (sender.IsEnemy && sender.Type == GameObjectType.obj_AI_Hero)
             {
-                Casted = Utils.GameTimeTickCount;
+                _casted = Utils.GameTimeTickCount;
                 foreach (var hero in Activator.Allies())
                 {
                     if (!hero.Player.IsValidTarget(float.MaxValue, false) || hero.Player.IsZombie || hero.Immunity)
@@ -190,7 +187,7 @@ namespace Activator.Handlers
 
                     #endregion
 
-                    foreach (var data in SpellData.Spells.Where(x => x.SDataName == args.SData.Name.ToLower()))
+                    foreach (var data in Data.SpellData.Spells.Where(x => x.SDataName == args.SData.Name.ToLower()))
                     {
                         #region self/selfaoe spell detection
 
@@ -298,7 +295,7 @@ namespace Activator.Handlers
                                 continue;
 
                             var distance = (int)(1000 * (startpos.Distance(hero.Player.ServerPosition) / data.MissileSpeed));
-                            var endtime = data.Delay - 100 + Game.Ping/2 + distance - (Utils.GameTimeTickCount - Casted);
+                            var endtime = data.Delay - 100 + Game.Ping/2 + distance - (Utils.GameTimeTickCount - _casted);
 
                             var direction = (args.End.To2D() - startpos.To2D()).Normalized();
                             var endpos = startpos.To2D() + direction * startpos.To2D().Distance(args.End.To2D());
@@ -389,7 +386,7 @@ namespace Activator.Handlers
                                 continue;
 
                             var distance = (int) (1000 * (sender.Distance(hero.Player.ServerPosition) / data.MissileSpeed));
-                            var endtime = data.Delay - 100 + Game.Ping / 2 + distance - (Utils.GameTimeTickCount - Casted);
+                            var endtime = data.Delay - 100 + Game.Ping / 2 + distance - (Utils.GameTimeTickCount - _casted);
 
                             if (!Activator.Origin.Item(data.SDataName + "predict").GetValue<bool>())
                                 continue;
@@ -439,7 +436,6 @@ namespace Activator.Handlers
 
                     }
                 }
-
             }
 
             #endregion
@@ -509,7 +505,7 @@ namespace Activator.Handlers
 
             #endregion
 
-            #region Gangplank Barell
+            #region Gangplank Barrel
             if (sender.IsEnemy)
             {
                 var enemy = sender as Obj_AI_Hero;

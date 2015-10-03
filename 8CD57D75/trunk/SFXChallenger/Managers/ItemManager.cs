@@ -118,6 +118,7 @@ namespace SFXChallenger.Managers
                     Damage = Damage.DamageItems.Hydra,
                     Range = ItemData.Ravenous_Hydra_Melee_Only.GetItem().Range
                 };
+
                 // Slow + Damage
                 BilgewaterCutlass = new CustomItem
                 {
@@ -160,19 +161,6 @@ namespace SFXChallenger.Managers
                     Range = ItemData.Hextech_Gunblade.GetItem().Range
                 };
 
-                // Remove stun + heal
-                MikaelsCrucible = new CustomItem
-                {
-                    Name = "mikaels-crucible",
-                    DisplayName = "Mikael's Crucible",
-                    Item = ItemData.Mikaels_Crucible.GetItem(),
-                    Flags = ItemFlags.Supportive | ItemFlags.Defensive,
-                    CombatFlags = CombatFlags.Melee | CombatFlags.Ranged,
-                    EffectFlags = EffectFlags.RemoveStun | EffectFlags.Heal,
-                    CastType = CastType.Target,
-                    Range = ItemData.Mikaels_Crucible.GetItem().Range
-                };
-
                 // AOE Shield
                 LocketIronSolari = new CustomItem
                 {
@@ -184,6 +172,19 @@ namespace SFXChallenger.Managers
                     EffectFlags = EffectFlags.Shield,
                     CastType = CastType.Self,
                     Range = ItemData.Locket_of_the_Iron_Solari.GetItem().Range
+                };
+
+                // Remove stun + heal
+                MikaelsCrucible = new CustomItem
+                {
+                    Name = "mikaels-crucible",
+                    DisplayName = "Mikael's Crucible",
+                    Item = ItemData.Mikaels_Crucible.GetItem(),
+                    Flags = ItemFlags.Supportive,
+                    CombatFlags = CombatFlags.Melee | CombatFlags.Ranged,
+                    EffectFlags = EffectFlags.RemoveStun | EffectFlags.Heal,
+                    CastType = CastType.Target,
+                    Range = ItemData.Mikaels_Crucible.GetItem().Range
                 };
 
                 // Place wards
@@ -283,6 +284,8 @@ namespace SFXChallenger.Managers
                     new MenuItem(muramanaMenu.Name + ".min-enemies-range", "Min. Enemies in Range").SetValue(
                         new Slider(1, 0, 5)));
                 muramanaMenu.AddItem(
+                    new MenuItem(muramanaMenu.Name + ".player-mana-above", "Player Mana % >=").SetValue(new Slider(30)));
+                muramanaMenu.AddItem(
                     new MenuItem(muramanaMenu.Name + ".player-health-below", "Player Health % <=").SetValue(
                         new Slider(100)));
                 muramanaMenu.AddItem(
@@ -343,7 +346,7 @@ namespace SFXChallenger.Managers
             return 0f;
         }
 
-        public static void UseComboItems(Obj_AI_Hero target)
+        public static void UseComboItems(Obj_AI_Hero target, bool killSteal = false)
         {
             if (_menu == null || !_menu.Item(_menu.Name + ".enabled").GetValue<bool>())
             {
@@ -363,17 +366,19 @@ namespace SFXChallenger.Managers
                             ((i.Flags & (_itemFlags)) != 0) &&
                             _menu.Item(_menu.Name + "." + i.Name + ".combo").GetValue<bool>() && i.Item.IsOwned() &&
                             i.Item.IsReady() && distance <= Math.Pow(i.Range, 2) &&
-                            ObjectManager.Player.CountEnemiesInRange(i.Range) >=
-                            _menu.Item(_menu.Name + "." + i.Name + ".min-enemies-range").GetValue<Slider>().Value &&
-                            ObjectManager.Player.HealthPercent <=
-                            _menu.Item(_menu.Name + "." + i.Name + ".player-health-below").GetValue<Slider>().Value &&
-                            ObjectManager.Player.HealthPercent >=
-                            _menu.Item(_menu.Name + "." + i.Name + ".player-health-above").GetValue<Slider>().Value &&
-                            (target == null ||
-                             target.HealthPercent <=
-                             _menu.Item(_menu.Name + "." + i.Name + ".target-health-below").GetValue<Slider>().Value &&
-                             target.HealthPercent >=
-                             _menu.Item(_menu.Name + "." + i.Name + ".target-health-above").GetValue<Slider>().Value)))
+                            (killSteal ||
+                             ObjectManager.Player.CountEnemiesInRange(i.Range) >=
+                             _menu.Item(_menu.Name + "." + i.Name + ".min-enemies-range").GetValue<Slider>().Value &&
+                             ObjectManager.Player.HealthPercent <=
+                             _menu.Item(_menu.Name + "." + i.Name + ".player-health-below").GetValue<Slider>().Value &&
+                             ObjectManager.Player.HealthPercent >=
+                             _menu.Item(_menu.Name + "." + i.Name + ".player-health-above").GetValue<Slider>().Value &&
+                             (target == null ||
+                              target.HealthPercent <=
+                              _menu.Item(_menu.Name + "." + i.Name + ".target-health-below").GetValue<Slider>().Value &&
+                              target.HealthPercent >=
+                              _menu.Item(_menu.Name + "." + i.Name + ".target-health-above").GetValue<Slider>().Value)))
+                    )
                 {
                     switch (item.CastType)
                     {
@@ -410,6 +415,8 @@ namespace SFXChallenger.Managers
                       ObjectManager.Player.CountEnemiesInRange(
                           overrideRange > 0 ? overrideRange : Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >=
                       _menu.Item(_menu.Name + ".muramana.min-enemies-range").GetValue<Slider>().Value &&
+                      ObjectManager.Player.ManaPercent >=
+                      _menu.Item(_menu.Name + ".muramana.player-mana-above").GetValue<Slider>().Value &&
                       ObjectManager.Player.HealthPercent <=
                       _menu.Item(_menu.Name + ".muramana.player-health-below").GetValue<Slider>().Value &&
                       ObjectManager.Player.HealthPercent >=
@@ -421,10 +428,10 @@ namespace SFXChallenger.Managers
                        _menu.Item(_menu.Name + ".muramana.target-health-above").GetValue<Slider>().Value))) ||
                     !activate && hasBuff)
                 {
-                    var muramana = ItemData.Muramana.GetItem();
-                    if (muramana.IsOwned(ObjectManager.Player))
+                    var muramana = ObjectManager.Player.GetSpellSlot("Muramana");
+                    if (muramana != SpellSlot.Unknown && muramana.IsReady())
                     {
-                        muramana.Cast();
+                        ObjectManager.Player.Spellbook.CastSpell(muramana);
                     }
                 }
             }
@@ -453,7 +460,7 @@ namespace SFXChallenger.Managers
                                  target, Damage.DamageType.Magical, ObjectManager.Player.FlatMagicDamageMod * 0.5f));
                 }
                 var sheen = ItemData.Sheen.GetItem();
-                if (sheen.IsOwned())
+                if (sheen.IsOwned() && sheen.IsReady())
                 {
                     return
                         (float)

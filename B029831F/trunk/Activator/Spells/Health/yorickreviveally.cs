@@ -47,7 +47,7 @@ namespace Activator.Spells.Health
                 if (hero.Player.Distance(Player.ServerPosition) > Range)
                     continue;
 
-                if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                     continue;
 
                 if (!Player.HasBuffOfType(BuffType.Invulnerability))

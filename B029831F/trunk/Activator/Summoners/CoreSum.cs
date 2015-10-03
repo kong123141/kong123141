@@ -1,3 +1,13 @@
+#region Copyright © 2015 Kurisu Solutions
+// All rights are reserved. Transmission or reproduction in part or whole,
+// any form or by any means, mechanical, electronical or otherwise, is prohibited
+// without the prior written consent of the copyright owner.
+// 
+// Document:	Summoners/CoreSum.cs
+// Date:		22/09/2015
+// Author:		Robin Kurisu
+#endregion
+
 using System;
 using System.Linq;
 using LeagueSharp;
@@ -37,6 +47,7 @@ namespace Activator.Summoners
                     .SetValue(new Slider(20));
                 Menu.AddItem(new MenuItem("selfmuchhp" + Name + "pct", "Use on Hero Dmg Dealt % >="))
                     .SetValue(new Slider(45));
+                Menu.AddItem(new MenuItem("mode" + Name, "Mode: ")).SetValue(new StringList(new[] { "Always", "Combo" }, 1));
             }
 
             if (Name == "summonerboost")
@@ -100,6 +111,7 @@ namespace Activator.Summoners
                 Menu.AddItem(new MenuItem("selflowhp" + Name + "pct", "Use on Hero HP % <=")).SetValue(new Slider(20));
                 Menu.AddItem(new MenuItem("selfmuchhp" + Name + "pct", "Use on Hero Dmg Dealt % >=")).SetValue(new Slider(45));
                 Menu.AddItem(new MenuItem("use" + Name + "ulti", "Use on Dangerous (Ultimates Only)")).SetValue(true);
+                Menu.AddItem(new MenuItem("mode" + Name, "Mode: ")).SetValue(new StringList(new[] { "Always", "Combo" }, 1));
             }
 
             if (Name == "summonerexhaust")

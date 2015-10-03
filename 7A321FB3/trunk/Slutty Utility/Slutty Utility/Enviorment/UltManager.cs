@@ -4,8 +4,9 @@ using LeagueSharp.Common;
 
 namespace Slutty_Utility.Enviorment
 {
-    class UltManager : Helper
+    internal class UltManager : Helper
     {
+
         public static Orbwalking.Orbwalker Orbwalker;
         private static int lastr;
         private static bool _defaultonbutton;
@@ -24,40 +25,34 @@ namespace Slutty_Utility.Enviorment
                 "Nunu"
             };
 
-          //  var ezevade = Menu.GetMenu("EzEvade", "ezEvade");
+            //  var ezevade = Menu.GetMenu("EzEvade", "ezEvade");
 
-         //   _defaultonbutton = ezevade.Item("DodgeSkillShots").GetValue<bool>();
+            //   _defaultonbutton = ezevade.Item("DodgeSkillShots").GetValue<bool>();
 
-            for (var i = 0; i >= 6; i++)
+            if (args.Slot == SpellSlot.R)
             {
-                if (sender.Owner.Name == champions[i]) continue;
+                lastr = Environment.TickCount;
+                Orbwalker.SetAttack(false);
+                Orbwalker.SetMovement(false);
 
-                if (args.Slot == SpellSlot.R)
+                if (_defaultonbutton)
                 {
-                    lastr = Environment.TickCount;
-                    Orbwalker.SetAttack(false);
-                    Orbwalker.SetMovement(false);
-                    /*
-                    if (_defaultonbutton)
-                    {
-                        ezevade.Item("DodgeSkillShots").SetValue(false);
-                    }
-                     */
-
+                  //  ezevade.Item("DodgeSkillShots").SetValue(false);
                 }
 
-                if (Environment.TickCount - lastr >= Player.Spellbook.GetSpell(SpellSlot.E).SData.SpellCastTime)
+            }
+
+            if (Environment.TickCount - lastr >= Player.Spellbook.GetSpell(SpellSlot.E).SData.SpellCastTime)
+            {
+                Orbwalker.SetAttack(true);
+                Orbwalker.SetMovement(true);
+
+                if (_defaultonbutton)
                 {
-                    Orbwalker.SetAttack(true);
-                    Orbwalker.SetMovement(true);
-                    /*
-                    if (_defaultonbutton)
-                    {
-                        ezevade.Item("DodgeSkillShots").SetValue(true);
-                    }
-                     */
+                   // ezevade.Item("DodgeSkillShots").SetValue(true);
                 }
             }
         }
     }
+
 }

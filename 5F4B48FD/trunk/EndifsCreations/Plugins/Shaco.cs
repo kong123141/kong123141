@@ -36,13 +36,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Shaco.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Shaco.Combo.E", "Use E").SetValue(true));
                 //combomenu.AddItem(new MenuItem("EC.Shaco.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Shaco.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Shaco.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -50,8 +50,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var UseW = config.Item("EC.Shaco.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Shaco.Combo.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Shaco.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Shaco.Combo.E").GetValue<bool>();
 
             if (RPet)
             {
@@ -160,7 +160,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && Q.IsReady())
             {
-                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Shaco.Combo.Q").GetValue<bool>())
+                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Shaco.Combo.Q").GetValue<bool>())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -184,11 +184,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Shaco.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Shaco.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Shaco.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Shaco.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

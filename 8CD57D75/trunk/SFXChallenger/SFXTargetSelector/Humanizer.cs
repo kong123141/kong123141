@@ -34,7 +34,7 @@ using SharpDX;
 
 namespace SFXChallenger.SFXTargetSelector
 {
-    internal class Humanizer
+    public class Humanizer
     {
         private static Menu _mainMenu;
         private static float _lastRange;
@@ -48,10 +48,10 @@ namespace SFXChallenger.SFXTargetSelector
 
                 _mainMenu.AddItem(
                     new MenuItem(_mainMenu.Name + ".fow", "Target Acquire Delay").SetShared()
-                        .SetValue(new Slider(400, 0, 1500)));
+                        .SetValue(new Slider(350, 0, 1500)));
                 _mainMenu.AddItem(
                     new MenuItem(_mainMenu.Name + ".range", "Range Change Delay").SetShared()
-                        .SetValue(new Slider(400, 0, 1500)));
+                        .SetValue(new Slider(350, 0, 1500)));
             }
             catch (Exception ex)
             {
@@ -63,30 +63,39 @@ namespace SFXChallenger.SFXTargetSelector
             Vector3 from,
             float range)
         {
-            var rangeDelay = _mainMenu.Item(_mainMenu.Name + ".range").GetValue<Slider>().Value;
-            var fowDelay = _mainMenu.Item(_mainMenu.Name + ".fow").GetValue<Slider>().Value;
-            if (rangeDelay > 0 && range > 0)
+            var finalTargets = targets.ToList();
+            try
             {
-                if (_lastRange > 0 && Game.Time - _lastRangeChange <= rangeDelay / 1000f)
+                var rangeDelay = _mainMenu.Item(_mainMenu.Name + ".range").GetValue<Slider>().Value;
+                var fowDelay = _mainMenu.Item(_mainMenu.Name + ".fow").GetValue<Slider>().Value;
+                if (rangeDelay > 0 && range > 0)
                 {
-                    targets =
-                        targets.Where(
-                            t =>
-                                t.Hero.Distance(
-                                    from.Equals(default(Vector3)) ? ObjectManager.Player.ServerPosition : from) <=
-                                _lastRange);
+                    if (_lastRange > 0 && Game.Time - _lastRangeChange <= rangeDelay / 1000f)
+                    {
+                        finalTargets =
+                            finalTargets.Where(
+                                t =>
+                                    t.Hero.Distance(
+                                        from.Equals(default(Vector3)) ? ObjectManager.Player.ServerPosition : from) <=
+                                    _lastRange).ToList();
+                    }
+                    else
+                    {
+                        _lastRange = range;
+                        _lastRangeChange = Game.Time;
+                    }
                 }
-                else
+                if (fowDelay > 0)
                 {
-                    _lastRange = range;
-                    _lastRangeChange = Game.Time;
+                    finalTargets =
+                        finalTargets.Where(item => Game.Time - item.LastVisibleChange > fowDelay / 1000f).ToList();
                 }
             }
-            if (fowDelay > 0)
+            catch (Exception ex)
             {
-                targets = targets.Where(item => Game.Time - item.LastVisibleChange > fowDelay / 1000f);
+                Global.Logger.AddItem(new LogItem(ex));
             }
-            return targets;
+            return finalTargets;
         }
     }
 }

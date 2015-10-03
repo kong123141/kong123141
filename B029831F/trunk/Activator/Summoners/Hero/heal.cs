@@ -37,7 +37,7 @@ namespace Activator.Summoners
 
             foreach (var hero in Activator.Allies())
             {
-                if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                     continue;
 
                 if (hero.Player.Distance(Player.ServerPosition) <= Range)
@@ -46,10 +46,10 @@ namespace Activator.Summoners
                         Menu.Item("selflowhp" + Name + "pct").GetValue<Slider>().Value)
                     {
                         if (hero.IncomeDamage > 0 && !hero.Player.IsRecalling() && !hero.Player.InFountain())
-                            UseSpell();
+                            UseSpell(Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
 
                         if (hero.IncomeDamage > hero.Player.Health)
-                            UseSpell();
+                            UseSpell(Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                     }
 
                     if (hero.IncomeDamage / hero.Player.MaxHealth * 100 >=
@@ -57,8 +57,8 @@ namespace Activator.Summoners
                     {
                         if (hero.Player.MaxHealth - hero.Player.Health > (75 + (15 * Activator.Player.Level)))
                         {
-                            if (hero.IncomeDamage > 0 && !hero.Player.IsRecalling() && !hero.Player.InFountain())
-                                UseSpell();
+                            if (!hero.Player.IsRecalling() && !hero.Player.InFountain())
+                                UseSpell(Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                         }
                     }
                 }

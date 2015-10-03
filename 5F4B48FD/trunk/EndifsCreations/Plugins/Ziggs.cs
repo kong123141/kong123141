@@ -46,13 +46,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Ziggs.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Ziggs.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Ziggs.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Ziggs.Misc.E", "E Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Ziggs.Misc.E2", "E Gapcloser").SetValue(false));                
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -60,7 +60,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Ziggs.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Ziggs.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Ziggs.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -68,9 +68,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q2.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Ziggs.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Ziggs.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Ziggs.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Ziggs.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Ziggs.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Ziggs.Combo.E").GetValue<bool>();
             if (UseW && W.IsReady() && SatchelCharge != null)
             {
                 if (Target.IsValidTarget() && Vector3.Distance(Target.Position, SatchelCharge.Position) <= 325)
@@ -98,11 +98,11 @@ namespace EndifsCreations.Plugins
                         if (Orbwalking.InAutoAttackRange(Target)) return;
                         if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= Q.Range)
                         {
-                            mySpellcast.CircularPrecise(Target, Q, HitChance.High);
+                            mySpellcast.CircularPrecise(Target, Q, HitChance.High, Q.Range, 130);
                         }
                         else if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) > Q.Range && Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= Q2.Range)
                         {
-                            mySpellcast.CircularPrecise(Target, Q2, HitChance.High);
+                            mySpellcast.CircularPrecise(Target, Q2, HitChance.High, Q.Range, 130);
                         }
                     }
                     if (UseW && W.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
@@ -114,7 +114,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, E, HitChance.High);
+                        mySpellcast.CircularAoe(Target, E, HitChance.High, E.Range, 100);
                     }
                 }
                 catch { }
@@ -156,7 +156,7 @@ namespace EndifsCreations.Plugins
         
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Ziggs.Misc.E").GetValue<bool>() && E.IsReady() && SatchelCharge == null)
+            if (Root.Item("EC.Ziggs.Misc.E").GetValue<bool>() && E.IsReady() && SatchelCharge == null)
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range + (E.Width / 2))
                 {
@@ -178,7 +178,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Ziggs.Misc.E2").GetValue<bool>() && E.IsReady() && SatchelCharge == null)
+            if (Root.Item("EC.Ziggs.Misc.E2").GetValue<bool>() && E.IsReady() && SatchelCharge == null)
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.Sender.ServerPosition) <= E.Range + (E.Width / 2))
                 {
@@ -190,20 +190,20 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Ziggs.Draw.W").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Ziggs.Draw.W").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, 850, Color.Cyan);
                 Render.Circle.DrawCircle(Player.Position, 1400, Color.Cyan);
             }
-            if (config.Item("EC.Ziggs.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Ziggs.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Ziggs.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Ziggs.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Ziggs.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Ziggs.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var tomouse = Player.ServerPosition.Extend(Game.CursorPos, Vector3.Distance(Player.ServerPosition, Game.CursorPos));
                 var tomax = Player.ServerPosition.Extend(Game.CursorPos, R.Range);

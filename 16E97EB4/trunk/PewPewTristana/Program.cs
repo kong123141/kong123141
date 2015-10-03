@@ -131,13 +131,14 @@ namespace PewPewTristana
             drawing.AddItem(new MenuItem("Wdraw", "Draw W Range").SetValue(new Circle(true, Color.DarkOrange)));
             drawing.AddItem(new MenuItem("Edraw", "Draw E Range").SetValue(new Circle(true, Color.AntiqueWhite)));
             drawing.AddItem(new MenuItem("Rdraw", "Draw R Range").SetValue(new Circle(true, Color.LawnGreen)));
-            drawing.AddItem(new MenuItem("CircleThickness", "Circle Thickness").SetValue(new Slider(7, 30, 0)));
+            drawing.AddItem(new MenuItem("CircleThickness", "Circle Thickness").SetValue(new Slider(1, 30, 0)));
 
             harass.AddItem(new MenuItem("harassQ", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("harassE", "Use E").SetValue(true));
             harass.AddItem(new MenuItem("harassmana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
 
-            drawing.AddItem(new MenuItem("dmgdrawer", "[Damage Indicator]:", true).SetValue(new StringList(new[] { "Custom", "Common" })));
+            drawing.AddItem(new MenuItem("disable.dmg", "Fully Disable Damage Indicator").SetValue(false));
+            drawing.AddItem(new MenuItem("dmgdrawer", "[Damage Indicator]:", true).SetValue(new StringList(new[] { "Custom", "Common" }, 1)));
 
             Config.SubMenu("[PPT]: Misc Settings").AddItem(new MenuItem("interrupt", "Interrupt Spells").SetValue(true));
             Config.SubMenu("[PPT]: Misc Settings").AddItem(new MenuItem("antigap", "Antigapcloser").SetValue(true));
@@ -201,6 +202,11 @@ namespace PewPewTristana
 
         private static void OnEndScene(EventArgs args)
         {
+            if (Config.Item("disable.dmg").GetValue<bool>())
+            {
+                Utility.HpBarDamageIndicator.Enabled = false;
+                return;
+            }
             int mode = Config.Item("dmgdrawer", true).GetValue<StringList>().SelectedIndex;
             if (mode == 0)
             {
@@ -234,27 +240,32 @@ namespace PewPewTristana
 
             if (E.IsReady() && Config.Item("UseE").GetValue<bool>()
             && player.ManaPercent >= emana)
-
                 E.CastOnUnit(target);
 
 
             var wmana = Config.Item("wmana").GetValue<Slider>().Value;
-
             if (W.IsReady() && target.IsValidTarget(W.Range) && target.HasBuff("tristanaecharge"))
+            {
                 wlogic();
+            }
 
             if (R.IsReady() && target.IsValidTarget(R.Range))
+            {
                 rlogic();
+            }
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 items();
 
             if (Config.Item("wturret").GetValue<bool>() && target.Position.UnderTurret(true))
                 return;
+
             if (target.HasBuff("deathdefiedbuff"))
                 return;
-            if (target.HasBuff("KogMawIcathianSurprise", true))
+
+            if (target.HasBuff("KogMawIcathianSurprise"))
                 return;
+
             if (target.IsInvulnerable)
                 return;
 
@@ -336,7 +347,7 @@ namespace PewPewTristana
         private static void qlogic()
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-
+            if (target == null || !target.IsValid) return;
 
             if (Config.Item("QonE").GetValue<bool>() && !target.HasBuff("tristanaecharge"))
                 return;
@@ -350,10 +361,10 @@ namespace PewPewTristana
 
         private static void rlogic()
         {
-            var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+            var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             var estacks = target.Buffs.Find(buff => buff.Name == "tristanaecharge").Count;
             var erdamage = (E.GetDamage(target) * ((0.30 * estacks) + 1) + R.GetDamage(target));
-            if (target == null || !target.IsValidTarget())
+            if (target == null || !target.IsValid)
                 return;
 
             if (Config.Item("manualr").GetValue<KeyBind>().Active && R.IsReady())
@@ -362,13 +373,16 @@ namespace PewPewTristana
             if (Config.Item("UseRE").GetValue<bool>()
                 && R.IsReady()
                 && Config.Item("UseR").GetValue<KeyBind>().Active
-                && target.HasBuff("tristanaecharge") && erdamage - 2*target.Level > target.Health)
-
+                && target.HasBuff("tristanaecharge") && erdamage - 2 * target.Level > target.Health)
+            {
                 R.CastOnUnit(target);
+            }
 
-            else if (Config.Item("UseR").GetValue<KeyBind>().Active && R.IsReady() &&
+            if (Config.Item("UseR").GetValue<KeyBind>().Active && R.IsReady() &&
                 R.GetDamage(target) > target.Health)
+            {
                 R.CastOnUnit(target);
+            }
 
         }
         private static float IgniteDamage(Obj_AI_Hero target)
@@ -437,7 +451,7 @@ namespace PewPewTristana
         {
             var harassmana = Config.Item("harassmana").GetValue<Slider>().Value;
             var target = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(player), TargetSelector.DamageType.Physical);
-            if (target == null)
+            if (target == null || !target.IsValid)
                 return;
 
 
@@ -459,33 +473,36 @@ namespace PewPewTristana
         private static void Laneclear()
         {
             var lanemana = Config.Item("laneclearmana").GetValue<Slider>().Value;
-            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range + W.Width + 30);
+            var MinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(player));
             var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
             var AA = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(player));
 
-            var Qfarmpos = W.GetLineFarmLocation(allMinionsQ, W.Width);
             var Efarmpos = W.GetCircularFarmLocation(allMinionsE, 200);
 
 
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
-                && Qfarmpos.MinionsHit >= 3 && allMinionsE.Count >= 2
+            if (MinionsQ.Count >= 2
                 && Config.Item("laneQ").GetValue<bool>()
                 && player.ManaPercent >= lanemana)
-
+            {
                 Q.Cast(player);
+            }
 
             foreach (var minion in allMinionsE)
+            {
+                if (minion == null) return;
+
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
                     && minion.IsValidTarget(E.Range) && Efarmpos.MinionsHit > 2
                     && allMinionsE.Count >= 2 && Config.Item("laneE").GetValue<bool>()
                     && player.ManaPercent >= lanemana)
 
                     E.CastOnUnit(minion);
+            }
 
 
             foreach (var turret in
                 ObjectManager.Get<Obj_AI_Turret>()
-                    .Where(t =>t.IsValidTarget() && player.Distance(t.Position) < Orbwalking.GetRealAutoAttackRange(player)))
+                    .Where(t =>t.IsValidTarget() && player.Distance(t.Position) < Orbwalking.GetRealAutoAttackRange(player) && t != null))
             {
                 if (Config.Item("eturret").GetValue<bool>())
                 {
@@ -497,18 +514,15 @@ namespace PewPewTristana
         private static void Jungleclear()
         {
             var jlanemana = Config.Item("jungleclearmana").GetValue<Slider>().Value;
-            var MinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range + W.Width + 30, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var MinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(player), MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             var MinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range + W.Width - 50, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
-            var Qfarmpos = W.GetLineFarmLocation(MinionsQ, W.Width + 100);
             var Efarmpos = W.GetCircularFarmLocation(MinionsE, W.Width - +100);
             var AA = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(player));
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
-                && Qfarmpos.MinionsHit >= 1
-                && MinionsE.Count >= 1 && Config.Item("jungleQ").GetValue<bool>()
+                && MinionsQ.Count >= 1 && Config.Item("jungleQ").GetValue<bool>()
                 && player.ManaPercent >= jlanemana)
-
                 Q.Cast(player);
 
             foreach (var minion in MinionsE)
@@ -566,7 +580,7 @@ namespace PewPewTristana
                                                         Config.Item("CircleThickness").GetValue<Slider>().Value);
 
             var orbtarget = Orbwalker.GetTarget();
-            if (Config.Item("drawtargetcircle").GetValue<bool>())
+            if (Config.Item("drawtargetcircle").GetValue<bool>() && orbtarget != null)
             Render.Circle.DrawCircle(orbtarget.Position, 100, Color.DarkOrange, 10);
 
         }

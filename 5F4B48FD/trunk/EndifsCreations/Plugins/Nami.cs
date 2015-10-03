@@ -35,24 +35,24 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Tidal Wave", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Nami.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Nami.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 //custommenu.AddItem(new MenuItem("EC.Nami.UseRDrawTarget", "Draw Target").SetValue(true));
                 //custommenu.AddItem(new MenuItem("EC.Nami.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
                 combomenu.AddItem(new MenuItem("EC.Nami.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Nami.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Nami.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Nami.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Nami.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Nami.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -61,13 +61,13 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Nami.Farm.Q.Value", "Q More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Nami.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Nami.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Nami.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Nami.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
@@ -76,7 +76,7 @@ namespace EndifsCreations.Plugins
                 miscmenu.AddItem(new MenuItem("EC.Nami.Misc.Q2", "Q Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Nami.UseWSupport", "W Supports").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Nami.UseESupport", "E Supports").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -84,7 +84,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Nami.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nami.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nami.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -92,9 +92,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             
-            var UseQ = config.Item("EC.Nami.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Nami.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Nami.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Nami.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Nami.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Nami.Combo.E").GetValue<bool>();
             if (UseW && W.IsReady() && !Target.IsValidTarget())
             {
                 var WAllies = HeroManager.Allies.Where(x => Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= W.Range);
@@ -108,7 +108,7 @@ namespace EndifsCreations.Plugins
                         }
                         else
                         {
-                            if (config.Item("EC.Nami.UseWSupport").GetValue<bool>() && wbounce.Health < 50)
+                            if (Root.Item("EC.Nami.UseWSupport").GetValue<bool>() && wbounce.Health < 50)
                             {
                                 W.Cast(wbounce);
                             }
@@ -125,7 +125,7 @@ namespace EndifsCreations.Plugins
                     if (UseQ && Q.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
                         if (myUtility.ImmuneToCC(Target)) return;
-                        mySpellcast.CircularPrecise(Target, Q, HitChance.High, 0, 0, 0);
+                        mySpellcast.CircularPrecise(Target, Q, HitChance.High,Q.Range, 125, 0, 0, 0);
                     }
                     if (UseW && W.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
@@ -151,9 +151,9 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Nami.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Nami.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Nami.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Nami.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Nami.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Nami.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -162,7 +162,7 @@ namespace EndifsCreations.Plugins
                     if (myUtility.ImmuneToCC(target) || (Player.UnderTurret(true) && target.UnderTurret(true))) return;
                     if (myUtility.IsFacing(Player, target.ServerPosition, 60))
                     {
-                        mySpellcast.CircularPrecise(target, Q, HitChance.High,0,0,0);
+                        mySpellcast.CircularPrecise(target, Q, HitChance.High, Q.Range, 125, 0, 0, 0);
                     }
                 }
                 if (UseW && W.IsReady())
@@ -202,22 +202,22 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Nami.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Nami.Farm.ManaPercent").GetValue<Slider>().Value) return;
             var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
             if (allMinionsQ == null) return;
-            if (config.Item("EC.Nami.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Nami.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
             {                                
                 foreach (var x in allMinionsQ)
                 {
-                    if (Q.IsInRange(x) && MinionManager.GetMinions(x.ServerPosition, Q.Width).Count() > config.Item("EC.Nami.Farm.Q.Value").GetValue<Slider>().Value)
+                    if (Q.IsInRange(x) && MinionManager.GetMinions(x.ServerPosition, Q.Width).Count() > Root.Item("EC.Nami.Farm.Q.Value").GetValue<Slider>().Value)
                     {
                         if (myUtility.IsFacing(Player, x.ServerPosition)) Q.CastOnUnit(x);
                     }
                 }
             }
-            if (config.Item("EC.Nami.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Nami.Farm.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
             {
-                if (allMinionsQ.Count() > config.Item("EC.Nami.Farm.E.Value").GetValue<Slider>().Value)
+                if (allMinionsQ.Count() > Root.Item("EC.Nami.Farm.E.Value").GetValue<Slider>().Value)
                 {
                     E.CastOnUnit(Player);
                 }
@@ -231,7 +231,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null && !Player.IsWindingUp)
             {
-                if (config.Item("EC.Nami.Jungle.Q").GetValue<bool>() && Q.IsReady())
+                if (Root.Item("EC.Nami.Jungle.Q").GetValue<bool>() && Q.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -242,7 +242,7 @@ namespace EndifsCreations.Plugins
                         if (myUtility.IsFacing(Player, mob.ServerPosition)) Q.Cast(mob.ServerPosition);
                     }
                 }
-                if (config.Item("EC.Nami.Jungle.E").GetValue<bool>() && E.IsReady())
+                if (Root.Item("EC.Nami.Jungle.E").GetValue<bool>() && E.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -268,7 +268,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQHitChance()
         {
-            switch (config.Item("EC.Nami.QPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Nami.QPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -325,7 +325,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsAlly && !unit.IsMe)
             {
-                if (config.Item("EC.Nami.UseESupport").GetValue<bool>())
+                if (Root.Item("EC.Nami.UseESupport").GetValue<bool>())
                 {
                     if (spell.Target is Obj_AI_Hero && spell.SData.IsAutoAttack() && spell.Target.IsEnemy && Vector3.Distance(Player.ServerPosition, unit.ServerPosition) <= E.Range)
                     {
@@ -340,7 +340,7 @@ namespace EndifsCreations.Plugins
             {
                 return;
             }
-            if (!config.Item("EC.Nami.UseESupport").GetValue<bool>()) return;
+            if (!Root.Item("EC.Nami.UseESupport").GetValue<bool>()) return;
             var missile = (MissileClient)sender;
             if (!missile.SpellCaster.IsValid<Obj_AI_Hero>() || !missile.SpellCaster.IsAlly || missile.SpellCaster.IsMe ||
                 missile.SpellCaster.IsMelee())
@@ -359,7 +359,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Nami.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Nami.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= Q.Range)
                 {
@@ -370,7 +370,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Nami.Misc.Q2").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Nami.Misc.Q2").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -383,19 +383,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Nami.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Nami.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Nami.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Nami.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Nami.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Nami.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Nami.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Nami.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var wtc = Drawing.WorldToScreen(Game.CursorPos);
                 var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Game.CursorPos, R.Range), R.Width);

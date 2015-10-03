@@ -67,23 +67,30 @@ namespace Activator.Items.Cleansers
             {
                 if (hero.Player.NetworkId == Player.NetworkId)
                 {
-                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.ChampionName).GetValue<bool>())
+                    if (!Parent.Item(Parent.Name + "useon" + hero.Player.NetworkId).GetValue<bool>())
                         continue;
 
-                    Auras.CheckMercurial(hero.Player);
+                    if (hero.ForceQSS)
+                    {
+                        UseItem();
+                        hero.QSSBuffCount = 0;
+                        hero.QSSHighestBuffTime = 0;
+                    }
+
+                    Buffs.CheckMercurial(hero.Player);
 
                     if (hero.MercurialBuffCount >= Menu.Item("use" + Name + "number").GetValue<Slider>().Value &&
                         hero.MercurialHighestBuffTime >= Menu.Item("use" + Name + "time").GetValue<Slider>().Value)
                     {
-                        //if (!Menu.Item("use" + Name + "od").GetValue<bool>())
-                        //{
+                        if (!Menu.Item("use" + Name + "od").GetValue<bool>())
+                        {
                             Utility.DelayAction.Add(Game.Ping + Menu.Item("use" + Name + "delay").GetValue<Slider>().Value, delegate
                             {
                                 UseItem(Menu.Item("mode" + Name).GetValue<StringList>().SelectedIndex == 1);
                                 hero.MercurialBuffCount = 0;
                                 hero.MercurialHighestBuffTime = 0;
                             });
-                        //}
+                        }
                     }
                 }
             }

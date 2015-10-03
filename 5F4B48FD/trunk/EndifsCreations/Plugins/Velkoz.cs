@@ -41,12 +41,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Velkoz.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Velkoz.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Velkoz.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Velkoz.Misc.E", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -54,7 +54,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Velkoz.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Velkoz.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Velkoz.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -62,9 +62,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(R.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Velkoz.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Velkoz.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Velkoz.Combo.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Velkoz.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Velkoz.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Velkoz.Combo.E").GetValue<bool>();
                         
             if (Target.IsValidTarget())
             {          
@@ -81,7 +81,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, E, HitChance.High);
+                        mySpellcast.CircularAoe(Target, E, HitChance.High, E.Range, 100);
                     }
                 }
                 catch { }
@@ -136,7 +136,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Velkoz.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Velkoz.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range + (E.Width/2))
                 {
@@ -148,19 +148,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Velkoz.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Velkoz.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Velkoz.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Velkoz.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Velkoz.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Velkoz.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Velkoz.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
+            if (Root.Item("EC.Velkoz.Draw.R").GetValue<bool>() && R.Level > 0 && R.IsReady())
             {
                 var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Game.CursorPos, R.Range), R.Width);
                 var insidebox = HeroManager.Enemies.Where(x => box.IsInside(x) && x.IsValidTarget()).ToList();

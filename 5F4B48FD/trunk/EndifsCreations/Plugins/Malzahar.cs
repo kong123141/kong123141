@@ -20,7 +20,7 @@ namespace EndifsCreations.Plugins
         private void LoadSpells()
         {
             Q = new Spell(SpellSlot.Q, 900);
-            W = new Spell(SpellSlot.W, 800);
+            W = new Spell(SpellSlot.W, 750);
             E = new Spell(SpellSlot.E, 650);
             R = new Spell(SpellSlot.R, 700);
 
@@ -36,11 +36,11 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Nether Grasp", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Malzahar.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Malzahar.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Malzahar.UseRType", "R").SetValue(new StringList(new[] { "Default", "Flash in" })));
                 custommenu.AddItem(new MenuItem("EC.Malzahar.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Malzahar.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -49,17 +49,17 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Malzahar.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Malzahar.Combo.R", "Use R").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Malzahar.Combo.EType", "E Voidlings check").SetValue(true));
-                combomenu.AddItem(new MenuItem("EC.Malzahar.Combo.RType", "R").SetValue(new StringList(new[] { "Always", "Killable", "Voidlings" })));
+                combomenu.AddItem(new MenuItem("EC.Malzahar.Combo.RType", "R").SetValue(new StringList(new[] { "Always", "Killable", "Voidlings", "When all spells are used" })));
                 combomenu.AddItem(new MenuItem("EC.Malzahar.NoRValue", "Don't R if > enemy").SetValue(new Slider(1, 1, 5)));
                 
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {               
                 harassmenu.AddItem(new MenuItem("EC.Malzahar.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Malzahar.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Malzahar.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -67,28 +67,28 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Malzahar.Farm.Q", "Use Q").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Malzahar.Farm.W", "Use W").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Malzahar.Farm.E", "Use E").SetValue(true));                
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Malzahar.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Malzahar.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Malzahar.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }  
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Malzahar.QPredHitchance", "Q Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
                 miscmenu.AddItem(new MenuItem("EC.Malzahar.Misc.Q", "Q Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Malzahar.Misc.E", "E Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Malzahar.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Malzahar.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Malzahar.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -96,11 +96,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(W.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Malzahar.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Malzahar.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Malzahar.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Malzahar.Combo.R").GetValue<bool>();
-            var UseEVoidlings = config.Item("EC.Malzahar.Combo.EType").GetValue<bool>();
+            var UseQ = Root.Item("EC.Malzahar.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Malzahar.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Malzahar.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Malzahar.Combo.R").GetValue<bool>();
+            var UseEVoidlings = Root.Item("EC.Malzahar.Combo.EType").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -113,7 +113,8 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseW && W.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
-                        mySpellcast.CircularAoe(Target, W, HitChance.High);
+                        //mySpellcast.CircularAoe(Target, W, HitChance.Medium, W.Range, 240);
+                        mySpellcast.CircularPrecise(Target, W, HitChance.Medium, W.Range, 200);
                     }
                     if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                     {
@@ -131,9 +132,9 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseR && R.IsReady())
                     {
-                        if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= R.Range && (Player.ServerPosition.CountEnemiesInRange(R.Range) - 1) < config.Item("EC.Malzahar.NoRValue").GetValue<Slider>().Value)
+                        if ((Player.ServerPosition.CountEnemiesInRange(R.Range) - 1) < Root.Item("EC.Malzahar.NoRValue").GetValue<Slider>().Value)
                         {                            
-                            switch (config.Item("EC.Malzahar.Combo.RType").GetValue<StringList>().SelectedIndex)
+                            switch (Root.Item("EC.Malzahar.Combo.RType").GetValue<StringList>().SelectedIndex)
                             {
                                 case 0:
                                     mySpellcast.Unit(Target, R);
@@ -150,6 +151,12 @@ namespace EndifsCreations.Plugins
                                         mySpellcast.Unit(Target, R);
                                     }
                                     break;
+                                case 3:
+                                    if (UseQ && Q.CanCast(Target)) return;
+                                    if (UseE && E.CanCast(Target)) return;
+                                    if (UseW && W.CanCast(Target)) return;
+                                    mySpellcast.Unit(Target, R);                                    
+                                    break;
                             }
                         }
                     }
@@ -159,9 +166,9 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Malzahar.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Malzahar.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Malzahar.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Malzahar.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Malzahar.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Malzahar.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -173,7 +180,7 @@ namespace EndifsCreations.Plugins
                 if (UseW && W.IsReady() && W.IsInRange(target))
                 {
                     if (Player.UnderTurret(true) && target.UnderTurret(true)) return;
-                    mySpellcast.CircularAoe(target, W, HitChance.High);
+                    mySpellcast.CircularAoe(target, W, HitChance.High, W.Range, 200);
                 }
                 if (UseE && E.IsReady() && E.IsInRange(target))
                 {
@@ -187,17 +194,17 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {            
-            if (myUtility.EnoughMana(config.Item("EC.Malzahar.Farm.ManaPercent").GetValue<Slider>().Value))
+            if (myUtility.EnoughMana(Root.Item("EC.Malzahar.Farm.ManaPercent").GetValue<Slider>().Value))
             {
-                if (config.Item("EC.Malzahar.Farm.Q").GetValue<bool>() && Q.IsReady())
+                if (Root.Item("EC.Malzahar.Farm.Q").GetValue<bool>() && Q.IsReady())
                 {
                     myFarmManager.LaneCircular(Q, Q.Range, 100);
                 }
-                if (config.Item("EC.Malzahar.Farm.W").GetValue<bool>() && W.IsReady())
+                if (Root.Item("EC.Malzahar.Farm.W").GetValue<bool>() && W.IsReady())
                 {
                     myFarmManager.LaneCircular(W, W.Range, 240);
                 }
-                if (config.Item("EC.Malzahar.Farm.E").GetValue<bool>() && E.IsReady())
+                if (Root.Item("EC.Malzahar.Farm.E").GetValue<bool>() && E.IsReady())
                 {
                     myFarmManager.LaneLastHit(E, E.Range, null, true);
                 }
@@ -211,7 +218,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Malzahar.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob) && !Player.IsWindingUp)
+                if (Root.Item("EC.Malzahar.Jungle.Q").GetValue<bool>() && Q.IsReady() && Q.IsInRange(mob) && !Player.IsWindingUp)
                 {
                     if (largemobs != null)
                     {
@@ -228,7 +235,7 @@ namespace EndifsCreations.Plugins
                         }
                     }
                 }
-                if (config.Item("EC.Malzahar.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Malzahar.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null)
                     {
@@ -245,7 +252,7 @@ namespace EndifsCreations.Plugins
                         }
                     }
                 }
-                if (config.Item("EC.Malzahar.Jungle.E").GetValue<bool>() && E.IsReady() && E.IsInRange(mob) && !Player.IsWindingUp)
+                if (Root.Item("EC.Malzahar.Jungle.E").GetValue<bool>() && E.IsReady() && E.IsInRange(mob) && !Player.IsWindingUp)
                 {
                     if (largemobs != null)
                     {
@@ -264,7 +271,7 @@ namespace EndifsCreations.Plugins
             {
                 Obj_AI_Hero target;
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
-                switch (config.Item("EC.Malzahar.UseRType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Malzahar.UseRType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
                         if (TargetSelector.GetSelectedTarget() != null && TargetSelector.GetSelectedTarget().IsValidTarget() && 
@@ -332,7 +339,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetQHitChance()
         {
-            switch (config.Item("EC.Malzahar.QPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Malzahar.QPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -405,7 +412,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Malzahar.Misc.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Malzahar.Misc.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= Q.Range)
                 {
@@ -417,29 +424,29 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Malzahar.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Malzahar.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Malzahar.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Malzahar.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Malzahar.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Malzahar.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
             if (R.Level > 0 && R.IsReady())
             {
                 var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToMagic(x));
-                switch (config.Item("EC.Malzahar.UseRType").GetValue<StringList>().SelectedIndex)
+                switch (Root.Item("EC.Malzahar.UseRType").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
-                       if (config.Item("EC.Malzahar.UseRDrawDistance").GetValue<bool>())
+                       if (Root.Item("EC.Malzahar.UseRDrawDistance").GetValue<bool>())
                         {
                             Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                         }
-                        if (config.Item("EC.Malzahar.UseRDrawTarget").GetValue<bool>())
+                        if (Root.Item("EC.Malzahar.UseRDrawTarget").GetValue<bool>())
                         {
                             var target = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&
                                 Vector3.Distance(Player.ServerPosition, x.ServerPosition) <= R.Range)
@@ -455,12 +462,12 @@ namespace EndifsCreations.Plugins
                     case 1:
                         if (FlashSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                         {
-                            if (config.Item("EC.Malzahar.UseRDrawDistance").GetValue<bool>())
+                            if (Root.Item("EC.Malzahar.UseRDrawDistance").GetValue<bool>())
                             {
                                 Render.Circle.DrawCircle(Player.Position, 425f, Color.Fuchsia, 7);
                                 Render.Circle.DrawCircle(Player.Position, R.Range + 425f, Color.Fuchsia, 7);
                             }
-                            if (config.Item("EC.Malzahar.UseRDrawTarget").GetValue<bool>())
+                            if (Root.Item("EC.Malzahar.UseRDrawTarget").GetValue<bool>())
                             {
                                 var target = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&
                                     Vector3.Distance(Player.ServerPosition, x.ServerPosition) > 425f &&

@@ -138,6 +138,7 @@ namespace MLGSORAKA
             combo.AddItem(new MenuItem("UseW", "Use W").SetValue(true));
             combo.AddItem(new MenuItem("UseE", "Use E").SetValue(true));
             combo.AddItem(new MenuItem("UseR", "Use R").SetValue(true));
+            combo.AddItem(new MenuItem("combo.disable.aa", "Disable AutoAttacks in Combo").SetValue(false));
 
             var mikael = healing.AddSubMenu(new Menu("Mikael's Crucible", "Mikael's Crucible"));
             foreach (var hero in HeroManager.Allies)
@@ -277,6 +278,10 @@ namespace MLGSORAKA
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
             {
                 if (((Obj_AI_Base)Orbwalker.GetTarget()).IsMinion) args.Process = false;
+            }
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Config.Item("combo.disable.aa").GetValue<bool>())
+            {
+                if (((Obj_AI_Hero)Orbwalker.GetTarget()).IsEnemy) args.Process = false;
             }
         }
 

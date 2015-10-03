@@ -37,12 +37,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Galio.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Galio.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Galio.Combo.R", "Use R").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Galio.Misc.W", "W Shields").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -50,7 +50,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Galio.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Galio.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Galio.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -58,15 +58,12 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Galio.Combo.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Galio.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Galio.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Galio.Combo.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Galio.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Galio.Combo.R").GetValue<bool>();
             if (UseR && R.IsReady())
             {
-                if (Player.CountEnemiesInRange(R.Range) >= 4)
-                {
-                    R.Cast();
-                }
+                mySpellcast.PointBlank(null, R, R.Range, 3);
             }
             if (Target.IsValidTarget())
             {
@@ -122,7 +119,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && E.IsReady())
             {
-                if (config.Item("EC.Galio.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Galio.Combo.W").GetValue<bool>()))                     
+                if (Root.Item("EC.Galio.Misc.W").GetValue<bool>() || (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Galio.Combo.W").GetValue<bool>()))                     
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -147,7 +144,7 @@ namespace EndifsCreations.Plugins
         {
             if (sender.Owner.IsMe && args.Slot == SpellSlot.R) //Player.HasBuff("GalioIdolOfDurand")
             {
-                if (!Player.HasBuff("GalioBulwark") && W.IsReady() && config.Item("EC.Galio.Combo.W").GetValue<bool>())
+                if (!Player.HasBuff("GalioBulwark") && W.IsReady() && Root.Item("EC.Galio.Combo.W").GetValue<bool>())
                 {
                     W.CastOnUnit(Player);
                 }
@@ -165,19 +162,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Galio.Draw.W").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Galio.Draw.W").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Galio.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Galio.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Galio.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Galio.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Galio.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Galio.Draw.R").GetValue<bool>() && R.Level > 0)
             {        
                 var color = Player.CountEnemiesInRange(R.Range) >= 4 ? Color.Red : Color.Yellow;
                 Drawing.DrawText(Player.HPBarPosition.X + 10, Player.HPBarPosition.Y - 15, color, "Hits: " + Player.CountEnemiesInRange(R.Range));

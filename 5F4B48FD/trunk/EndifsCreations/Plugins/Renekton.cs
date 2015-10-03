@@ -41,14 +41,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Renekton.Combo.R", "Use R").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Renekton.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Renekton.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Renekton.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Renekton.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Renekton.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -57,14 +57,14 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Renekton.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Renekton.Farm.Q.Value", "Q More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Renekton.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Renekton.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Renekton.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Renekton.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
@@ -72,7 +72,7 @@ namespace EndifsCreations.Plugins
                 drawmenu.AddItem(new MenuItem("EC.Renekton.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Renekton.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Renekton.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -80,12 +80,12 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(W.Range + E.Range, TargetSelector.DamageType.Physical);  
 
-            var UseQ = config.Item("EC.Renekton.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Renekton.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Renekton.Combo.E").GetValue<bool>();
-            var UseE2 = config.Item("EC.Renekton.Combo.E2").GetValue<bool>();       
-            var UseR = config.Item("EC.Renekton.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Renekton.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Renekton.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Renekton.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Renekton.Combo.E").GetValue<bool>();
+            var UseE2 = Root.Item("EC.Renekton.Combo.E2").GetValue<bool>();       
+            var UseR = Root.Item("EC.Renekton.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Renekton.Combo.Items").GetValue<bool>();
             if (UseR && R.IsReady())
             {
                 if (Player.CountEnemiesInRange(R.Range) > 1) R.Cast();
@@ -103,7 +103,7 @@ namespace EndifsCreations.Plugins
                         if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) > Q.Range &&
                             Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= W.Range + E.Range)
                         {
-                            if (Target.UnderTurret(true) && !config.Item("EC.Renekton.Combo.Dive").GetValue<bool>()) return;
+                            if (Target.UnderTurret(true) && !Root.Item("EC.Renekton.Combo.Dive").GetValue<bool>()) return;
                             W.Cast();
                             E.Cast(Target.ServerPosition);
                         }
@@ -118,7 +118,7 @@ namespace EndifsCreations.Plugins
                     } 
                     if (UseE && E.IsReady() && Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= E.Range)
                     {
-                        if (Target.UnderTurret(true) && !config.Item("EC.Renekton.Combo.Dive").GetValue<bool>()) return;
+                        if (Target.UnderTurret(true) && !Root.Item("EC.Renekton.Combo.Dive").GetValue<bool>()) return;
                         if (!CanDice)
                         {
                             E.Cast(Target.ServerPosition);
@@ -148,9 +148,9 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Renekton.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Renekton.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Renekton.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Renekton.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Renekton.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Renekton.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (target != null && target.IsValidTarget())
             {
@@ -170,7 +170,7 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (config.Item("EC.Renekton.Farm.Q").GetValue<bool>() && Q.IsReady() && (!myOrbwalker.IsWaiting() || Fury) && !Player.IsWindingUp)
+            if (Root.Item("EC.Renekton.Farm.Q").GetValue<bool>() && Q.IsReady() && (!myOrbwalker.Waiting || Fury) && !Player.IsWindingUp)
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 if (allMinionsQ == null) return;
@@ -179,13 +179,13 @@ namespace EndifsCreations.Plugins
                 {
                     Q.Cast();
                 }
-                if (allMinionsQ.Count > config.Item("EC.Renekton.Farm.Q.Value").GetValue<Slider>().Value)
+                if (allMinionsQ.Count > Root.Item("EC.Renekton.Farm.Q.Value").GetValue<Slider>().Value)
                 {
                     if (Player.UnderTurret(true)) return;
                     Q.Cast();
                 }
             }
-            if (config.Item("EC.Renekton.Farm.E").GetValue<bool>() && E.IsReady() && (!myOrbwalker.IsWaiting() || !Fury) && !Player.IsWindingUp)
+            if (Root.Item("EC.Renekton.Farm.E").GetValue<bool>() && E.IsReady() && (!myOrbwalker.Waiting || !Fury) && !Player.IsWindingUp)
             {
                 var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 if (allMinionsE == null) return;
@@ -200,7 +200,7 @@ namespace EndifsCreations.Plugins
                 var ELine = E.GetLineFarmLocation(allMinionsE, E.Width);
                 if (ELine.Position.IsValid() && !ELine.Position.To3D().UnderTurret(true))
                 {
-                    if (ELine.MinionsHit > config.Item("EC.Renekton.Farm.E.Value").GetValue<Slider>().Value)
+                    if (ELine.MinionsHit > Root.Item("EC.Renekton.Farm.E.Value").GetValue<Slider>().Value)
                     {
                         E.Cast(ELine.Position);
                     }
@@ -215,7 +215,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Renekton.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Renekton.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < Q.Range)
                     {
@@ -226,7 +226,7 @@ namespace EndifsCreations.Plugins
                         Q.Cast();
                     }
                 }
-                if (config.Item("EC.Renekton.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Renekton.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Orbwalking.InAutoAttackRange(largemobs))
                     {
@@ -234,7 +234,7 @@ namespace EndifsCreations.Plugins
                     }
                     W.Cast();
                 }
-                if (config.Item("EC.Renekton.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Renekton.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < E.Range)
                     {
@@ -294,7 +294,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Renekton.Farm.W").GetValue<bool>() && W.IsReady() && !Fury)
+            if (Root.Item("EC.Renekton.Farm.W").GetValue<bool>() && W.IsReady() && !Fury)
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null &&
@@ -327,11 +327,11 @@ namespace EndifsCreations.Plugins
                 {
                     if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                     {
-                        if (config.Item("EC.Renekton.Combo.Items").GetValue<bool>())
+                        if (Root.Item("EC.Renekton.Combo.Items").GetValue<bool>())
                         {
                             myItemManager.UseItems(2, null);
                         }
-                        if (config.Item("EC.Renekton.Combo.W").GetValue<bool>() && Fury && W.IsReady() && !WBuff)
+                        if (Root.Item("EC.Renekton.Combo.W").GetValue<bool>() && Fury && W.IsReady() && !WBuff)
                         {
                            W.Cast();
                         }
@@ -341,7 +341,7 @@ namespace EndifsCreations.Plugins
                 {
                     if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear)
                     {
-                        if (config.Item("EC.Renekton.Farm.W").GetValue<bool>())
+                        if (Root.Item("EC.Renekton.Farm.W").GetValue<bool>())
                         {
                             if (W.IsKillable((Obj_AI_Minion)target))
                             {
@@ -351,7 +351,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.JungleClear)
                     {
-                        if (config.Item("EC.Renekton.Jungle.W").GetValue<bool>())
+                        if (Root.Item("EC.Renekton.Jungle.W").GetValue<bool>())
                         {
                             if (W.IsKillable((Obj_AI_Minion)target))
                             {
@@ -365,19 +365,19 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Renekton.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Renekton.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Renekton.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Renekton.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Renekton.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Renekton.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Renekton.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Renekton.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);
             }

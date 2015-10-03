@@ -71,7 +71,7 @@ namespace Activator.Items.Offensives
                     }
                 }
 
-                if (!Parent.Item(Parent.Name + "useon" + Tar.Player.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + Tar.Player.NetworkId).GetValue<bool>())
                 {
                     return;
                 }

@@ -43,11 +43,11 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Dragon's Descent", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Shyvana.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Shyvana.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Shyvana.UseRHitChecks", "Only if hits").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Shyvana.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Shyvana.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -56,14 +56,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Shyvana.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Shyvana.Combo.Dive", "Turret Dive").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Shyvana.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Shyvana.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Shyvana.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Shyvana.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -73,26 +73,26 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Shyvana.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Shyvana.Farm.W.Value", "W More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Shyvana.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Shyvana.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Shyvana.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Shyvana.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Shyvana.EPredHitchance", "E Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
                 miscmenu.AddItem(new MenuItem("EC.Shyvana.Misc.Q", "Q Turrets").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Shyvana.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Shyvana.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -100,16 +100,13 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             
-            //var UseQ = config.Item("EC.Shyvana.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Shyvana.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Shyvana.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Shyvana.Combo.Items").GetValue<bool>();
+            //var UseQ = Root.Item("EC.Shyvana.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Shyvana.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Shyvana.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Shyvana.Combo.Items").GetValue<bool>();
             if (UseW && W.IsReady())
             {
-                if (Player.CountEnemiesInRange(400) > 0)
-                {
-                    W.Cast();
-                }
+                mySpellcast.PointBlank(null, W, 400);
             }
             if (Target.IsValidTarget())
             {
@@ -134,7 +131,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (UseE && E.IsReady())
                     {
-                        EPredict(Target);
+                        mySpellcast.Linear(Target, E, ERHitChance);
                     }
                     if (CastItems)
                     {
@@ -155,9 +152,9 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Shyvana.Harass.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Shyvana.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Shyvana.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Shyvana.Harass.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Shyvana.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Shyvana.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (target != null && target.IsValidTarget())
             {
@@ -186,7 +183,7 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (config.Item("EC.Shyvana.Farm.Q").GetValue<bool>() && Q.IsReady() && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (Root.Item("EC.Shyvana.Farm.Q").GetValue<bool>() && Q.IsReady() && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 var siegeQ = myFarmManager.GetLargeMinions(Q.Range).FirstOrDefault(x => Q.IsKillable(x));
@@ -203,17 +200,17 @@ namespace EndifsCreations.Plugins
                     }
                 }
             }
-            if (config.Item("EC.Shyvana.Farm.W").GetValue<bool>() && W.IsReady() && !myOrbwalker.IsWaiting())
+            if (Root.Item("EC.Shyvana.Farm.W").GetValue<bool>() && W.IsReady() && !myOrbwalker.Waiting)
             {
                 var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range);
                 if (allMinionsW == null) return;
-                if (allMinionsW.Count > config.Item("EC.Shyvana.Farm.W.Value").GetValue<Slider>().Value)
+                if (allMinionsW.Count > Root.Item("EC.Shyvana.Farm.W.Value").GetValue<Slider>().Value)
                 {
                     if (Player.UnderTurret(true)) return;
                     W.CastOnUnit(Player);
                 }
             }
-            if (config.Item("EC.Shyvana.Farm.E").GetValue<bool>() && E.IsReady() && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (Root.Item("EC.Shyvana.Farm.E").GetValue<bool>() && E.IsReady() && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 if (allMinionsE == null) return;
@@ -221,7 +218,7 @@ namespace EndifsCreations.Plugins
                 {
                     foreach (var x in allMinionsE)
                     {
-                        if (MinionManager.GetMinions(x.ServerPosition, 275).Count() > config.Item("EC.Shyvana.Farm.E.Value").GetValue<Slider>().Value)
+                        if (MinionManager.GetMinions(x.ServerPosition, 275).Count() > Root.Item("EC.Shyvana.Farm.E.Value").GetValue<Slider>().Value)
                         {
                             if (x.IsValidTarget() && x.ServerPosition.IsValid()) E.Cast(x.ServerPosition);
                         }
@@ -230,7 +227,7 @@ namespace EndifsCreations.Plugins
                 else
                 {
                     var ELine = E.GetLineFarmLocation(allMinionsE, E.Width);
-                    if (ELine.MinionsHit > config.Item("EC.Shyvana.Farm.E.Value").GetValue<Slider>().Value)
+                    if (ELine.MinionsHit > Root.Item("EC.Shyvana.Farm.E.Value").GetValue<Slider>().Value)
                     {
                         if (Player.UnderTurret(true)) return;
                         if (myUtility.IsFacing(Player, ELine.Position.To3D())) E.Cast(ELine.Position);
@@ -247,7 +244,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Shyvana.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Shyvana.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Q.IsInRange(largemobs))
                     {
@@ -255,7 +252,7 @@ namespace EndifsCreations.Plugins
                     }
                     else if (Q.IsInRange(mob)) Q.Cast();
                 }
-                if (config.Item("EC.Shyvana.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Shyvana.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < W.Range)
                     {
@@ -263,7 +260,7 @@ namespace EndifsCreations.Plugins
                     }
                     else if (Vector3.Distance(Player.ServerPosition, mob.ServerPosition) < W.Range) W.CastOnUnit(Player);
                 }
-                if (config.Item("EC.Shyvana.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Shyvana.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null)
                     {
@@ -275,7 +272,7 @@ namespace EndifsCreations.Plugins
         }
         private void LastHit()
         {
-            if (myOrbwalker.IsWaiting() && !Player.IsWindingUp && config.Item("EC.Shyvana.UseQLastHit").GetValue<bool>() && Q.IsReady())
+            if (myOrbwalker.Waiting && !Player.IsWindingUp && Root.Item("EC.Shyvana.UseQLastHit").GetValue<bool>() && Q.IsReady())
             {
                 Q.Cast();
             }
@@ -329,7 +326,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetERHitChance()
         {
-            switch (config.Item("EC.Shyvana.EPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Shyvana.EPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -395,7 +392,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && (config.Item("EC.Shyvana.UseRHitChecks").GetValue<bool>()))
+            if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && (Root.Item("EC.Shyvana.UseRHitChecks").GetValue<bool>()))
             {
                 if (args.Slot == SpellSlot.R && myUtility.SpellHits(R).Item1 == 0)
                 {
@@ -405,7 +402,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Shyvana.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Shyvana.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null &&
@@ -430,7 +427,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Shyvana.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Shyvana.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
@@ -446,11 +443,11 @@ namespace EndifsCreations.Plugins
                 {
                     if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                     {
-                        if (config.Item("EC.Shyvana.Combo.Items").GetValue<bool>())
+                        if (Root.Item("EC.Shyvana.Combo.Items").GetValue<bool>())
                         {
                             myItemManager.UseItems(2, null);
                         }
-                        if (config.Item("EC.Shyvana.Combo.Q").GetValue<bool>() && Orbwalking.InAutoAttackRange(target) && Q.IsReady())
+                        if (Root.Item("EC.Shyvana.Combo.Q").GetValue<bool>() && Orbwalking.InAutoAttackRange(target) && Q.IsReady())
                         {
                             Q.Cast();
                         }
@@ -459,7 +456,7 @@ namespace EndifsCreations.Plugins
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear)
                 {
                     if (target is Obj_AI_Turret && target.Team != Player.Team &&
-                        config.Item("EC.Shyvana.Misc.Q").GetValue<bool>() &&
+                        Root.Item("EC.Shyvana.Misc.Q").GetValue<bool>() &&
                         !Player.IsWindingUp && Orbwalking.InAutoAttackRange(target) && Q.IsReady())
                     {
                         Q.Cast();
@@ -470,21 +467,21 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Shyvana.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Shyvana.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Shyvana.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Shyvana.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
             if (R.Level > 0 && R.IsReady())
             {
-                if (config.Item("EC.Shyvana.UseRDrawDistance").GetValue<bool>())
+                if (Root.Item("EC.Shyvana.UseRDrawDistance").GetValue<bool>())
                 {
                     Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                 }
-                if (config.Item("EC.Shyvana.UseRDrawTarget").GetValue<bool>())
+                if (Root.Item("EC.Shyvana.UseRDrawTarget").GetValue<bool>())
                 {
                     var EnemyList = HeroManager.Enemies.Where(x => x.IsValidTarget() && !x.IsDead && !x.IsZombie && !x.IsInvulnerable && !myUtility.ImmuneToCC(x) && !myUtility.ImmuneToDeath(x));
                     var target = EnemyList.Where(x => !x.InFountain() && x.IsVisible &&

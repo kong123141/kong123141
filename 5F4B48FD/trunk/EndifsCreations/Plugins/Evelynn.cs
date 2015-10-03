@@ -36,11 +36,11 @@ namespace EndifsCreations.Plugins
         {
             var custommenu = new Menu("Agony's Embrace", "Custom");
             {
-                custommenu.AddItem(new MenuItem("EC.Evelynn.UseRKey", "Key").SetValue(new KeyBind(config.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
+                custommenu.AddItem(new MenuItem("EC.Evelynn.UseRKey", "Key").SetValue(new KeyBind(Root.Item("CustomMode_Key").GetValue<KeyBind>().Key, KeyBindType.Press)));  //T
                 custommenu.AddItem(new MenuItem("EC.Evelynn.UseRHitChecks", "Only if hits").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Evelynn.UseRDrawTarget", "Draw Target").SetValue(true));
                 custommenu.AddItem(new MenuItem("EC.Evelynn.UseRDrawDistance", "Draw Distance").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -48,37 +48,37 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Evelynn.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Evelynn.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Evelynn.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Evelynn.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Evelynn.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
                 laneclearmenu.AddItem(new MenuItem("EC.Evelynn.Farm.Q", "Use Q").SetValue(true));                
                 laneclearmenu.AddItem(new MenuItem("EC.Evelynn.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Evelynn.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Evelynn.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Evelynn.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Evelynn.RPredHitchance", "R Hitchance").SetValue(new StringList(new[] { "Low", "Medium", "High" })));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Evelynn.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Evelynn.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -86,16 +86,13 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);            
 
-            var UseQ = config.Item("EC.Evelynn.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Evelynn.Combo.W").GetValue<bool>();
-            //var UseE = config.Item("EC.Evelynn.Combo.E").GetValue<bool>();
-            var CastItems = config.Item("EC.Evelynn.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Evelynn.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Evelynn.Combo.W").GetValue<bool>();
+            //var UseE = Root.Item("EC.Evelynn.Combo.E").GetValue<bool>();
+            var CastItems = Root.Item("EC.Evelynn.Combo.Items").GetValue<bool>();
             if (UseQ && Q.IsReady())
             {
-                if (Player.CountEnemiesInRange(Q.Range) > 0)
-                {
-                    Q.Cast();
-                }
+                mySpellcast.PointBlank(null, Q, Q.Range);
             }
             if (Target.IsValidTarget())
             {
@@ -141,10 +138,10 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Evelynn.Harass.Q").GetValue<bool>();
-            var UseE = config.Item("EC.Evelynn.Harass.E").GetValue<bool>();
+            var UseQ = Root.Item("EC.Evelynn.Harass.Q").GetValue<bool>();
+            var UseE = Root.Item("EC.Evelynn.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            if (target.IsValidTarget() && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (target.IsValidTarget() && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 if (UseQ && Q.IsReady())
                 {
@@ -164,8 +161,8 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Evelynn.Farm.ManaPercent").GetValue<Slider>().Value) return;
-            if (config.Item("EC.Evelynn.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Evelynn.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (Root.Item("EC.Evelynn.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 if (Player.UnderTurret(true)) return;
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
@@ -176,7 +173,7 @@ namespace EndifsCreations.Plugins
                     Q.Cast();
                 }
             }
-            if (config.Item("EC.Evelynn.Farm.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Evelynn.Farm.E").GetValue<bool>() && E.IsReady())
             {
                 var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 if (allMinionsE == null) return;
@@ -203,7 +200,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Evelynn.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Evelynn.Jungle.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) < Q.Range)
                     {
@@ -214,7 +211,7 @@ namespace EndifsCreations.Plugins
                         Q.Cast();
                     }
                 }
-                if (config.Item("EC.Evelynn.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Evelynn.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Vector3.Distance(Player.ServerPosition, largemobs.ServerPosition) <= E.Range)
                     {
@@ -276,7 +273,7 @@ namespace EndifsCreations.Plugins
         }
         private HitChance GetRHitChance()
         {
-            switch (config.Item("EC.Evelynn.RPredHitchance").GetValue<StringList>().SelectedIndex)
+            switch (Root.Item("EC.Evelynn.RPredHitchance").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
                     return HitChance.Low;
@@ -324,7 +321,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && (config.Item("EC.Evelynn.UseRHitChecks").GetValue<bool>()))
+            if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Custom && (Root.Item("EC.Evelynn.UseRHitChecks").GetValue<bool>()))
             {
                 if (args.Slot == SpellSlot.R && myUtility.SpellHits(R).Item1 == 0)
                 {
@@ -334,8 +331,8 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Evelynn.Farm.E").GetValue<bool>() && E.IsReady() &&
-                myUtility.PlayerManaPercentage > config.Item("EC.Evelynn.Farm.ManaPercent").GetValue<Slider>().Value)
+            if (Root.Item("EC.Evelynn.Farm.E").GetValue<bool>() && E.IsReady() &&
+                myUtility.PlayerManaPercentage > Root.Item("EC.Evelynn.Farm.ManaPercent").GetValue<Slider>().Value)
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null &&
@@ -352,12 +349,12 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {
-                    if (config.Item("EC.Evelynn.Combo.Items").GetValue<bool>())
+                    if (Root.Item("EC.Evelynn.Combo.Items").GetValue<bool>())
                     {
                         myItemManager.UseItems(0, null);
                         myItemManager.UseItems(2, null);
                     }
-                    if (config.Item("EC.Evelynn.Combo.E").GetValue<bool>())
+                    if (Root.Item("EC.Evelynn.Combo.E").GetValue<bool>())
                     {
                         E.CastOnUnit(args.Target);
                     }
@@ -367,21 +364,21 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Evelynn.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Evelynn.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Evelynn.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Evelynn.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
             if (R.IsReady() && R.Level > 0)
             {
-                if (config.Item("EC.Evelynn.UseRDrawDistance").GetValue<bool>())
+                if (Root.Item("EC.Evelynn.UseRDrawDistance").GetValue<bool>())
                 {
                     Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia, 7);
                 }
-                if (config.Item("EC.Evelynn.UseRDrawTarget").GetValue<bool>())
+                if (Root.Item("EC.Evelynn.UseRDrawTarget").GetValue<bool>())
                 {
                     if (R.IsReady())
                     {

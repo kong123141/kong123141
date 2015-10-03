@@ -159,6 +159,22 @@ namespace UnderratedAIO.Champions
                     }
                 }
             }
+
+            if (config.Item("AutoQBarrel", true).GetValue<bool>() && Q.IsReady())
+            {
+                var barrel =
+                    GetBarrels()
+                        .FirstOrDefault(
+                            o =>
+                                o.IsValid && !o.IsDead && o.Distance(player) < Q.Range &&
+                                o.SkinName == "GangplankBarrel" && o.GetBuff("gangplankebarrellife").Caster.IsMe &&
+                                KillableBarrel(o) && o.CountEnemiesInRange(BarrelExplosionRange) > 0);
+
+                if (barrel!=null)
+                {
+                    Q.Cast(barrel);
+                }
+            }
         }
 
         private void Lasthit()
@@ -187,7 +203,21 @@ namespace UnderratedAIO.Champions
             {
                 return;
             }
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(
+                Q.Range + BarrelExplosionRange, TargetSelector.DamageType.Physical);
+            var barrel =
+                GetBarrels()
+                    .FirstOrDefault(
+                        o =>
+                            target != null && o.IsValid && !o.IsDead && o.Distance(player) < Q.Range &&
+                            o.SkinName == "GangplankBarrel" && o.GetBuff("gangplankebarrellife").Caster.IsMe &&
+                            KillableBarrel(o) && o.Distance(target) < BarrelExplosionRange);
+
+            if (barrel != null)
+            {
+                Q.CastOnUnit(barrel, config.Item("packets").GetValue<bool>());
+                return;
+            }
             if (config.Item("useqLHH", true).GetValue<bool>())
             {
                 var mini =
@@ -196,19 +226,7 @@ namespace UnderratedAIO.Champions
                         .OrderByDescending(m => m.MaxHealth)
                         .ThenByDescending(m => m.Distance(player))
                         .FirstOrDefault();
-                var barrel =
-                    GetBarrels()
-                        .FirstOrDefault(
-                            o =>
-                                target != null && o.IsValid && !o.IsDead && o.Distance(player) < Q.Range &&
-                                o.SkinName == "GangplankBarrel" && o.GetBuff("gangplankebarrellife").Caster.IsMe &&
-                                KillableBarrel(o) && o.Distance(target) < BarrelExplosionRange);
 
-                if (barrel != null)
-                {
-                    Q.CastOnUnit(barrel, config.Item("packets").GetValue<bool>());
-                    return;
-                }
                 if (mini != null)
                 {
                     Q.CastOnUnit(mini, config.Item("packets").GetValue<bool>());
@@ -492,7 +510,7 @@ namespace UnderratedAIO.Champions
 
         private void CastE(Obj_AI_Hero target, List<Obj_AI_Minion> barrels)
         {
-            if (barrels.Count(b=>b.CountEnemiesInRange(BarrelConnectionRange) > 0) < 1)
+            if (barrels.Count(b => b.CountEnemiesInRange(BarrelConnectionRange) > 0) < 1)
             {
                 if (config.Item("useeAlways", true).GetValue<bool>())
                 {
@@ -557,31 +575,58 @@ namespace UnderratedAIO.Champions
                         Color.Coral);
                 }
             }
-            if (config.Item("drawKillable", true).GetValue<bool>() && R.IsReady())
+            if (config.Item("drawKillableSL", true).GetValue<StringList>().SelectedIndex != 0 && R.IsReady())
             {
-                var baseText = "Killable with R: ";
                 var text = new List<string>();
-                foreach (var enemy in HeroManager.Enemies.Where(e=> e.IsValidTarget()))
+                foreach (var enemy in HeroManager.Enemies.Where(e => e.IsValidTarget()))
                 {
-                    if (getRDamage(enemy)>enemy.Health)
+                    if (getRDamage(enemy) > enemy.Health)
                     {
                         text.Add(enemy.ChampionName + "(" + Math.Ceiling(enemy.Health / Rwave[R.Level - 1]) + " wave)");
                     }
                 }
-                if (text.Count>0)
+                if (text.Count > 0)
                 {
                     var result = string.Join(", ", text);
-                    Drawing.DrawText(Drawing.Width / 2 - (baseText + result).Length * 5, Drawing.Height * 0.8f, Color.Red, baseText + result); 
+                    switch (config.Item("drawKillableSL", true).GetValue<StringList>().SelectedIndex)
+                    {
+                        case 2:
+                            drawText(2, result);
+                            break;
+                        case 1:
+                            drawText(1, result);
+                            break;
+                        default:
+                            return;
+                    }
                 }
-                
+            }
+        }
+
+        public void drawText(int mode, string result)
+        {
+            const string baseText = "Killable with R: ";
+            if (mode == 1)
+            {
+                Drawing.DrawText(
+                    Drawing.Width / 2 - (baseText + result).Length * 5, Drawing.Height * 0.75f, Color.Red,
+                    baseText + result);
+            }
+            else
+            {
+                Drawing.DrawText(
+                    player.HPBarPosition.X - (baseText + result).Length * 5 + 110, player.HPBarPosition.Y + 250,
+                    Color.Red, baseText + result);
             }
         }
 
         private float getRDamage(Obj_AI_Hero enemy)
         {
-            return (float) Damage.CalcDamage(
-                player, enemy, Damage.DamageType.Magical,
-                (Rwave[R.Level - 1] + 0.1 * player.FlatMagicDamageMod) * waveLength());
+            return
+                (float)
+                    Damage.CalcDamage(
+                        player, enemy, Damage.DamageType.Magical,
+                        (Rwave[R.Level - 1] + 0.1 * player.FlatMagicDamageMod) * waveLength());
         }
 
         public int waveLength()
@@ -592,7 +637,7 @@ namespace UnderratedAIO.Champions
             }
             else
             {
-                return 12; 
+                return 12;
             }
         }
 
@@ -678,7 +723,8 @@ namespace UnderratedAIO.Champions
                 .SetValue(new Circle(false, Color.FromArgb(180, 100, 146, 166)));
             menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage", true)).SetValue(true);
             menuD.AddItem(new MenuItem("drawW", "Draw W", true)).SetValue(true);
-            menuD.AddItem(new MenuItem("drawKillable", "Show killable targets with R", true)).SetValue(true);
+            menuD.AddItem(new MenuItem("drawKillableSL", "Show killable targets with R", true))
+                .SetValue(new StringList(new[] { "OFF", "Above HUD", "Under GP" }, 1));
             config.AddSubMenu(menuD);
             // Combo Settings
             Menu menuC = new Menu("Combo ", "csettings");
@@ -716,6 +762,7 @@ namespace UnderratedAIO.Champions
             menuM.AddItem(new MenuItem("Rhealt", "   Enemy health %", true)).SetValue(new Slider(35, 0, 100));
             menuM.AddItem(new MenuItem("RhealtMin", "   Enemy min health %", true)).SetValue(new Slider(10, 0, 100));
             menuM.AddItem(new MenuItem("AutoW", "W with QSS options", true)).SetValue(true);
+            menuM.AddItem(new MenuItem("AutoQBarrel", "AutoQ barrel near enemies", true)).SetValue(false);
             menuM = Jungle.addJungleOptions(menuM);
 
             Menu autolvlM = new Menu("AutoLevel", "AutoLevel");

@@ -43,19 +43,19 @@ namespace EndifsCreations.Plugins
             {
                 combomenu.AddItem(new MenuItem("EC.Heimerdinger.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Heimerdinger.Combo.E", "Use E").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Heimerdinger.Misc.E", "E Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Heimerdinger.Misc.E2", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Heimerdinger.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Heimerdinger.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -63,8 +63,8 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var UseW = config.Item("EC.Heimerdinger.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Heimerdinger.Combo.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Heimerdinger.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Heimerdinger.Combo.E").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 if (Target.InFountain()) return;
@@ -79,7 +79,7 @@ namespace EndifsCreations.Plugins
                         if (UseE && E.IsReady() && myUtility.TickCount - LastSpell > myHumazier.SpellDelay)
                         {
                             E.Range = 925;
-                            mySpellcast.CircularPrecise(Target, E, HitChance.High);
+                            mySpellcast.CircularPrecise(Target, E, HitChance.High, E.Range, 120);
                         }
                     }
                     else
@@ -93,7 +93,7 @@ namespace EndifsCreations.Plugins
                             if (myUtility.MovementDisabled(Target))
                             {
                                 E.Range = 925 + 540;
-                                mySpellcast.CircularPrecise(Target, E, HitChance.High);                               
+                                mySpellcast.CircularPrecise(Target, E, HitChance.High, E.Range, 120);                          
                             }
                         }
                     }
@@ -139,7 +139,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("EC.Heimerdinger.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Heimerdinger.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (sender.IsEnemy && Vector3.Distance(Player.ServerPosition, sender.ServerPosition) <= E.Range)
                 {
@@ -150,7 +150,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Heimerdinger.Misc.E2").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Heimerdinger.Misc.E2").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -162,11 +162,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Heimerdinger.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Heimerdinger.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.White);
             }
-            if (config.Item("EC.Heimerdinger.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Heimerdinger.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }

@@ -35,7 +35,7 @@ namespace EndifsCreations.Plugins
             var custommenu = new Menu("Demacian Justice", "Custom");
             {
                 custommenu.AddItem(new MenuItem("EC.Garen.UseAutoR", "Auto").SetValue(true));
-                config.AddSubMenu(custommenu);
+                Root.AddSubMenu(custommenu);
             }
             var combomenu = new Menu("Combo", "Combo");
             {
@@ -44,14 +44,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Garen.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Garen.Combo.R", "Use R").SetValue(false));
                 combomenu.AddItem(new MenuItem("EC.Garen.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("EC.Garen.Harass.Q", "Use Q").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Garen.Harass.W", "Use W").SetValue(true));
                 harassmenu.AddItem(new MenuItem("EC.Garen.Harass.E", "Use E").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -59,14 +59,14 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Garen.Farm.W", "Use W").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Garen.Farm.E", "Use E").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Garen.Farm.E.Value", "E More Than").SetValue(new Slider(1, 1, 5)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Garen.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Garen.Jungle.W", "Use W").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Garen.Jungle.E", "Use E").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
@@ -74,12 +74,12 @@ namespace EndifsCreations.Plugins
                 miscmenu.AddItem(new MenuItem("EC.Garen.Misc.Q2", "Q Interrupts").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Garen.UseQ3Misc", "Q Gapcloser").SetValue(false));
                 miscmenu.AddItem(new MenuItem("EC.Garen.Misc.W", "W Shields").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Garen.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         private void Custom()
@@ -94,11 +94,11 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
-            var UseQ = config.Item("EC.Garen.Combo.Q").GetValue<bool>();
-            //var UseW = config.Item("EC.Garen.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Garen.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Garen.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Garen.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.Garen.Combo.Q").GetValue<bool>();
+            //var UseW = Root.Item("EC.Garen.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Garen.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Garen.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Garen.Combo.Items").GetValue<bool>();
 
             if (Target.IsValidTarget())
             {
@@ -162,10 +162,10 @@ namespace EndifsCreations.Plugins
         private void Harass()
         {
             if (EActive) return;
-            var UseW = config.Item("EC.Garen.Harass.W").GetValue<bool>();
-            var UseE = config.Item("EC.Garen.Harass.E").GetValue<bool>();
+            var UseW = Root.Item("EC.Garen.Harass.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Garen.Harass.E").GetValue<bool>();
             var target = TargetSelector.GetTarget(Player.AttackRange * 2, TargetSelector.DamageType.Physical);
-            if (target.IsValidTarget() && !myOrbwalker.IsWaiting() && !Player.IsWindingUp)
+            if (target.IsValidTarget() && !myOrbwalker.Waiting && !Player.IsWindingUp)
             {
                 if (UseW && W.IsReady())
                 {
@@ -193,11 +193,11 @@ namespace EndifsCreations.Plugins
         private void LaneClear()
         {
             if (EActive) return;
-            if (config.Item("EC.Garen.Farm.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Garen.Farm.E").GetValue<bool>() && E.IsReady())
             {
                 var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 if (allMinionsE == null) return;
-                if (allMinionsE.Count > config.Item("EC.Garen.Farm.E.Value").GetValue<Slider>().Value)
+                if (allMinionsE.Count > Root.Item("EC.Garen.Farm.E.Value").GetValue<Slider>().Value)
                 {
                     if (Player.UnderTurret(true)) return;
                     E.Cast();
@@ -213,7 +213,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null)
             {
-                if (config.Item("EC.Garen.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Garen.Jungle.W").GetValue<bool>() && W.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && Orbwalking.InAutoAttackRange(largemobs))
                     {
@@ -221,7 +221,7 @@ namespace EndifsCreations.Plugins
                     }
                     if (Orbwalking.InAutoAttackRange(mob)) W.Cast();
                 }
-                if (config.Item("EC.Garen.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
+                if (Root.Item("EC.Garen.Jungle.E").GetValue<bool>() && E.IsReady() && !Player.IsWindingUp)
                 {
                     if (largemobs != null && E.IsInRange(largemobs))
                     {
@@ -270,7 +270,7 @@ namespace EndifsCreations.Plugins
                 myUtility.Reset();
                 return;
             }
-            if (config.Item("EC.Garen.UseAutoR").GetValue<bool>())
+            if (Root.Item("EC.Garen.UseAutoR").GetValue<bool>())
             {
                 Custom();
             }
@@ -312,7 +312,7 @@ namespace EndifsCreations.Plugins
             }
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if (config.Item("EC.Garen.Misc.W").GetValue<bool>() || myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.Garen.Combo.W").GetValue<bool>())
+                if (Root.Item("EC.Garen.Misc.W").GetValue<bool>() || myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.Garen.Combo.W").GetValue<bool>())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -336,7 +336,7 @@ namespace EndifsCreations.Plugins
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
             if (EActive) return;
-            if (config.Item("EC.Garen.Farm.Q").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Garen.Farm.Q").GetValue<bool>() && Q.IsReady())
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null && Q.IsKillable(target)  && Orbwalking.InAutoAttackRange(target) && !Player.IsWindingUp)
@@ -353,14 +353,14 @@ namespace EndifsCreations.Plugins
                 if (EActive) return;
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo)
                 {
-                    if (config.Item("EC.Garen.Combo.Q").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.Garen.Combo.Q").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
                     {
                         Q.Cast();
                     }
                 }
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Harass)
                 {
-                    if (config.Item("EC.Garen.Harass.Q").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
+                    if (Root.Item("EC.Garen.Harass.Q").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
                     {
                         Q.Cast();
                     }
@@ -368,7 +368,7 @@ namespace EndifsCreations.Plugins
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.JungleClear)
                 {
                     if (target is Obj_AI_Minion && target.Team == GameObjectTeam.Neutral && !target.Name.Contains("Mini") &&
-                        config.Item("EC.Garen.Jungle.Q").GetValue<bool>() && !Player.IsWindingUp && Orbwalking.InAutoAttackRange(target))
+                        Root.Item("EC.Garen.Jungle.Q").GetValue<bool>() && !Player.IsWindingUp && Orbwalking.InAutoAttackRange(target))
                     {
                         Q.Cast();
                     }
@@ -376,7 +376,7 @@ namespace EndifsCreations.Plugins
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.LaneClear)
                 {
                     if (target is Obj_AI_Turret && target.Team != Player.Team &&
-                        config.Item("EC.Garen.Misc.Q").GetValue<bool>() &&
+                        Root.Item("EC.Garen.Misc.Q").GetValue<bool>() &&
                         !Player.IsWindingUp && Orbwalking.InAutoAttackRange(target))
                     {
                         Q.Cast();
@@ -389,7 +389,7 @@ namespace EndifsCreations.Plugins
             if (sender.IsEnemy)
             {
                 if (myUtility.ImmuneToCC(sender)) return;
-                if (config.Item("EC.Garen.Misc.Q2").GetValue<bool>() && Q.IsReady() && args.DangerLevel == Interrupter2.DangerLevel.High)
+                if (Root.Item("EC.Garen.Misc.Q2").GetValue<bool>() && Q.IsReady() && args.DangerLevel == Interrupter2.DangerLevel.High)
                 {
                     if (Vector3.Distance(Player.ServerPosition, sender.ServerPosition) < Player.AttackRange*3)
                     {
@@ -400,7 +400,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Garen.UseQ3Misc").GetValue<bool>() && Q.IsReady())
+            if (Root.Item("EC.Garen.UseQ3Misc").GetValue<bool>() && Q.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Q.Range)
                 {
@@ -412,7 +412,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Garen.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Garen.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

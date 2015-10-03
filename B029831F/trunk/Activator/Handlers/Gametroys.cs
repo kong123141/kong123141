@@ -3,8 +3,8 @@
 // any form or by any means, mechanical, electronical or otherwise, is prohibited
 // without the prior written consent of the copyright owner.
 // 
-// Document:	activator/gametroyhandler.cs
-// Date:		01/07/2015
+// Document:	Handlers/Gametroys.cs
+// Date:		22/09/2015
 // Author:		Robin Kurisu
 #endregion
 
@@ -27,7 +27,7 @@ namespace Activator.Handlers
 
         static void GameObject_OnCreate(GameObject obj, EventArgs args)
         {
-            foreach (var troy in Gametroy.Troys)
+            foreach (var troy in GameTroy.Troys)
             {
                 if (obj.Name.Contains(troy.Name))
                 {
@@ -42,7 +42,7 @@ namespace Activator.Handlers
 
         static void Game_OnUpdate(EventArgs args)
         {
-            foreach (var troy in Gametroy.Troys.Where(x => x.Included))
+            foreach (var troy in GameTroy.Troys.Where(x => x.Included))
             {
                 if (troy.Owner.IsAlly)
                     continue;

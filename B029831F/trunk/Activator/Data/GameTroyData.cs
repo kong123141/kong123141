@@ -3,14 +3,14 @@
 // any form or by any means, mechanical, electronical or otherwise, is prohibited
 // without the prior written consent of the copyright owner.
 // 
-// Document:	activator/gametroydata.cs
-// Date:		01/07/2015
+// Document:	Data/GameData.cs
+// Date:		22/09/2015
 // Author:		Robin Kurisu
 #endregion
 
-using System.Collections.Generic;
-using Activator.Base;
 using LeagueSharp;
+using Activator.Base;
+using System.Collections.Generic;
 
 namespace Activator.Data
 {
@@ -102,7 +102,7 @@ namespace Activator.Data
                 ChampionName = "FiddleSticks",
                 Radius = 250f,
                 Slot = SpellSlot.E,
-                HitType = new[] { Base.HitType.CrowdControl },
+                HitType = new[] { Base.HitType.None },
                 PredictDmg = true,
                 Interval = 1.5
             });
@@ -148,7 +148,8 @@ namespace Activator.Data
                 Radius = 250f,
                 Slot = SpellSlot.R,
                 HitType = new[] { Base.HitType.CrowdControl, Base.HitType.Danger },
-                PredictDmg = false
+                PredictDmg = false,
+                Interval = 1.0
             });
 
             Troys.Add(new GameTroyData
@@ -179,6 +180,7 @@ namespace Activator.Data
                 ChampionName = "FiddleSticks",
                 Radius = 450f,
                 Slot = SpellSlot.R,
+                DelayFromStart = 500,
                 HitType =
                     new[]
                     {
@@ -219,7 +221,7 @@ namespace Activator.Data
                 Slot = SpellSlot.R,
                 HitType = new[] { Base.HitType.Danger, Base.HitType.CrowdControl },
                 PredictDmg = true,
-                Interval = .75
+                Interval = 1.0
             });
 
             Troys.Add(new GameTroyData
@@ -229,7 +231,8 @@ namespace Activator.Data
                 Radius = 375f,
                 Slot = SpellSlot.W,
                 HitType = new[] { Base.HitType.CrowdControl },
-                PredictDmg = false
+                PredictDmg = false,
+                Interval = 1.0
             });
 
             Troys.Add(new GameTroyData
@@ -239,7 +242,8 @@ namespace Activator.Data
                 Radius = 375f,
                 Slot = SpellSlot.W,
                 HitType = new[] { Base.HitType.CrowdControl },
-                PredictDmg = false
+                PredictDmg = false,
+                Interval = 1.0
             });
 
             Troys.Add(new GameTroyData
@@ -271,7 +275,8 @@ namespace Activator.Data
                 Radius = 350f,
                 Slot = SpellSlot.W,
                 HitType = new []{ Base.HitType.CrowdControl },
-                PredictDmg = false
+                PredictDmg = false,
+                Interval = 1.0
             });
 
             Troys.Add(new GameTroyData
@@ -291,7 +296,7 @@ namespace Activator.Data
                 ChampionName = "Soraka",
                 Radius = 375f,
                 Slot = SpellSlot.E,
-                HitType = new[] { Base.HitType.CrowdControl },
+                HitType = new[] { Base.HitType.None },
                 PredictDmg = true,
                 Interval = 1.0
             });

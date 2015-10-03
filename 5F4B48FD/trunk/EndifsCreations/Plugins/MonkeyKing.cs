@@ -38,13 +38,13 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.MonkeyKing.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.MonkeyKing.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.MonkeyKing.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.MonkeyKing.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.MonkeyKing.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
@@ -52,15 +52,12 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
-            var UseE = config.Item("EC.MonkeyKing.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.MonkeyKing.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.MonkeyKing.Combo.Items").GetValue<bool>();
+            var UseE = Root.Item("EC.MonkeyKing.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.MonkeyKing.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.MonkeyKing.Combo.Items").GetValue<bool>();
             if (UseR && R.IsReady())
             {
-                if (Player.CountEnemiesInRange(R.Range) >= 4)
-                {
-                    R.Cast();
-                }
+                mySpellcast.PointBlank(null, R, R.Range, 3);
             }
             if (Target.IsValidTarget())
             {
@@ -112,7 +109,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {                    
-                    if (config.Item("EC.MonkeyKing.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.MonkeyKing.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast();
                     }
@@ -123,7 +120,7 @@ namespace EndifsCreations.Plugins
         {
             if (unit is Obj_AI_Hero && unit.IsEnemy && !spell.SData.IsAutoAttack() && W.IsReady())
             {
-                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && config.Item("EC.MonkeyKing.Combo.W").GetValue<bool>())
+                if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Root.Item("EC.MonkeyKing.Combo.W").GetValue<bool>())
                 {
                     if (spell.SData.TargettingType.Equals(SpellDataTargetType.Location) || spell.SData.TargettingType.Equals(SpellDataTargetType.Location2) || spell.SData.TargettingType.Equals(SpellDataTargetType.LocationVector) || spell.SData.TargettingType.Equals(SpellDataTargetType.Cone))
                     {
@@ -157,11 +154,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.MonkeyKing.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.MonkeyKing.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.MonkeyKing.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.MonkeyKing.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Drawing.DrawText(Player.HPBarPosition.X + 10, Player.HPBarPosition.Y - 15, Color.Yellow, "Hits: " + Player.CountEnemiesInRange(R.Range));
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Fuchsia);

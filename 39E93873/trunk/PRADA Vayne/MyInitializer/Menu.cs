@@ -28,7 +28,7 @@ namespace PRADA_Vayne.MyInitializer
                 Program.LaneClearMenu = new Menu("Laneclear Settings", "laneclearmenu");
                 Program.EscapeMenu = new Menu("Escape Settings", "escapemenu");
 
-                Program.ActivatorMenu = new Menu("CK Activator", "activatormenu");
+                Program.ActivatorMenu = new Menu("MActivator", "activatormenu");
 
                 Program.DrawingsMenu = new Menu("Drawing Settings", "drawingsmenu");
                 Program.DrawingsMenu.AddItem(new MenuItem("streamingmode", "Disable All Drawings").SetValue(false));
@@ -51,10 +51,10 @@ namespace PRADA_Vayne.MyInitializer
                     new MenuItem("ManualE", "Semi-Manual Condemn").SetValue(new KeyBind('E', KeyBindType.Press)));
                 Program.ComboMenu.AddItem(
                     new MenuItem("EMode", "E Mode").SetValue(
-                        new StringList(new[] {"PRADAPERFECT", "MARKSMAN", "SHARPSHOOTER", "GOSU", "VHR", "PRADALEGACY", "FASTEST"})));
+                        new StringList(new[] {"PRADASMART", "PRADAPERFECT", "MARKSMAN", "SHARPSHOOTER", "GOSU", "VHR", "PRADALEGACY", "FASTEST", "OLDPRADA"})));
                 Program.ComboMenu.AddItem(
-                    new MenuItem("EPushDist", "E Push Distance").SetValue(new Slider(420, 300, 475)));
-                Program.ComboMenu.AddItem(new MenuItem("EHitchance", "E % Hitchance").SetValue(new Slider(67)));
+                    new MenuItem("EPushDist", "E Push Distance").SetValue(new Slider(450, 300, 475)));
+                Program.ComboMenu.AddItem(new MenuItem("EHitchance", "E % Hitchance").SetValue(new Slider(50)));
                 Program.ComboMenu.AddItem(new MenuItem("RCombo", "Auto Ult").SetValue(false));
                 Program.ComboMenu.AddItem(new MenuItem("AutoBuy", "Auto-Swap Trinkets?").SetValue(true));
                 Program.EscapeMenu.AddItem(new MenuItem("QUlt", "Smart Q-Ult").SetValue(true));
@@ -67,7 +67,7 @@ namespace PRADA_Vayne.MyInitializer
                 }
                 Program.LaneClearMenu.AddItem(new MenuItem("QLastHit", "Use Q to Lasthit").SetValue(true));
                 Program.LaneClearMenu.AddItem(
-                    new MenuItem("QLastHitMana", "Min Mana for Q Lasthit").SetValue(new Slider(45)));
+                    new MenuItem("QLastHitMana", "Min Mana% for Q Lasthit").SetValue(new Slider(45))); 
                 Program.LaneClearMenu.AddItem(new MenuItem("QWaveClear", "Use Q to clear the wave").SetValue(false));
                 Program.LaneClearMenu.AddItem(
                     new MenuItem("QWaveClearMana", "Min Mana for Q Wave clear").SetValue(new Slider(75)));
@@ -87,7 +87,7 @@ namespace PRADA_Vayne.MyInitializer
 
         public static void InitActivator()
         {
-            Program.Activator = new MyUtils.Activator(Program.ActivatorMenu);
+            Program.Activator = new MActivator();
         }
 
         public static void InitOrbwalker()

@@ -3,10 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
+using SharpDX.Direct3D9;
 
 #endregion
 
@@ -21,6 +23,7 @@ namespace Marksman.Champions
 
     internal class Kalista : Champion
     {
+        public static Font font;
         public static Spell E;
         public static Dictionary<Vector3, Vector3> JumpPos = new Dictionary<Vector3, Vector3>();
         private static readonly List<EnemyMarker> xEnemyMarker = new List<EnemyMarker>();
@@ -35,31 +38,36 @@ namespace Marksman.Champions
         {
             Utils.Utils.PrintMessage("Kalista loaded.");
 
-            Q = new Spell(SpellSlot.Q, 1150);
+            Q = new Spell(SpellSlot.Q, 1170);
             W = new Spell(SpellSlot.W, 5500);
             E = new Spell(SpellSlot.E, 950);
             R = new Spell(SpellSlot.R, 1250);
 
-            Q.SetSkillshot(0.25f, 40f, 1300f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 40f, 1200f, true, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
+
+            font = new Font(
+                Drawing.Direct3DDevice,
+                new FontDescription
+                {
+                    FaceName = "Segoe UI",
+                    Height = 45,
+                    OutputPrecision = FontPrecision.Default,
+                    Quality = FontQuality.Default
+                });
+
         }
 
         public int KalistaMarkerCount
         {
             get
             {
-                var xbuffCount = 0;
-                foreach (
-                    var buff in from enemy in ObjectManager.Get<Obj_AI_Hero>().Where(tx => tx.IsEnemy && !tx.IsDead)
-                        where ObjectManager.Player.Distance(enemy) < E.Range
-                        from buff in enemy.Buffs
-                        where buff.Name.Contains("kalistaexpungemarker")
-                        select buff)
-                {
-                    xbuffCount = buff.Count;
-                }
-                return xbuffCount;
+                return (from enemy in ObjectManager.Get<Obj_AI_Hero>().Where(tx => tx.IsEnemy && !tx.IsDead)
+                    where ObjectManager.Player.Distance(enemy) < E.Range
+                    from buff in enemy.Buffs
+                    where buff.Name.Contains("kalistaexpungemarker")
+                    select buff).Select(buff => buff.Count).FirstOrDefault();
             }
         }
 
@@ -69,6 +77,38 @@ namespace Marksman.Champions
 
         public override void Drawing_OnDraw(EventArgs args)
         {
+
+            var Minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All,
+                MinionTeam.Enemy);
+
+            var killableMinionCount = 0;
+            foreach (var m in Minions.Where(x => E.CanCast(x) && x.Health <= E.GetDamage(x)))
+            {
+                if (m.SkinName == "SRU_ChaosMinionSiege" || m.SkinName == "SRU_ChaosMinionSuper")
+                    killableMinionCount += 2;
+                else
+                    killableMinionCount++;
+
+                Render.Circle.DrawCircle(m.Position, (float) (m.BoundingRadius*1.5), Color.White, 5);
+            }
+
+            if (killableMinionCount >= 3 && E.IsReady() && ObjectManager.Player.ManaPercent > 15)
+                E.Cast();
+
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All,
+                MinionTeam.Neutral);
+
+            foreach (
+                var m in
+                    MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All,
+                        MinionTeam.Neutral).Where(m => E.CanCast(m) && m.Health <= E.GetDamage(m)))
+            {
+                if (m.SkinName.ToLower().Contains("baron") || m.SkinName.ToLower().Contains("dragon") && E.CanCast(m))
+                    E.Cast(m);
+                else
+                    Render.Circle.DrawCircle(m.Position, (float) (m.BoundingRadius*1.5), Color.White, 5);
+            }
+            
             Spell[] spellList = {Q, W, E, R};
             foreach (var spell in spellList)
             {
@@ -76,10 +116,6 @@ namespace Marksman.Champions
                 if (menuItem.Active && spell.Level > 0)
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
             }
-
-            var drawConn = GetValue<Circle>("DrawConnMax");
-            if (drawConn.Active)
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, CoopStrikeAllyRange, drawConn.Color);
 
             var drawJumpPos = GetValue<Circle>("DrawJumpPos");
             if (drawJumpPos.Active)
@@ -138,6 +174,15 @@ namespace Marksman.Champions
 
         public override void Game_OnGameUpdate(EventArgs args)
         {
+            var t1 =
+                HeroManager.Enemies.FirstOrDefault(
+                    x =>
+                        !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield) &&
+                        E.CanCast(x) && (x.Health + (x.HPRegenRate/2) + x.Level*1.5) <= E.GetDamage(x));
+
+            if (E.CanCast(t1))
+                E.Cast();
+
             if (GetValue<Circle>("DrawJumpPos").Active)
                 fillPositions();
 
@@ -156,59 +201,15 @@ namespace Marksman.Champions
             {
                 Render.Circle.DrawCircle(myBoddy.Position, 75f, Color.Red);
             }
-            if (CoopStrikeAlly == null)
-            {
-                foreach (
-                    var ally in
-                        from ally in ObjectManager.Get<Obj_AI_Hero>().Where(tx => tx.IsAlly && !tx.IsDead && !tx.IsMe)
-                        where ObjectManager.Player.Distance(ally) <= CoopStrikeAllyRange
-                        from buff in ally.Buffs
-                        where buff.Name.Contains("kalistacoopstrikeally")
-                        select ally)
-                {
-                    CoopStrikeAlly = ally;
-                }
-                if (W.Level != 0)
-                    Drawing.DrawText(Drawing.Width*0.44f, Drawing.Height*0.80f, Color.Red, "Searching Your Friend...");
-            }
-            else
-            {
-                var drawConnText = GetValue<Circle>("DrawConnText");
-                if (drawConnText.Active)
-                {
-                    Drawing.DrawText(Drawing.Width*0.44f, Drawing.Height*0.80f, drawConnText.Color,
-                        "You Connected with " + CoopStrikeAlly.ChampionName);
-                }
 
-                var drawConnSignal = GetValue<bool>("DrawConnSignal");
-                if (drawConnSignal)
-                {
-                    if (ObjectManager.Player.Distance(CoopStrikeAlly) > 800 &&
-                        ObjectManager.Player.Distance(CoopStrikeAlly) < CoopStrikeAllyRange)
-                    {
-                        Drawing.DrawText(Drawing.Width*0.45f, Drawing.Height*0.82f, Color.Gold,
-                            "Connection Signal: Low");
-                    }
-                    else if (ObjectManager.Player.Distance(CoopStrikeAlly) < 800)
-                    {
-                        Drawing.DrawText(Drawing.Width*0.45f, Drawing.Height*0.82f, Color.GreenYellow,
-                            "Connection Signal: Good");
-                    }
-                    else if (ObjectManager.Player.Distance(CoopStrikeAlly) > CoopStrikeAllyRange)
-                    {
-                        Drawing.DrawText(Drawing.Width*0.45f, Drawing.Height*0.82f, Color.Red,
-                            "Connection Signal: None");
-                    }
-                }
-            }
             var drawEStackCount = GetValue<Circle>("DrawEStackCount");
             if (drawEStackCount.Active)
             {
                 xEnemyMarker.Clear();
                 foreach (
                     var xEnemy in
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(tx => tx.IsEnemy && !tx.IsDead && ObjectManager.Player.Distance(tx) < E.Range))
+                        HeroManager.Enemies.Where(
+                            tx => tx.IsEnemy && !tx.IsDead && ObjectManager.Player.Distance(tx) < E.Range))
                 {
                     foreach (var buff in xEnemy.Buffs.Where(buff => buff.Name.Contains("kalistaexpungemarker")))
                     {
@@ -228,12 +229,14 @@ namespace Marksman.Champions
                         if (enemy.IsEnemy && !enemy.IsDead && ObjectManager.Player.Distance(enemy) <= E.Range &&
                             enemy.ChampionName == markedEnemies.ChampionName)
                         {
-                            if (!(markedEnemies.ExpireTime > Game.Time)) continue;
+                            if (!(markedEnemies.ExpireTime > Game.Time))
+                            {
+                                continue;
+                            }
                             var xCoolDown = TimeSpan.FromSeconds(markedEnemies.ExpireTime - Game.Time);
                             var display = string.Format("E:{0}", markedEnemies.BuffCount);
-                            Drawing.DrawText(enemy.HPBarPosition.X + 145, enemy.HPBarPosition.Y + 20,
-                                drawEStackCount.Color,
-                                display);
+                            //Utils.Utils.DrawText(font, "aaaaa", (int) enemy.HPBarPosition.X, (int) enemy.HPBarPosition.Y, SharpDX.Color.GreenYellow);
+                            Drawing.DrawText(enemy.HPBarPosition.X + 145, enemy.HPBarPosition.Y + 20, drawEStackCount.Color, display);
                         }
                     }
                 }
@@ -277,11 +280,6 @@ namespace Marksman.Champions
                     }
                 }
             }
-
-            if (!R.IsReady() || !GetValue<KeyBind>("CastR").Active) return;
-            t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-            if (t != null)
-                R.Cast(t);
         }
 
         public override bool ComboMenu(Menu config)
@@ -307,6 +305,7 @@ namespace Marksman.Champions
         {
             config.AddItem(
                 new MenuItem("JumpTo" + Id, "JumpTo").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+            config.AddItem(new MenuItem("JumpTo2" + Id, "JumpTo2").SetValue(true));
             return true;
         }
 
@@ -320,20 +319,9 @@ namespace Marksman.Champions
                 new MenuItem("DrawE" + Id, "E range").SetValue(new Circle(false, Color.FromArgb(100, 255, 255, 255))));
             config.AddItem(
                 new MenuItem("DrawR" + Id, "R range").SetValue(new Circle(false, Color.FromArgb(100, 255, 255, 255))));
-            config.AddItem(new MenuItem("Dx" + Id, ""));
-            config.AddItem(
-                new MenuItem("DrawConnMax" + Id, "Connection range").SetValue(new Circle(false,
-                    Color.FromArgb(100, 255, 255, 255))));
-            config.AddItem(
-                new MenuItem("DrawConnText" + Id, "Connection Text").SetValue(new Circle(false, Color.GreenYellow)));
-            config.AddItem(
-                new MenuItem("DrawConnSignal" + Id, "Connection Signal").SetValue(true));
-            config.AddItem(new MenuItem("Dx" + Id, ""));
             config.AddItem(
                 new MenuItem("DrawEStackCount" + Id, "E Stack Count").SetValue(new Circle(false, Color.Firebrick)));
-            config.AddItem(new MenuItem("Dx", ""));
-            config.AddItem(
-                new MenuItem("DrawJumpPos" + Id, "Jump Positions").SetValue(new Circle(false, Color.HotPink)));
+            config.AddItem(new MenuItem("DrawJumpPos" + Id, "Jump Positions").SetValue(new Circle(false, Color.HotPink)));
 
             var damageAfterE = new MenuItem("DamageAfterE", "Damage After E").SetValue(true);
             config.AddItem(damageAfterE);

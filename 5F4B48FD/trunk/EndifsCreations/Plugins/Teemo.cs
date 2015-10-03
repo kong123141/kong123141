@@ -36,12 +36,12 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Teemo.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Teemo.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Teemo.Combo.R", "Use R").SetValue(false));                
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var harassmenu = new Menu("Harass", "Harass");
             {               
                 harassmenu.AddItem(new MenuItem("EC.Teemo.Harass.Q", "Use Q").SetValue(true));
-                config.AddSubMenu(harassmenu);
+                Root.AddSubMenu(harassmenu);
             }
             var laneclearmenu = new Menu("Farm", "Farm");
             {
@@ -49,24 +49,24 @@ namespace EndifsCreations.Plugins
                 laneclearmenu.AddItem(new MenuItem("EC.Teemo.UseRFarm", "Use R").SetValue(true));
                 laneclearmenu.AddItem(new MenuItem("EC.Teemo.RFarmValue", "R More Than").SetValue(new Slider(1, 1, 5)));
                 laneclearmenu.AddItem(new MenuItem("EC.Teemo.Farm.ManaPercent", "Farm Mana >").SetValue(new Slider(50)));
-                config.AddSubMenu(laneclearmenu);
+                Root.AddSubMenu(laneclearmenu);
             }
             var junglemenu = new Menu("Jungle", "Jungle");
             {
                 junglemenu.AddItem(new MenuItem("EC.Teemo.Jungle.Q", "Use Q").SetValue(true));
                 junglemenu.AddItem(new MenuItem("EC.Teemo.UseRJFarm", "Use R").SetValue(true));
-                config.AddSubMenu(junglemenu);
+                Root.AddSubMenu(junglemenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Teemo.UseRMisc", "R Gapcloser").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Teemo.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Teemo.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -74,9 +74,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.Teemo.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.Teemo.Combo.W").GetValue<bool>();
-            var UseR = config.Item("EC.Teemo.Combo.R").GetValue<bool>();
+            var UseQ = Root.Item("EC.Teemo.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.Teemo.Combo.W").GetValue<bool>();
+            var UseR = Root.Item("EC.Teemo.Combo.R").GetValue<bool>();
             if (Target.IsValidTarget())
             {
                 try
@@ -89,14 +89,14 @@ namespace EndifsCreations.Plugins
                     {
                         if (Vector3.Distance(Player.ServerPosition, Target.ServerPosition) <= R.Range)
                         {
-                            mySpellcast.LinearVector(Target.ServerPosition, R, Vector3.Distance(Player.ServerPosition, Target.ServerPosition));
+                            mySpellcast.PointVector(Target.ServerPosition, R, Vector3.Distance(Player.ServerPosition, Target.ServerPosition));
                         }
                         else
                         {
                             var box = new Geometry.Polygon.Rectangle(Player.ServerPosition, Player.ServerPosition.Extend(Target.ServerPosition, R.Range), 50);
                             if (AllNoxiousTraps.Any(x => box.IsInside(x)))
                             {
-                                mySpellcast.LinearVector(AllNoxiousTraps.Where(x => box.IsInside(x)).Select(p => p.ServerPosition).LastOrDefault(), R);
+                                mySpellcast.PointVector(AllNoxiousTraps.Where(x => box.IsInside(x)).Select(p => p.ServerPosition).LastOrDefault(), R);
                             }
                         }
                     }
@@ -106,7 +106,7 @@ namespace EndifsCreations.Plugins
         }
         private void Harass()
         {
-            var UseQ = config.Item("EC.Teemo.Harass.Q").GetValue<bool>();
+            var UseQ = Root.Item("EC.Teemo.Harass.Q").GetValue<bool>();
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -119,9 +119,9 @@ namespace EndifsCreations.Plugins
         }
         private void LaneClear()
         {
-            if (myUtility.PlayerManaPercentage < config.Item("EC.Teemo.Farm.ManaPercent").GetValue<Slider>().Value) return;
+            if (myUtility.PlayerManaPercentage < Root.Item("EC.Teemo.Farm.ManaPercent").GetValue<Slider>().Value) return;
             if (Player.UnderTurret(true)) return;
-            if (config.Item("EC.Teemo.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && myOrbwalker.IsWaiting())
+            if (Root.Item("EC.Teemo.Farm.Q").GetValue<bool>() && Q.IsReady() && !Player.IsWindingUp && myOrbwalker.Waiting)
             {
                 var siegeQ = myFarmManager.GetLargeMinions(Q.Range).FirstOrDefault(x => Q.IsKillable(x));
                 if (siegeQ != null && siegeQ.IsValidTarget())
@@ -137,12 +137,12 @@ namespace EndifsCreations.Plugins
                     }
                 }
             }
-            if (config.Item("EC.Teemo.UseRFarm").GetValue<bool>() && R.IsReady() && !Player.IsWindingUp)
+            if (Root.Item("EC.Teemo.UseRFarm").GetValue<bool>() && R.IsReady() && !Player.IsWindingUp)
             {
                 var minionR = MinionManager.GetMinions(Player.ServerPosition, R.Range);
                 if (minionR == null) return;
                 var rpred = R.GetCircularFarmLocation(minionR);
-                if (rpred.MinionsHit > config.Item("EC.Teemo.RFarmValue").GetValue<Slider>().Value)
+                if (rpred.MinionsHit > Root.Item("EC.Teemo.RFarmValue").GetValue<Slider>().Value)
                 {
                     R.Cast(rpred.Position);
                 }
@@ -156,7 +156,7 @@ namespace EndifsCreations.Plugins
             var mob = mobs[0];
             if (mob != null && !Player.IsWindingUp)
             {
-                if (config.Item("EC.Teemo.Jungle.Q").GetValue<bool>() && Q.IsReady() && Orbwalking.InAutoAttackRange(mob))
+                if (Root.Item("EC.Teemo.Jungle.Q").GetValue<bool>() && Q.IsReady() && Orbwalking.InAutoAttackRange(mob))
                 {
                     if (largemobs != null)
                     {
@@ -167,7 +167,7 @@ namespace EndifsCreations.Plugins
                         Q.Cast(mob);
                     }
                 }
-                if (config.Item("EC.Teemo.UseRJFarm").GetValue<bool>() && R.IsReady())
+                if (Root.Item("EC.Teemo.UseRJFarm").GetValue<bool>() && R.IsReady())
                 {
                     if (largemobs != null)
                     {
@@ -248,11 +248,11 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(args.Target))
                 {                   
-                    if (config.Item("EC.Teemo.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Teemo.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.Cast(args.Target);
                     }
-                    if (config.Item("EC.Teemo.Combo.W").GetValue<bool>() && W.IsReady())
+                    if (Root.Item("EC.Teemo.Combo.W").GetValue<bool>() && W.IsReady())
                     {
                         W.Cast();
                     }
@@ -261,7 +261,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnNonKillableMinion(AttackableUnit minion)
         {
-            if (config.Item("EC.Teemo.Farm.Q").GetValue<bool>() && Q.IsReady() && (myUtility.PlayerManaPercentage > config.Item("EC.Teemo.Farm.ManaPercent").GetValue<Slider>().Value))
+            if (Root.Item("EC.Teemo.Farm.Q").GetValue<bool>() && Q.IsReady() && (myUtility.PlayerManaPercentage > Root.Item("EC.Teemo.Farm.ManaPercent").GetValue<Slider>().Value))
             {
                 var target = minion as Obj_AI_Base;
                 if (target != null &&
@@ -274,7 +274,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Teemo.UseRMisc").GetValue<bool>() && R.IsReady())
+            if (Root.Item("EC.Teemo.UseRMisc").GetValue<bool>() && R.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= R.Range)
                 {
@@ -287,11 +287,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Teemo.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Teemo.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }
-            if (config.Item("EC.Teemo.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Teemo.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.White);
             }

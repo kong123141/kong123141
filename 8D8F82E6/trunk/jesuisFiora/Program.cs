@@ -17,7 +17,6 @@ namespace jesuisFiora
         public static Spell Q, W, E, R;
         public static Menu Menu;
         public static Color ScriptColor = new Color(255, 0, 255);
-        public static UltTarget UltTarget;
         public static Spell Ignite;
 
         private static IEnumerable<Obj_AI_Hero> Enemies
@@ -33,29 +32,6 @@ namespace jesuisFiora
         private static List<Obj_AI_Base> QJungleMinions
         {
             get { return MinionManager.GetMinions(Q.Range, MinionTypes.All, MinionTeam.Neutral); }
-        }
-
-        private static IEnumerable<Obj_GeneralParticleEmitter> FioraUltPassiveObjects
-        {
-            get
-            {
-                return
-                    ObjectManager.Get<Obj_GeneralParticleEmitter>()
-                        .Where(
-                            obj =>
-                                obj.IsValid && obj.Name.Contains("Fiora_Base_R_Mark") ||
-                                (obj.Name.Contains("Fiora_Base_R") && obj.Name.Contains("Timeout")));
-            }
-        }
-
-        private static IEnumerable<Obj_GeneralParticleEmitter> FioraPassiveObjects
-        {
-            get
-            {
-                return
-                    ObjectManager.Get<Obj_GeneralParticleEmitter>()
-                        .Where(obj => obj.IsValid && obj.Name.Contains("Fiora_Base_Passive"));
-            }
         }
 
         private static float FioraAutoAttackRange
@@ -84,7 +60,7 @@ namespace jesuisFiora
             Q.SetSkillshot(.25f, 0, 500, false, SkillshotType.SkillshotLine);
 
             W = new Spell(SpellSlot.W, 750);
-            W.SetSkillshot(0.5f, 95, 3000, false, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.5f, 70, 3200, false, SkillshotType.SkillshotLine);
 
             E = new Spell(SpellSlot.E);
 
@@ -104,8 +80,14 @@ namespace jesuisFiora
             qMenu.AddBool("QHarass", "Use in Harass");
             qMenu.AddSlider("QRange", "Decrease Q Max Range", 10, 0, 150);
             Q.Range = 750 - qMenu.Item("QRange").GetValue<Slider>().Value;
-            qMenu.Item("QRange").ValueChanged +=
-                (sender, eventArgs) => { Q.Range = 750 - eventArgs.GetNewValue<Slider>().Value; };
+            qMenu.Item("QRange").ValueChanged += (sender, eventArgs) =>
+            {
+                Q.Range = 750 - eventArgs.GetNewValue<Slider>().Value;
+                var qDraw = Menu.Item("QDraw");
+                var qCircle = qDraw.GetValue<Circle>();
+                qDraw.SetValue(new Circle(qCircle.Active, qCircle.Color, Q.Range));
+            };
+            qMenu.AddBool("QForcePassive", "Only Q to Vitals", false);
             qMenu.AddInfo("QFleeInfo", "Flee:", ScriptColor);
             qMenu.AddKeyBind("QFlee", "Q Flee", 'T');
             qMenu.AddInfo("FleeInfo", " --> Flees towards cursor position.", ScriptColor);
@@ -253,17 +235,16 @@ namespace jesuisFiora
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (Player.IsDead)
+            if (Player.IsDead || Flee())
             {
                 return;
             }
 
-            Flee();
-            DuelistMode();
-            Farm();
             KillstealQ();
             KillstealW();
             AutoIgnite();
+            DuelistMode();
+            Farm();
 
             var mode = Orbwalker.ActiveMode;
             var combo = mode.Equals(Orbwalking.OrbwalkingMode.Combo) || mode.Equals(Orbwalking.OrbwalkingMode.Mixed);
@@ -275,7 +256,7 @@ namespace jesuisFiora
             }
 
             var comboMode = mode.GetModeString();
-            var target = UltTarget != null && UltTarget.Target.IsValidTarget(Q.Range)
+            var target = UltTarget.Target != null && UltTarget.Target.IsValidTarget(Q.Range)
                 ? UltTarget.Target
                 : TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
 
@@ -294,6 +275,11 @@ namespace jesuisFiora
             }
 
             if (Player.IsDashing() || Player.IsWindingUp || Player.Spellbook.IsCastingSpell)
+            {
+                return;
+            }
+
+            if (rCombo && ComboR(target))
             {
                 return;
             }
@@ -319,25 +305,6 @@ namespace jesuisFiora
                 if ((dT > .2f || (d2 < 690 && dT > -1)) && CastQ(target))
                 {
                     //  Console.WriteLine("{0} {1}", dT, d2);
-                    return;
-                }
-            }
-
-            if (rCombo)
-            {
-                if (Menu.Item("RComboSelected").IsActive())
-                {
-                    var unit = TargetSelector.GetSelectedTarget();
-                    if (unit != null && unit.IsValid && unit.NetworkId.Equals(target.NetworkId) && CastR(target))
-                    {
-                        return;
-                    }
-                    return;
-                }
-
-                if (CastR(target))
-                {
-                    Hud.SelectedUnit = target;
                 }
             }
         }
@@ -357,10 +324,7 @@ namespace jesuisFiora
                 {
                     Orbwalking.ResetAutoAttackTimer();
                 }
-                else if (slot.Equals(SpellSlot.R) && args.Target != null)
-                {
-                    UltTarget = new UltTarget(args.Target);
-                }
+
                 return;
             }
 
@@ -385,7 +349,12 @@ namespace jesuisFiora
             //Console.WriteLine(type);
             if (!unit.IsValidTarget() || Menu.Item("WMode").GetValue<StringList>().SelectedIndex == 1)
             {
-                var target = TargetSelector.GetTargetNoCollision(W);
+                var target = TargetSelector.GetSelectedTarget();
+                if (target == null || !target.IsValidTarget(W.Range))
+                {
+                    target = TargetSelector.GetTargetNoCollision(W);
+                }
+
                 if (target != null && target.IsValidTarget(W.Range))
                 {
                     castUnit = target;
@@ -524,7 +493,7 @@ namespace jesuisFiora
                     enemy =>
                         Menu.Item("Duelist" + enemy.ChampionName).IsActive() && enemy.IsValidTarget(R.Range) &&
                         GetComboDamage(enemy, vitalCalc) >= enemy.Health &&
-                        enemy.Health > Player.GetSpellDamage(enemy, SpellSlot.Q) + GetPassiveDamage(enemy, 1)))
+                        enemy.Health > Player.GetSpellDamage(enemy, SpellSlot.Q) + enemy.GetPassiveDamage(1)))
             {
                 if (Menu.Item("RComboSelected").IsActive())
                 {
@@ -600,23 +569,50 @@ namespace jesuisFiora
             if (lane != null && Q.Cast(lane).IsCasted()) {}
         }
 
-        public static bool CastQ(Obj_AI_Base target)
+        public static bool CastQ(Obj_AI_Base target, bool force = false)
         {
             if (!Q.IsReady() || !target.IsValidTarget(Q.Range))
             {
                 return false;
             }
 
-            if (CountPassive(target) == 0)
+
+            var forcePassive = Menu.Item("QForcePassive").IsActive() && !force;
+            var predicted = Prediction.GetPrediction(target, Q.Delay);
+            var condition = predicted.Hitchance > HitChance.High && Q.IsInRange(predicted.UnitPosition);
+
+            if (target.CountPassive() == 0)
             {
-                var predicted = Prediction.GetPrediction(target, Q.Delay);
-                return predicted.Hitchance > HitChance.Medium && Q.IsInRange(predicted.UnitPosition) &&
-                       Q.Cast(predicted.UnitPosition);
+                if (forcePassive)
+                {
+                    //  Console.WriteLine("NO PASSIVE");
+                    return false;
+                }
+
+                return condition && Q.Cast(predicted.UnitPosition);
             }
 
-            var pos = GetPassivePosition(target);
+            var pos = target.GetPassivePosition();
+            if (pos.Equals(Vector3.Zero))
+            {
+                if (forcePassive)
+                {
+                    // Console.WriteLine("CAN'T FIND PASSIVE POS");
+                    return false;
+                }
+                return condition && Q.Cast(predicted.UnitPosition);
+            }
 
-            return pos.Equals(Vector3.Zero) ? Q.Cast(target).IsCasted() : Q.Cast(pos);
+            if (Player.Distance(pos) > Q.Range)
+            {
+                if (forcePassive)
+                {
+                    // Console.WriteLine("PASSIVE OUT OF RANGE");
+                    return false;
+                }
+                return condition && Q.Cast(predicted.UnitPosition);
+            }
+            return Q.Cast(pos);
         }
 
         public static bool CastW(Obj_AI_Base target)
@@ -632,10 +628,11 @@ namespace jesuisFiora
             }
 
             var unit =
-                Enemies.FirstOrDefault(o => o.IsValidTarget(Q.Range) && o.Health < Q.GetDamage(o) + GetPassiveDamage(o));
+                Enemies.FirstOrDefault(
+                    o => o.IsValidTarget(Q.Range) && o.Health < Q.GetDamage(o) + o.GetPassiveDamage());
             if (unit != null)
             {
-                CastQ(unit);
+                CastQ(unit, true);
             }
         }
 
@@ -658,6 +655,27 @@ namespace jesuisFiora
             {
                 W.Cast(unit);
             }
+        }
+
+        public static bool ComboR(Obj_AI_Base target)
+        {
+            if (Menu.Item("RComboSelected").IsActive())
+            {
+                var unit = TargetSelector.GetSelectedTarget();
+                if (unit != null && unit.IsValid && unit.NetworkId.Equals(target.NetworkId) && CastR(target))
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (!CastR(target))
+            {
+                return false;
+            }
+
+            Hud.SelectedUnit = target;
+            return true;
         }
 
         public static bool CastR(Obj_AI_Base target)
@@ -684,7 +702,8 @@ namespace jesuisFiora
                 botrk.Cast(target);
             }
 
-            var units = MinionManager.GetMinions(385, MinionTypes.All, MinionTeam.NotAlly).Count;
+            var units =
+                MinionManager.GetMinions(385, MinionTypes.All, MinionTeam.NotAlly).Count(o => !(o is Obj_AI_Turret));
             var heroes = Player.GetEnemiesInRange(385).Count;
             var count = units + heroes;
 
@@ -730,11 +749,11 @@ namespace jesuisFiora
             }
         }
 
-        public static void Flee()
+        public static bool Flee()
         {
             if (!Menu.Item("QFlee").IsActive())
             {
-                return;
+                return false;
             }
 
             Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.None;
@@ -748,70 +767,8 @@ namespace jesuisFiora
             {
                 Q.Cast(Player.ServerPosition.Extend(Game.CursorPos, Q.Range + 10));
             }
-        }
 
-        public static double GetPassiveDamage(Obj_AI_Base target)
-        {
-            var count = CountPassive(target);
-            return count == 0 ? 0 : GetPassiveDamage(target, count);
-        }
-
-        public static double GetPassiveDamage(Obj_AI_Base target, int passiveCount)
-        {
-            return passiveCount *
-                   (.03f +
-                    (Math.Min(
-                        Math.Max(.028f, (.027 + .001f * Player.Level * Player.FlatPhysicalDamageMod / 100f)), .45f))) *
-                   target.MaxHealth;
-        }
-
-        public static int CountPassive(Obj_AI_Base target)
-        {
-            return FioraPassiveObjects.Count(obj => obj.Position.Distance(target.ServerPosition) <= 50) +
-                   FioraUltPassiveObjects.Count(obj => obj.Position.Distance(target.ServerPosition) <= 50);
-        }
-
-        public static Vector3 GetPassivePosition(Obj_AI_Base target)
-        {
-            var passive =
-                FioraUltPassiveObjects.OrderBy(obj => obj.Position.Distance(target.ServerPosition))
-                    .FirstOrDefault(obj => obj.IsValid && obj.IsVisible);
-            var d = 320;
-
-            if (passive == null)
-            {
-                passive = FioraPassiveObjects.FirstOrDefault(obj => obj.Position.Distance(target.ServerPosition) < 50);
-                d = 200;
-            }
-
-            if (passive == null)
-            {
-                return Vector3.Zero;
-            }
-
-            var pos = Prediction.GetPrediction(target, Q.Delay).UnitPosition.To2D();
-
-            if (passive.Name.Contains("NE"))
-            {
-                pos.Y += d;
-            }
-
-            if (passive.Name.Contains("SE"))
-            {
-                pos.X -= d;
-            }
-
-            if (passive.Name.Contains("NW"))
-            {
-                pos.X += d;
-            }
-
-            if (passive.Name.Contains("SW"))
-            {
-                pos.Y -= d;
-            }
-
-            return pos.To3D();
+            return true;
         }
 
         public static float GetComboDamage(Obj_AI_Hero unit)
@@ -874,42 +831,19 @@ namespace jesuisFiora
             {
                 if (R.IsReady())
                 {
-                    d += GetPassiveDamage(unit, 4);
+                    d += unit.GetPassiveDamage(4);
                 }
                 else
                 {
-                    d += GetPassiveDamage(unit);
+                    d += unit.GetPassiveDamage();
                 }
             }
             else
             {
-                d += GetPassiveDamage(unit, maxStacks);
+                d += unit.GetPassiveDamage(maxStacks);
             }
 
             return (float) d;
-        }
-    }
-
-    public class UltTarget
-    {
-        public int CastTime;
-        public int EndTime;
-        public Obj_AI_Hero Target;
-
-        public UltTarget(GameObject obj)
-        {
-            Target = obj as Obj_AI_Hero;
-            CastTime = Environment.TickCount;
-            EndTime = CastTime + 8000;
-            Game.OnUpdate += Game_OnUpdate;
-        }
-
-        private void Game_OnUpdate(EventArgs args)
-        {
-            if (Target == null || Target.IsDead || Environment.TickCount - EndTime > 0)
-            {
-                Program.UltTarget = null;
-            }
         }
     }
 }

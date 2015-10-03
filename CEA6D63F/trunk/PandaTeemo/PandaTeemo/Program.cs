@@ -1,7 +1,6 @@
 ﻿namespace PandaTeemo
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using LeagueSharp;
@@ -19,7 +18,6 @@
         /// <summary>
         /// Teemo's Name
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private const string ChampionName = "Teemo";
 
         /// <summary>
@@ -30,25 +28,21 @@
         /// <summary>
         /// Spell Q
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1306:FieldNamesMustBeginWithLowerCaseLetter", Justification = "Reviewed. Suppression is OK here.")]
         private static Spell Q;
 
         /// <summary>
         /// Spell W
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1306:FieldNamesMustBeginWithLowerCaseLetter", Justification = "Reviewed. Suppression is OK here.")]
         private static Spell W;
 
         /// <summary>
         /// Spell E
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1306:FieldNamesMustBeginWithLowerCaseLetter", Justification = "Reviewed. Suppression is OK here.")]
         private static Spell E;
 
         /// <summary>
         /// Spell R
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1306:FieldNamesMustBeginWithLowerCaseLetter", Justification = "Reviewed. Suppression is OK here.")]
         private static Spell R;
         
         /// <summary>
@@ -59,7 +53,6 @@
         /// <summary>
         /// Initializes Shroom Positions
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static ShroomTables shroomPositions;
 
         /// <summary>
@@ -70,14 +63,11 @@
         /// <summary>
         /// Initializes Orbwalker
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1306:FieldNamesMustBeginWithLowerCaseLetter", Justification = "Reviewed. Suppression is OK here.")]
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static Orbwalking.Orbwalker Orbwalker;
 
         /// <summary>
         /// Initializes the Menu
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public static Menu Config;
 
         /// <summary>
@@ -105,7 +95,6 @@
         /// <returns>
         /// Teemo's E <see cref="double"/>.
         /// </returns>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public static double TeemoE (Obj_AI_Base minion)
         {
             { return Player.GetSpellDamage(minion, SpellSlot.E); }
@@ -131,7 +120,6 @@
         /// Loads when Game Starts
         /// </summary>
         /// <param name="args"></param>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1614:ElementParameterDocumentationMustHaveText", Justification = "Reviewed. Suppression is OK here.")]
         private static void Game_OnGameLoad(EventArgs args)
         {
             // Checks if Player is Teemo
@@ -206,7 +194,6 @@
             // KillSteal Menu
             ks.AddItem(new MenuItem("KSQ", "KillSteal with Q").SetValue(true));
             ks.AddItem(new MenuItem("KSR", "KillSteal with R").SetValue(true));
-            ks.AddItem(new MenuItem("KSAA", "KillSteal with AutoAttack").SetValue(true));
 
             // Drawing Menu
             drawing.AddItem(new MenuItem("drawQ", "Draw Q Range").SetValue(true));
@@ -252,7 +239,7 @@
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
 
             // GG PrintChat Bik™
-            Game.PrintChat("<font color='#FBF5EF'>Game.PrintChat Bik</font> - <font color = '#01DF3A'>PandaTeemo v1.7.5.4 Loaded</font>");
+            Game.PrintChat("<font color='#FBF5EF'>Game.PrintChat Bik</font> - <font color = '#01DF3A'>PandaTeemo v1.7.6.0 Loaded</font>");
 
             // Loads ShroomPosition
             fileHandler = new FileHandler();
@@ -280,20 +267,23 @@
         /// Actions before attacking
         /// </summary>
         /// <param name="args">Attack Action</param>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1408:ConditionalExpressionsMustDeclarePrecedence", Justification = "Reviewed. Suppression is OK here.")]
         private static void OrbwalkingBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
             {
-                foreach (var minion in MinionManager.GetMinions(ObjectManager.Player.Position, Player.AttackRange))
+                var m = MinionManager.GetMinions(ObjectManager.Player.Position, Player.AttackRange);
+                
+                if (m != null)
                 {
-                    if (minion.Health <= ObjectManager.Player.GetAutoAttackDamage(minion) + TeemoE(minion))
+                    foreach (var minion in m)
                     {
-                        Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
-                    }
-                    else
-                    {
-                        return;
+                        if (minion != null)
+                        {
+                            if (minion.Health <= ObjectManager.Player.GetAutoAttackDamage(minion) + TeemoE(minion))
+                            {
+                                Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
+                            }
+                        }
                     }
                 }
             }
@@ -304,27 +294,31 @@
 
                 if (minion == null)
                 {
-                    if (enemy != null
-                        && Orbwalker.InAutoAttackRange(enemy))
+                    if (enemy != null)
                     {
-                        Player.IssueOrder(GameObjectOrder.AttackUnit, enemy);
+                        if (Orbwalker.InAutoAttackRange(enemy))
+                        {
+                            Player.IssueOrder(GameObjectOrder.AttackUnit, enemy);
+                        }
                     }
                 }
                 else
                 {
-                    if (enemy != null
-                        && minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion) + TeemoE(minion)
-                        && Orbwalker.InAutoAttackRange(enemy))
+                    if (enemy != null)
                     {
-                        Player.IssueOrder(GameObjectOrder.AttackUnit, enemy);
+                        if (minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion) + TeemoE(minion)
+                        && Orbwalker.InAutoAttackRange(enemy))
+                        {
+                            Player.IssueOrder(GameObjectOrder.AttackUnit, enemy);
+                        }
+                        else if (minion.Health <= ObjectManager.Player.GetAutoAttackDamage(minion) + TeemoE(minion))
+                        {
+                            Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
+                        }
                     }
                     else if (minion.Health <= ObjectManager.Player.GetAutoAttackDamage(minion) + TeemoE(minion))
                     {
                         Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
-                    }
-                    else
-                    {
-                        return;
                     }
                 }
             }
@@ -333,123 +327,105 @@
             {
                 var attackTurret = Config.SubMenu("LaneClear").Item("attackTurret").GetValue<bool>();
                 var attackWard = Config.SubMenu("LaneClear").Item("attackWard").GetValue<bool>();
-                var useQ = Config.SubMenu("LaneClear").Item("qclear").GetValue<bool>();
                 var turret = ObjectManager.Get<Obj_AI_Turret>().Where(t => Orbwalking.InAutoAttackRange(t) && t.IsEnemy).OrderBy(t => t.Health).FirstOrDefault();
                 var inhib = ObjectManager.Get<Obj_BarracksDampener>().Where(t => Orbwalking.InAutoAttackRange(t) && t.IsEnemy).OrderBy(t => t.Health).FirstOrDefault();
                 var nexus = ObjectManager.Get<Obj_HQ>().Where(t => Orbwalking.InAutoAttackRange(t) && t.IsEnemy).OrderBy(t => t.Health).FirstOrDefault();
                 var ward = MinionManager.GetMinions(Player.AttackRange, MinionTypes.Wards).FirstOrDefault();
                 var mob = MinionManager.GetMinions(Player.AttackRange, MinionTypes.All, MinionTeam.NotAlly);
 
-                foreach (var m in mob)
+                if (mob != null)
                 {
-                    if (!Orbwalker.InAutoAttackRange(m))
+                    foreach (var m in mob)
                     {
-                        if (attackTurret)
-                        {
-                            if (turret != null)
-                            {
-                                Player.IssueOrder(GameObjectOrder.AttackUnit, turret);
-                                Utility.DelayAction.Add(1500, () => Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos));
-                            }
+                        #region Attacking Turret and Ward
 
-                            if (inhib != null)
-                            {
-                                Player.IssueOrder(GameObjectOrder.AttackUnit, inhib);
-                                Utility.DelayAction.Add(1500, () => Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos));
-                            }
-
-                            if (nexus != null)
-                            {
-                                Player.IssueOrder(GameObjectOrder.AttackUnit, nexus);
-                                Utility.DelayAction.Add(1500, () => Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos));
-                            }
-                        }
-
-                        if (attackWard)
+                        if (!Orbwalker.InAutoAttackRange(m))
                         {
-                            if (ward.IsValid && Orbwalker.InAutoAttackRange(ward) && ward.IsEnemy)
-                            {
-                                Player.IssueOrder(GameObjectOrder.AttackUnit, ward);
-                            }
-                        }
-                    }
-                    else if (Orbwalker.InAutoAttackRange(m))
-                    {
-                        if (Orbwalker.InAutoAttackRange(turret) && attackTurret
-                            || Orbwalker.InAutoAttackRange(inhib) && attackTurret
-                            || Orbwalker.InAutoAttackRange(nexus) && attackTurret
-                            || Orbwalker.InAutoAttackRange(ward) && attackWard)
-                        {
+                            #region Attack Structure
+
                             if (attackTurret)
                             {
-                                if (m.Health < Player.GetAutoAttackDamage(m) + TeemoE(m))
-                                {
-                                    Player.IssueOrder(GameObjectOrder.AttackUnit, m);
-                                }
-
-                                if (turret != null && m.Health > Player.GetAutoAttackDamage(m) + TeemoE(m))
+                                if (turret != null)
                                 {
                                     Player.IssueOrder(GameObjectOrder.AttackUnit, turret);
+                                    Utility.DelayAction.Add(1500, () => Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos));
                                 }
 
-                                if (inhib != null && m.Health > Player.GetAutoAttackDamage(m) + TeemoE(m))
+                                if (inhib != null)
                                 {
                                     Player.IssueOrder(GameObjectOrder.AttackUnit, inhib);
+                                    Utility.DelayAction.Add(1500, () => Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos));
                                 }
 
-                                if (nexus != null && m.Health > Player.GetAutoAttackDamage(m) + TeemoE(m))
+                                if (nexus != null)
                                 {
                                     Player.IssueOrder(GameObjectOrder.AttackUnit, nexus);
+                                    Utility.DelayAction.Add(1500, () => Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos));
                                 }
                             }
+
+                            #endregion
+
+                            #region Attack Ward
 
                             if (attackWard)
                             {
-                                if (m.Health < Player.GetAutoAttackDamage(m) + TeemoE(m))
+                                if (ward != null)
                                 {
-                                    Player.IssueOrder(GameObjectOrder.AttackUnit, m);
+                                    if (ward.IsValid && Orbwalker.InAutoAttackRange(ward) && ward.IsEnemy)
+                                    {
+                                        Player.IssueOrder(GameObjectOrder.AttackUnit, ward);
+                                    }
                                 }
+                            }
 
-                                if (ward.IsValid && Orbwalker.InAutoAttackRange(ward) && ward.IsEnemy
-                                    && m.Health > Player.GetAutoAttackDamage(m) + TeemoE(m))
+                            #endregion
+                        }
+
+                        else if (Orbwalker.InAutoAttackRange(m))
+                        {
+                            #region Attack Minion
+
+                            if (m.Health < Player.GetAutoAttackDamage(m) + TeemoE(m))
+                            {
+                                Player.IssueOrder(GameObjectOrder.AttackUnit, m);
+                            }
+
+                            #endregion
+
+                            #region Attack Structure
+
+                            if (turret != null && Orbwalker.InAutoAttackRange(turret) && attackTurret)
+                            {
+                                Player.IssueOrder(GameObjectOrder.AttackUnit, turret);
+                            }
+
+                            if (inhib != null && Orbwalker.InAutoAttackRange(inhib) && attackTurret)
+                            {
+                                Player.IssueOrder(GameObjectOrder.AttackUnit, inhib);
+                            }
+
+                            if (nexus != null && Orbwalker.InAutoAttackRange(nexus) && attackTurret)
+                            {
+                                Player.IssueOrder(GameObjectOrder.AttackUnit, nexus);
+                            }
+
+                            #endregion
+
+                            #region Attack Ward
+
+                            if (turret != null && Orbwalker.InAutoAttackRange(ward) && attackWard)
+                            {
+                                if (ward.IsValidTarget() && Orbwalker.InAutoAttackRange(ward) && ward.IsEnemy)
                                 {
                                     Player.IssueOrder(GameObjectOrder.AttackUnit, ward);
                                 }
                             }
-                        }
-                        else
-                        {
-                            var qManaManager = Config.SubMenu("LaneClear").Item("qManaManager").GetValue<Slider>().Value;
 
-                            if (Player.GetAutoAttackDamage(m) + TeemoE(m) < m.Health)
-                            {
-                                Player.IssueOrder(GameObjectOrder.AttackUnit, m);
-                            }
-                            else if (m.Health <= Player.GetAutoAttackDamage(m) + TeemoE(m) || m.Health <= Q.GetDamage(m))
-                            {
-                                if (useQ)
-                                {
-                                    if (Q.IsReady() && Q.IsInRange(m) && Q.GetDamage(m) >= m.Health
-                                        && qManaManager >= (int)Player.ManaPercent)
-                                    {
-                                        Q.CastOnUnit(m, Packets);
-                                    }
-                                    else if (Player.Distance3D(m) <= Player.AttackRange)
-                                    {
-                                        Player.IssueOrder(GameObjectOrder.AttackUnit, m);
-                                    }
-                                }
-                                else
-                                {
-                                    Player.IssueOrder(GameObjectOrder.AttackUnit, m);
-                                }
-                            }
-                            else
-                            {
-                                args.Process = true;
-                                return;
-                            }
+                            #endregion
                         }
+
+                        #endregion
                     }
                 }
             }
@@ -463,8 +439,6 @@
         /// Called when Gapcloser can be done.
         /// </summary>
         /// <param name="gapcloser"></param>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1614:ElementParameterDocumentationMustHaveText", Justification = "Reviewed. Suppression is OK here.")]
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             var gapR = Config.SubMenu("Interrupt").Item("gapR").GetValue<bool>();
@@ -573,7 +547,6 @@
         /// </summary>
         /// <param name="position">The location of check</param>
         /// <returns>If that location has a shroom.</returns>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static bool IsShroomed(Vector3 position)
         {
             return ObjectManager.Get<Obj_AI_Base>().Where(obj => obj.Name == "Noxious Trap").Any(obj => position.Distance(obj.Position) <= 250);
@@ -645,24 +618,6 @@
         {
             var ksq = Config.SubMenu("KSMenu").Item("KSQ").GetValue<bool>();
             var ksr = Config.SubMenu("KSMenu").Item("KSR").GetValue<bool>();
-            var ksaa = Config.SubMenu("KSMenu").Item("KSAA").GetValue<bool>();
-
-            if (ksaa)
-            {
-                var aatarget = HeroManager.Enemies.Where(t => 
-                    t.IsValidTarget() 
-                    && Orbwalker.InAutoAttackRange(t) 
-                    && Player.GetAutoAttackDamage(t) + TeemoE(t) >= t.Health).OrderBy(t => t.Health).FirstOrDefault();
-
-                if (aatarget != null)
-                {
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, aatarget);
-                }
-                else
-                {
-                    return;
-                }
-            }
 
             if (ksq)
             {
@@ -696,9 +651,23 @@
         /// <summary>
         /// Does the LaneClear
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1408:ConditionalExpressionsMustDeclarePrecedence", Justification = "Reviewed. Suppression is OK here.")]
         private static void LaneClear()
         {
+            var useQ = Config.SubMenu("LaneClear").Item("qclear").GetValue<bool>();
+            var qMinion = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range, MinionTypes.All);
+            var qManaManager = Config.SubMenu("LaneClear").Item("qManaManager").GetValue<Slider>().Value;
+
+            if (useQ && Q.IsReady() && qMinion != null)
+            {
+                foreach (var m in qMinion)
+                {
+                    if (Q.IsInRange(m) && Q.GetDamage(m) >= m.Health && (int)Player.ManaPercent >= qManaManager)
+                    {
+                        Q.CastOnUnit(m, Packets);
+                    }
+                }
+            }
+
             var allMinionsR = MinionManager.GetMinions(ObjectManager.Player.Position, R.Range, MinionTypes.Melee);
             var rangedMinionsR = MinionManager.GetMinions(ObjectManager.Player.Position, R.Range, MinionTypes.Ranged);
             var rLocation = R.GetCircularFarmLocation(allMinionsR, R.Range);
@@ -826,7 +795,6 @@
         /// <summary>
         /// Does the AutoShroom
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static void AutoShroom()
         {
             var autoRPanic = Config.SubMenu("Misc").Item("autoRPanic").IsActive();
@@ -837,7 +805,7 @@
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             }
 
-            if (!R.IsReady() || Player.HasBuff("Recall") || autoRPanic)
+            if (!R.IsReady() || Player.IsRecalling() || autoRPanic)
             {
                 return;
             }
@@ -858,53 +826,66 @@
 
                 if (Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift)
                 {
-                    foreach (var place in shroomPositions.SummonersRift.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
+                    if (shroomPositions.SummonersRift.Any())
                     {
-                        if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                        foreach (var place in shroomPositions.SummonersRift.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
                         {
-                            R.Cast(place, Packets);
-                        }
-                    }         
+                            if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                            {
+                                R.Cast(place, Packets);
+                            }
+                        }         
+                    }
                 }
                 else if (Utility.Map.GetMap().Type == Utility.Map.MapType.HowlingAbyss)
                 {
-                    foreach (var place in shroomPositions.HowlingAbyss.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
+                    if (shroomPositions.HowlingAbyss.Any())
                     {
-                        if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                        foreach (var place in shroomPositions.HowlingAbyss.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
                         {
-                            R.Cast(place, Packets);
+                            if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                            {
+                                R.Cast(place, Packets);
+                            }
                         }
                     }
                 }
                 else if (Utility.Map.GetMap().Type == Utility.Map.MapType.CrystalScar)
                 {
-                    // WIP
-                    foreach (var place in shroomPositions.CrystalScar.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
+                    if (shroomPositions.CrystalScar.Any())
                     {
-                        if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                        foreach (var place in shroomPositions.CrystalScar.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
                         {
-                            R.Cast(place, Packets);
+                            if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                            {
+                                R.Cast(place, Packets);
+                            }
                         }
                     }
                 }
                 else if (Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline)
                 {
-                    // WIP
-                    foreach (var place in shroomPositions.TwistedTreeline.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
+                    if (shroomPositions.TwistedTreeline.Any())
                     {
-                        if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                        foreach (var place in shroomPositions.TwistedTreeline.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
                         {
-                            R.Cast(place, Packets);
-                        }
-                    }        
+                            if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                            {
+                                R.Cast(place, Packets);
+                            }
+                        }     
+                    }
                 }
                 else if (Utility.Map.GetMap().Type.ToString() == "Unknown")
                 {
-                    foreach (var place in shroomPositions.ButcherBridge.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
+                    if (shroomPositions.ButcherBridge.Any())
                     {
-                        if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                        foreach (var place in shroomPositions.ButcherBridge.Where(pos => pos.Distance(ObjectManager.Player.Position) <= R.Range && !IsShroomed(pos)))
                         {
-                            R.Cast(place, Packets);
+                            if (rCharge <= rCount && Environment.TickCount - lastR > 5000)
+                            {
+                                R.Cast(place, Packets);
+                            }
                         }
                     }
                 }
@@ -945,29 +926,26 @@
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range);
 
-            if (target == null)
-            {
-                return;
-            }
-
-            if (!Q.IsReady())
-            {
-                return;
-            }
-
             if (Q.IsReady() && 1 <= allMinionsQ.Count)
             {
-                foreach (var minion in allMinionsQ)
+                if (allMinionsQ != null)
                 {
-                    if (minion.Health <= Q.GetDamage(minion) && Q.IsInRange(minion))
+                    foreach (var minion in allMinionsQ)
                     {
-                        Q.CastOnUnit(minion, Packets);
+                        if (minion.Health <= Q.GetDamage(minion) && Q.IsInRange(minion))
+                        {
+                            Q.CastOnUnit(minion, Packets);
+                        }
                     }
                 }
             }
-            else if (Q.IsReady() && Q.IsInRange(target) && target.IsValidTarget())
+
+            if (target != null)
             {
-                Q.Cast(target, Packets);
+                if (Q.IsReady() && Q.IsInRange(target) && target.IsValidTarget() && Player.ManaPercent >= 25)
+                {
+                    Q.Cast(target);
+                }
             }
         }
 
@@ -976,11 +954,6 @@
         /// </summary>
         private static void AutoW()
         {
-            if (!W.IsReady())
-            { 
-                return; 
-            }
-
             if (W.IsReady())
             {
                 W.Cast(Player);
@@ -995,34 +968,31 @@
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range);
 
-            if (!W.IsReady() || !Q.IsReady())
-            {
-                return;
-            }
-
             if (W.IsReady())
             {
                 W.Cast();
             }
 
-            if (target == null)
-            {
-                return;
-            }
-
             if (Q.IsReady() && 1 <= allMinionsQ.Count)
             {
-                foreach (var minion in allMinionsQ)
+                if (allMinionsQ != null)
                 {
-                    if (minion.Health <= Q.GetDamage(minion) && Q.IsInRange(minion))
+                    foreach (var minion in allMinionsQ)
                     {
-                        Q.CastOnUnit(minion, Packets);
+                        if (minion.Health <= Q.GetDamage(minion) && Q.IsInRange(minion))
+                        {
+                            Q.CastOnUnit(minion, Packets);
+                        }
                     }
                 }
             }
-            else if (Q.IsReady() && Q.IsInRange(target) && target.IsValidTarget() && 25 <= Player.ManaPercent)
+
+            if (target != null)
             {
-                Q.Cast(target);
+                if (Q.IsReady() && Q.IsInRange(target) && target.IsValidTarget() && Player.ManaPercent >= 25)
+                {
+                    Q.Cast(target);
+                }
             }
         }
 
@@ -1030,14 +1000,18 @@
         /// Called when Game Updates.
         /// </summary>
         /// <param name="args"></param>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1614:ElementParameterDocumentationMustHaveText", Justification = "Reviewed. Suppression is OK here.")]
         private static void Game_OnUpdate(EventArgs args)
         {
             // Hacks.ZoomHack = Config.SubMenu("Hacks").Item("zoomHack").GetValue<bool>();
-            R.Range = RRange;
+            /*if (R.Range != null)
+            {
+                R.Range = RRange;
+            }*/
 
-            var autoQ = Config.Item("autoQ").GetValue<bool>();
-            var autoW = Config.Item("autoW").GetValue<bool>();
+            R = new Spell(SpellSlot.R, RRange);
+
+            var autoQ = Config.SubMenu("Misc").Item("autoQ").GetValue<bool>();
+            var autoW = Config.SubMenu("Misc").Item("autoW").GetValue<bool>();
 
             // Reworked Auto Q and W
             if (autoQ && autoW)
@@ -1083,7 +1057,6 @@
                     {
                         KillSteal();
                     }
-
                     break;
             }
         }
@@ -1092,7 +1065,7 @@
         /// Called when Game Draws
         /// </summary>
         /// <param name="args">
-        /// TODO The args.
+        /// The Args
         /// </param>
         private static void Drawing_OnDraw(EventArgs args)
         {
@@ -1132,7 +1105,7 @@
 
             var drawautoR = Config.SubMenu("Drawing").Item("drawautoR").GetValue<bool>();
 
-            if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift)
+            if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift && shroomPositions.SummonersRift.Any())
             {
                 foreach (var place in shroomPositions.SummonersRift.Where(pos => pos.Distance(ObjectManager.Player.Position) <= Config.SubMenu("Drawing").Item("DrawVision").GetValue<Slider>().Value))
                 {
@@ -1146,7 +1119,7 @@
                     }
                 }
             }
-            else if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.CrystalScar)
+            else if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.CrystalScar && shroomPositions.CrystalScar.Any())
             {
                 foreach (var place in shroomPositions.CrystalScar.Where(pos => pos.Distance(ObjectManager.Player.Position) <= Config.SubMenu("Drawing").Item("DrawVision").GetValue<Slider>().Value))
                 {
@@ -1160,7 +1133,7 @@
                     }
                 }
             }
-            else if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.HowlingAbyss)
+            else if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.HowlingAbyss && shroomPositions.HowlingAbyss.Any())
             {
                 foreach (var place in shroomPositions.HowlingAbyss.Where(pos => pos.Distance(ObjectManager.Player.Position) <= Config.SubMenu("Drawing").Item("DrawVision").GetValue<Slider>().Value))
                 {
@@ -1174,7 +1147,7 @@
                     }
                 }
             }
-            else if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline)
+            else if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline && shroomPositions.TwistedTreeline.Any())
             {
                 foreach (var place in shroomPositions.TwistedTreeline.Where(pos => pos.Distance(ObjectManager.Player.Position) <= Config.SubMenu("Drawing").Item("DrawVision").GetValue<Slider>().Value))
                 {
@@ -1188,7 +1161,7 @@
                     }
                 }
             }
-            else if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.Unknown)
+            else if (drawautoR && Utility.Map.GetMap().Type == Utility.Map.MapType.Unknown && shroomPositions.ButcherBridge.Any())
             {
                 foreach (var place in shroomPositions.ButcherBridge.Where(pos => pos.Distance(ObjectManager.Player.Position) <= Config.SubMenu("Drawing").Item("DrawVision").GetValue<Slider>().Value))
                 {

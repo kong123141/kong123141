@@ -2,8 +2,6 @@
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SpellData = Activator.Data.SpellData;
-
 namespace Activator.Summoners
 {
     internal class dot : CoreSum
@@ -46,7 +44,7 @@ namespace Activator.Summoners
                 if (tar.Player.IsZombie || tar.Player.HasBuff("summonerdot")) 
                     continue;
 
-                if (!Parent.Item(Parent.Name + "useon" + tar.Player.ChampionName).GetValue<bool>())
+                if (!Parent.Item(Parent.Name + "useon" + tar.Player.NetworkId).GetValue<bool>())
                     continue;
 
                 // ignite damagerino
@@ -102,7 +100,7 @@ namespace Activator.Summoners
 
                 // combo damge
                 totaldmg +=
-                    SpellData.DamageLib.Sum(
+                    Data.SpellData.DamageLib.Sum(
                         entry =>
                             Player.GetSpell(entry.Value).IsReady(5)
                                 ? entry.Key(Player, tar.Player, Player.GetSpell(entry.Value).Level - 1)

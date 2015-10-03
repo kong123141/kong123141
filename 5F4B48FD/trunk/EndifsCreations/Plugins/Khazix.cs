@@ -45,14 +45,14 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Khazix.Combo.R", "Use R").SetValue(false));
                 //combomenu.AddItem(new MenuItem("EC.Khazix.Combo.Dive", "Turret Dive").SetValue(false));
                 //combomenu.AddItem(new MenuItem("EC.Khazix.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Khazix.Draw.Q", "Q").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Khazix.Draw.W", "W").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Khazix.Draw.E", "E").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
                     
         }
@@ -231,7 +231,7 @@ namespace EndifsCreations.Plugins
             {
                 if (myOrbwalker.ActiveMode == myOrbwalker.OrbwalkingMode.Combo && Orbwalking.InAutoAttackRange(target) && !Player.IsDashing())
                 {
-                    if (config.Item("EC.Khazix.Combo.Q").GetValue<bool>() && Q.IsReady())
+                    if (Root.Item("EC.Khazix.Combo.Q").GetValue<bool>() && Q.IsReady())
                     {
                         Q.CastOnUnit((Obj_AI_Hero)target);
                     }
@@ -247,7 +247,7 @@ namespace EndifsCreations.Plugins
                 box.Draw(Color.Red, 2);
             }
             
-            if (config.Item("EC.Khazix.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.Khazix.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {                
                 if (Player.HasBuff("khazixqevo"))
                 {
@@ -258,12 +258,12 @@ namespace EndifsCreations.Plugins
                     Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
                 }
             }
-            if (config.Item("EC.Khazix.Draw.W").GetValue<bool>() && W.Level > 0)
+            if (Root.Item("EC.Khazix.Draw.W").GetValue<bool>() && W.Level > 0)
             {
                 Color color = Player.HasBuff("khazixwevo") ? Color.Cyan : Color.White;
                 Render.Circle.DrawCircle(Player.Position, W.Range, color);
             }
-            if (config.Item("EC.Khazix.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Khazix.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 if (Player.HasBuff("khazixeevo"))
                 {

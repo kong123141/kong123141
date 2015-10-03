@@ -33,17 +33,17 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.TwistedFate.Combo.Q", "Use Q").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.TwistedFate.Combo.W", "Use W").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.TwistedFate.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.TwistedFate.Misc.W", "W Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.TwistedFate.Draw.Q", "Q").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
         
@@ -51,9 +51,9 @@ namespace EndifsCreations.Plugins
         {
             Target = myUtility.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            var UseQ = config.Item("EC.TwistedFate.Combo.Q").GetValue<bool>();
-            var UseW = config.Item("EC.TwistedFate.Combo.W").GetValue<bool>();
-            var CastItems = config.Item("EC.TwistedFate.Combo.Items").GetValue<bool>();
+            var UseQ = Root.Item("EC.TwistedFate.Combo.Q").GetValue<bool>();
+            var UseW = Root.Item("EC.TwistedFate.Combo.W").GetValue<bool>();
+            var CastItems = Root.Item("EC.TwistedFate.Combo.Items").GetValue<bool>();
             if (UseW && W.IsReady())
             {
                 if (Target.IsValidTarget() && Orbwalking.InAutoAttackRange(Target))
@@ -241,7 +241,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.TwistedFate.Misc.W").GetValue<bool>() && W.IsReady())
+            if (Root.Item("EC.TwistedFate.Misc.W").GetValue<bool>() && W.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= Player.BoundingRadius)
                 {
@@ -253,7 +253,7 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.TwistedFate.Draw.Q").GetValue<bool>() && Q.Level > 0)
+            if (Root.Item("EC.TwistedFate.Draw.Q").GetValue<bool>() && Q.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.White);
             }

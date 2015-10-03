@@ -29,6 +29,7 @@ namespace SephSoraka
 				Menu Healing = new Menu("Healing", "Auto");
 				Healing.AddItem(new MenuItem("Healing.UseW", "Use W").SetValue(true));
 				Healing.AddItem(new MenuItem("Healing.UseR", "Use R").SetValue(true));
+				Healing.AddItem(new MenuItem("Healing.MinHP", "Ally min HP to Heal (%)").SetValue(new Slider(0, 0 , 100)));
 				Healing.AddItem(new MenuItem("Healing.Priority", "Priority Type").SetValue(new StringList(new[] { "Lowest Health", "Priority List" })));
 
 				Config.AddSubMenu(Healing);
@@ -40,6 +41,7 @@ namespace SephSoraka
 				WManager.AddItem(new MenuItem("wdamagedetection", "Disable damage detection").SetValue(false));
 				WManager.AddItem(new MenuItem("wcheckdmgafter", "Take HP-after-Damage into consideration").SetValue(true));
 				WManager.AddItem(new MenuItem("wonlyadc", "Heal only ADC").SetValue(false));
+				Healing.AddItem(new MenuItem("Healing.MinHPME", "Soraka min HP to Heal (%)").SetValue(new Slider(10, 0, 100)));
 
 				Menu Wsubmenu = new Menu("Heal %", "healpercent");
 				foreach (var hero in HeroManager.Allies.Where(x => !x.IsMe))
@@ -122,6 +124,7 @@ namespace SephSoraka
 				Menu Combo = new Menu("Combo", "Combo");
 				Combo.AddItem(new MenuItem("Combo.UseQ", "Use Q").SetValue(true));
 				Combo.AddItem(new MenuItem("Combo.UseE", "Use E").SetValue(true));
+				Combo.AddItem(new MenuItem("Combo.Disableauto", "Disable auto attacks in Combo").SetValue(true));
 				Config.AddSubMenu(Combo);
 
 
@@ -140,6 +143,7 @@ namespace SephSoraka
 				Harass.AddItem(new MenuItem("Harass.InMixed", "Harass in Mixed Mode").SetValue(true));
 				Harass.AddItem(new MenuItem("Harass.UseQ", "Use Q").SetValue(true));
 				Harass.AddItem(new MenuItem("Harass.UseE", "Use E").SetValue(true));
+				Harass.AddItem(new MenuItem("Harass.Eminhit", "Min targs for E").SetValue(new Slider(1, 1, 5)));
 				Harass.AddItem(
 					new MenuItem("Harass.Mana", "Min mana for harass (%)", false).SetValue(new Slider(50, 0, 100)));
 				Config.AddSubMenu(Harass);
@@ -177,6 +181,7 @@ namespace SephSoraka
 				Interrupter.AddItem(new MenuItem("Interrupter.UseQ", "Use Q").SetValue(true));
 				Interrupter.AddItem(new MenuItem("Interrupter.UseE", "Use E").SetValue(true));
 				Interrupter.AddItem(new MenuItem("Seperator", "----- Anti-Gapcloser -----"));
+				Interrupter.AddItem(new MenuItem("Interrupter.AG.ADConly", "Only Anti-AG for ADC").SetValue(false));
 				Interrupter.AddItem(new MenuItem("Interrupter.AG.UseQ", "Anti-Gapclose with Q").SetValue(true));
 				Interrupter.AddItem(new MenuItem("Interrupter.AG.UseE", "Anti-Gapclose with E").SetValue(true));
 

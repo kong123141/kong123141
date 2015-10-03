@@ -64,33 +64,34 @@ namespace Activator.Items.Consumables
             {
                 if (hero.Player.NetworkId == Player.NetworkId)
                 {
-                    if (hero.Player.HasBuff("ItemCrystalFlask"))
-                        return;
-
-                    if (hero.Player.Health/hero.Player.MaxHealth*100 <=
-                        Menu.Item("selflowhp" + Name + "pct").GetValue<Slider>().Value)
+                    if (!hero.Player.HasBuff("ItemCrystalFlask"))
                     {
-                        if (hero.IncomeDamage > 0 || hero.MinionDamage > 0)
+                        if (hero.Player.MaxHealth - hero.Player.Health + hero.IncomeDamage > 120)
                         {
-                            if (!hero.Player.IsRecalling() && !hero.Player.InFountain())
-                                UseItem();
+                            if (hero.Player.Health / hero.Player.MaxHealth * 100 <=
+                                Menu.Item("selflowhp" + Name + "pct").GetValue<Slider>().Value)
+                            {
+                                if ((hero.IncomeDamage > 0 || hero.MinionDamage > 0) ||
+                                    !Menu.Item("use" + Name + "cbat").GetValue<bool>())
+                                {
+                                    if (!hero.Player.IsRecalling() && !hero.Player.InFountain())
+                                        UseItem();
+                                }
+                            }
+
+                            if (hero.IncomeDamage / hero.Player.MaxHealth * 100 >=
+                                Menu.Item("selfmuchhp" + Name + "pct").GetValue<Slider>().Value)
+                            {
+                                if (!hero.Player.IsRecalling() && !hero.Player.InFountain())
+                                    UseItem();
+                            }
                         }
                     }
 
-                    if (hero.IncomeDamage/hero.Player.MaxHealth*100 >=
-                        Menu.Item("selfmuchhp" + Name + "pct").GetValue<Slider>().Value)
-                    {
-                        if (hero.IncomeDamage > 0 || hero.MinionDamage > 0)
-                        {
-                            if (!hero.Player.IsRecalling() && !hero.Player.InFountain())
-                                UseItem();
-                        }
-                    }
-
-                    if (hero.Player.MaxMana <= 200) 
+                    if (hero.Player.MaxMana <= 200)
                         continue;
 
-                    if (hero.Player.Mana / hero.Player.MaxMana * 100 <= 
+                    if (hero.Player.Mana / hero.Player.MaxMana * 100 <=
                         Menu.Item("selflowmp" + Name + "pct").GetValue<Slider>().Value)
                     {
                         if (!hero.Player.IsRecalling() && !hero.Player.InFountain())

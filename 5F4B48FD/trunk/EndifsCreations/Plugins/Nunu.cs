@@ -39,28 +39,28 @@ namespace EndifsCreations.Plugins
                 combomenu.AddItem(new MenuItem("EC.Nunu.Combo.E", "Use E").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Nunu.Combo.R", "Use R").SetValue(true));
                 combomenu.AddItem(new MenuItem("EC.Nunu.Combo.Items", "Use Items").SetValue(true));
-                config.AddSubMenu(combomenu);
+                Root.AddSubMenu(combomenu);
             }
             var miscmenu = new Menu("Misc", "Misc");
             {
                 miscmenu.AddItem(new MenuItem("EC.Nunu.Misc.E", "E Gapclosers").SetValue(false));
-                config.AddSubMenu(miscmenu);
+                Root.AddSubMenu(miscmenu);
             }
             var drawmenu = new Menu("Draw", "Draw");
             {
                 drawmenu.AddItem(new MenuItem("EC.Nunu.Draw.E", "E").SetValue(true));
                 drawmenu.AddItem(new MenuItem("EC.Nunu.Draw.R", "R").SetValue(true));
-                config.AddSubMenu(drawmenu);
+                Root.AddSubMenu(drawmenu);
             }
         }
 
         private void Combo()
         {
             Target = myUtility.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-            var UseW = config.Item("EC.Nunu.Combo.W").GetValue<bool>();
-            var UseE = config.Item("EC.Nunu.Combo.E").GetValue<bool>();
-            var UseR = config.Item("EC.Nunu.Combo.R").GetValue<bool>();
-            var CastItems = config.Item("EC.Nunu.Combo.Items").GetValue<bool>();
+            var UseW = Root.Item("EC.Nunu.Combo.W").GetValue<bool>();
+            var UseE = Root.Item("EC.Nunu.Combo.E").GetValue<bool>();
+            var UseR = Root.Item("EC.Nunu.Combo.R").GetValue<bool>();
+            var CastItems = Root.Item("EC.Nunu.Combo.Items").GetValue<bool>();
             if (UseE && E.IsReady())
             {
                 if (Target.IsValidTarget())
@@ -81,15 +81,12 @@ namespace EndifsCreations.Plugins
             {
                 if (Player.CountAlliesInRange(W.Range) > 0 && Player.CountEnemiesInRange(W.Range) > 0)
                 {
-                    W.CastOnUnit(Player);
+                    mySpellcast.Unit(null, W);
                 }
             }
             if (UseR && R.IsReady())
-            {
-                if (Player.CountEnemiesInRange(R.Range) >= 4)
-                {
-                    R.Cast();
-                }
+            {                
+                mySpellcast.PointBlank(null, R, R.Range, 3);
             }
         }
         private float GetDamage(Obj_AI_Hero target)
@@ -143,7 +140,7 @@ namespace EndifsCreations.Plugins
         }
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("EC.Nunu.Misc.E").GetValue<bool>() && E.IsReady())
+            if (Root.Item("EC.Nunu.Misc.E").GetValue<bool>() && E.IsReady())
             {
                 if (gapcloser.Sender.IsEnemy && Vector3.Distance(Player.ServerPosition, gapcloser.End) <= E.Range)
                 {
@@ -170,11 +167,11 @@ namespace EndifsCreations.Plugins
         protected override void OnDraw(EventArgs args)
         {
             if (Player.IsDead) return;
-            if (config.Item("EC.Nunu.Draw.E").GetValue<bool>() && E.Level > 0)
+            if (Root.Item("EC.Nunu.Draw.E").GetValue<bool>() && E.Level > 0)
             {
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.White);
             }
-            if (config.Item("EC.Nunu.Draw.R").GetValue<bool>() && R.Level > 0)
+            if (Root.Item("EC.Nunu.Draw.R").GetValue<bool>() && R.Level > 0)
             {
                 var color = Player.CountEnemiesInRange(R.Range) >= 4 ? Color.Red : Color.Yellow;
                 Drawing.DrawText(Player.HPBarPosition.X + 10, Player.HPBarPosition.Y - 15, color, "Hits: " + Player.CountEnemiesInRange(R.Range));
