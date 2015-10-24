@@ -1,0 +1,12 @@
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\bin\Release\LeagueSharp.Common.dll
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\bin\Release\LeagueSharp.Common.pdb
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\bin\Release\clipper_library.dll
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\bin\Release\LeagueSharp.dll
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\bin\Release\LeagueSharp.Sandbox.dll
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\bin\Release\SharpDX.dll
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\obj\Debug\【零度汉化】基础功能.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\obj\Debug\LeagueSharp.Common.Properties.Resources.resources
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\obj\Debug\【零度汉化】基础功能.csproj.GenerateResource.Cache
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\obj\Debug\LeagueSharp.Common.dll
+C:\Users\Administrator\Documents\GitHub\无为\【零度汉化】基础功能\obj\Debug\LeagueSharp.Common.pdb

@@ -47,7 +47,8 @@ namespace LeagueSharp.Common
         {
             TargetSelector.Initialize();
             Prediction.Initialize();
-            Hacks.Initialize();
+            Flowers.Initilalize();
+            //Hacks.Initialize();
             FakeClicks.Initialize();
             Spell.Initialize();
 

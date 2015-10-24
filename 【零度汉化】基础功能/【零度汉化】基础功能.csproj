@@ -111,6 +111,7 @@
     <Compile Include="Data\ItemData.cs" />
     <Compile Include="Data\MasteryData.cs" />
     <Compile Include="FakeClicks.cs" />
+    <Compile Include="Flowers.cs" />
     <Compile Include="GamePacket.cs" />
     <Compile Include="Hacks.cs" />
     <Compile Include="HealthPrediction.cs" />
