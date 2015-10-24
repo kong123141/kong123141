@@ -340,7 +340,7 @@ namespace LeagueSharp.Common
         internal static void DrawOnOff(bool on, Vector2 position, MenuItem item)
         {
             DrawBox(position, item.Height, item.Height, on ? Color.FromArgb(1, 169, 234) : Color.FromArgb(37, 37, 37), 1, Color.Black);
-            var s = on ? "ON" : "OFF";
+            var s = on ? "开" : "关";
             Font.DrawText(
                 null, s,
                 new Rectangle(
@@ -441,6 +441,9 @@ namespace LeagueSharp.Common
 
         static Menu()
         {
+			root.AddItem(
+				new MenuItem("Language", "选择语言:").SetValue(
+					new StringList(new[] { "默认", "中文", "英语" }, 0)));
             root.AddItem(new MenuItem("BackgroundAlpha", "Background Opacity")).SetValue(new Slider(165, 55, 255));
             root.AddItem(
                 new MenuItem("FontName", "Font Name:").SetValue(
