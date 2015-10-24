@@ -11735,7 +11735,8 @@
 	"r if enemy is killable with combo": "R\u5982\u679c\u654c\u4eba\u53ef\u51fb\u6740\u7684\u8fde\u62db",
 	"use w on gap closer": "\u7528W\u7f1d\u9699\u9760\u8fd1",
 	"cast q before e": "\u6295Q\u524dE",
-    "w obj. pos.": "W\u7269\u4f53"
+	"background opacity": "\u83dc\u5355\u900f\u660e\u5ea6",
+	"w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
