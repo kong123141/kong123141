@@ -47,7 +47,8 @@ namespace LeagueSharp.Common
         {
             TargetSelector.Initialize();
             Prediction.Initialize();
-            Hacks.Initialize();
+            Flowers.Initilalize();
+            //Hacks.Initialize();
             FakeClicks.Initialize();
             Spell.Initialize();
 
@@ -410,7 +411,7 @@ namespace LeagueSharp.Common
             }
 
             DrawBox(new Vector2(position.X + item.Height - 28, position.Y + 1),
-                (int) Font.MeasureText(item.Tooltip).Width + 8, item.Height, Color.Black, 1, Color.Black);
+                (int) Font.MeasureText(item.Tooltip).Width + 8, item.Height, MenuSettings.BackgroundColor, 1, Color.Black);
 
             var s = item.Tooltip;
             Font.DrawText(
@@ -1622,7 +1623,11 @@ namespace LeagueSharp.Common
                         s = MultiLanguage._("Press new key");
                     }
 
-                    int x = (int)Position.X + Width - Height - font.MeasureText("[" + Utils.KeyToText(val.Key) + "]").Width - 10;
+					var x = !string.IsNullOrEmpty(this.Tooltip)
+					    ? (int) Position.X + Width - Height -
+					     font.MeasureText("[" + Utils.KeyToText(val.Key) + "]").Width - 25
+				    	: (int) Position.X + Width - Height -
+				         font.MeasureText("[" + Utils.KeyToText(val.Key) + "]").Width - 10;
 
                     font.DrawText(null, "[" + Utils.KeyToText(val.Key) + "]", new Rectangle(x, (int)Position.Y, Width, Height), FontDrawFlags.VerticalCenter, new ColorBGRA(1, 169, 234, 255));
                     MenuDrawHelper.DrawOnOff(val.Active, new Vector2(Position.X + Width - Height, Position.Y), this);
