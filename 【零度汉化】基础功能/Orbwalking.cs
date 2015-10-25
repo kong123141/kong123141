@@ -562,12 +562,11 @@ namespace LeagueSharp.Common
                 misc.AddItem(new MenuItem("AttackWards", "自动A眼").SetShared().SetValue(false));
                 misc.AddItem(new MenuItem("AttackPetsnTraps", "自动打召唤物").SetShared().SetValue(true));
 				misc.AddItem(new MenuItem("Smallminionsprio", "清野时先把小的草了").SetShared().SetValue(false));
-
-				_config.AddSubMenu(misc);
+                _config.AddSubMenu(misc);
 
                 /* Missile check */
-                _config.AddItem(new MenuItem("MissileCheck", "开启碰撞检测").SetShared().SetValue(false));
-
+                _config.AddItem(new MenuItem("MissileCheck", "开启碰撞检测").SetShared().SetValue(true));
+                _config.AddItem(new MenuItem("Flowers", "自动设置AA后摇(花边)").SetShared().SetValue(false));
                 /* Delay sliders */
                 _config.AddItem(
                     new MenuItem("ExtraWindup", "AA后摇设置").SetShared().SetValue(new Slider(80, 0, 200)));
@@ -835,34 +834,47 @@ namespace LeagueSharp.Common
                 return result;
             }
 
-            private static int extraWindup;
+            private static int ExtraWindupTime;
 
             private void AutoSetExByHuabian()
             {
-                if (!Flowers.fl.Item("Flowers").GetValue<bool>())
+                if (!_config.Item("Flowers").GetValue<bool>())
                 {
-                    extraWindup = _config.Item("ExtraWindup").GetValue<Slider>().Value;
+                    ExtraWindupTime = _config.Item("ExtraWindup").GetValue<Slider>().Value;
                     return;
                 }
+
                 var additional = 0;
                 if (Game.Ping >= 100)
+                {
                     additional = Game.Ping / 100 * 5;
+                }
                 else if (Game.Ping > 40 && Game.Ping < 100)
+                {
                     additional = Game.Ping / 100 * 10;
+                }
                 else if (Game.Ping <= 40)
+                {
                     additional = +15;
+                }
 
                 var windUp = Game.Ping - 20 + additional;
 
                 if (windUp < 40 && 20 < windUp)
+                {
                     windUp = 36;
+                }
                 else if (windUp < 20 && 10 < windUp)
+                {
                     windUp = 14;
+                }
                 else if (windUp < 10)
+                {
                     windUp = 5;
+                }
 
                 _config.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
-                extraWindup = windUp;
+                ExtraWindupTime = windUp;
             }
 
             private void GameOnOnGameUpdate(EventArgs args)
@@ -886,7 +898,7 @@ namespace LeagueSharp.Common
                         _config.Item("ExtraWindup").GetValue<Slider>().Value,
                         _config.Item("HoldPosRadius").GetValue<Slider>().Value);
 
-                    if (Flowers.fl.Item("AttackPetsnTraps").GetValue<bool>())
+                    if (_config.Item("Flowers").GetValue<bool>())
                     {
                         AutoSetExByHuabian();
                     }

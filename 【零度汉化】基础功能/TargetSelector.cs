@@ -259,7 +259,7 @@ namespace LeagueSharp.Common
                     .Permashow();
                 config.AddItem(
                     new MenuItem("SelTColor", "被选择目标地下线圈颜色").SetShared().SetValue(new Circle(true, Color.Red)));
-                config.AddItem(new MenuItem("FuckSoraka", "自动提高索拉卡目标选择位置").SetShared().SetValue(true));
+                config.AddItem(new MenuItem("FuckSoraka", "自动提高索拉卡目标选择位置").SetShared().SetValue(false));
                 var autoPriorityItem =
                     new MenuItem("AutoPriority", "自动排列顺序").SetShared().SetValue(false);
                 autoPriorityItem.ValueChanged += autoPriorityItem_ValueChanged;
