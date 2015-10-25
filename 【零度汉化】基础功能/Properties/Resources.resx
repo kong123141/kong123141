@@ -11736,6 +11736,13 @@
 	"use w on gap closer": "\u7528W\u7f1d\u9699\u9760\u8fd1",
 	"cast q before e": "\u6295Q\u524dE",
 	"background opacity": "\u83dc\u5355\u900f\u660e\u5ea6",
+	"dzawareness": "\u3010\u96f6\u5ea6\u6c49\u5316\u3011DZ\u610f\u8bc6",
+	"aa range tracking": "AA\u8303\u56f4\u8ddf\u8e2a",
+	"ally ranges": "\u76df\u53cb\u8303\u56f4",
+	"enemy ranges": "\u654c\u4eba\u8303\u56f4",
+	"show cooldowns": "\u663e\u793a\u51b7\u5374\u65f6\u95f4",
+	"wards tracker": "\u773c\u4f4d\u8ddf\u8e2a\u5668",
+	"sides of polygon (higher = laggier)": "\u4e24\u4fa7\u7684\u591a\u8fb9\u5f62\uff08\u9ad8= \u635f\u5931FPS\uff09",
 	"w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
