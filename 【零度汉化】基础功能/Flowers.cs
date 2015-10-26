@@ -1,6 +1,7 @@
 ﻿namespace LeagueSharp.Common
 {
     using System;
+    using System.Threading;
     using Lost = LeagueSharp.Hacks;
 
     class Flowers
@@ -16,7 +17,6 @@
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            fl.AddItem(new MenuItem("Flowers", "自动设置AA后摇(花边)").SetShared().SetValue(true));
             fl.AddItem(new MenuItem("Disable Drawing", "屏蔽线圈开关 默认按键:Home").SetValue(new KeyBind(36, KeyBindType.Toggle)));
             fl.AddItem(new MenuItem("zoom hack", "无限视距").SetValue(false));
             fl.AddItem(new MenuItem("disable say", "禁止脚本发聊天信息").SetValue(true));
@@ -27,6 +27,7 @@
 
             if (fl.Item("SaySomething").IsActive())
             {
+                Thread.Sleep(1000);
                 Game.Say("/");
                 Game.Say("/");
                 Game.Say("/");
