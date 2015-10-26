@@ -229,8 +229,8 @@ namespace LeagueSharp.Common
 
         public static Color BackgroundColor
         {
-			//get { return Color.FromArgb(Menu.root.Item("BackgroundAlpha").GetValue<Slider>().Value, Menu.root.Item("BackgroundColor").GetValue<Color>()); }
-			get { return Menu.root.Item("BackgroundColor").GetValue<Color>(); }
+			get { return Color.FromArgb(Menu.root.Item("BackgroundAlpha").GetValue<Slider>().Value, Menu.root.Item("BackgroundColor").GetValue<Color>()); }
+			//get { return Menu.root.Item("BackgroundColor").GetValue<Color>(); }
 		}
 
         public static Color ActiveBackgroundColor
@@ -447,9 +447,8 @@ namespace LeagueSharp.Common
 			root.AddItem(
 				new MenuItem("Language", "选择语言:").SetValue(
 					new StringList(new[] { "默认", "中文", "英语" }, 1)));
-			root.AddItem(new MenuItem("BackgroundColor", "背景颜色及透明度").SetValue(System.Drawing.Color.Black));
-			root.AddItem(new MenuItem("ActiveBackgroundColor", "选项颜色及透明度").SetValue(System.Drawing.Color.FromArgb(0, 37, 53)));
-			//root.AddItem(new MenuItem("BackgroundAlpha", "Background Opacity")).SetValue(new Slider(165, 55, 255));
+			root.AddItem(new MenuItem("BackgroundColor", "背景颜色").SetValue(System.Drawing.Color.Black));
+			root.AddItem(new MenuItem("BackgroundAlpha", "Background Opacity")).SetValue(new Slider(165, 55, 255));
 			root.AddItem(
                 new MenuItem("FontName", "Font Name:").SetValue(
                     new StringList(new[] { "Tahoma", "Calibri", "Segoe UI", "Microsoft YaHei" }, 0)));
