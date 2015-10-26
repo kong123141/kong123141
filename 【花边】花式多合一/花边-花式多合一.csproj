@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4FEE0854-84B2-4C40-99F7-81DD851CC5D1}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>花边_花式多合一</RootNamespace>
+    <AssemblyName>花边-花式多合一</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PreBuildEvent />
+    <PostBuildEvent />
+    <OutputPath>bin\Release</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="clipper_library">
+      <HintPath>D:\LeagueSharp\System\clipper_library.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp">
+      <HintPath>D:\LeagueSharp\System\LeagueSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp.Common">
+      <HintPath>D:\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>D:\LeagueSharp\System\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>D:\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CheckVersion.cs" />
+    <Compile Include="Core\Activators.cs" />
+    <Compile Include="Core\AutoDisableDrawing.cs" />
+    <Compile Include="Core\AutoKillSteal.cs" />
+    <Compile Include="Core\AutoLantern.cs" />
+    <Compile Include="Core\AutoLevels.cs" />
+    <Compile Include="Core\AutoSmite.cs" />
+    <Compile Include="Core\AutoZhongya.cs" />
+    <Compile Include="Core\CheckMoreL.cs" />
+    <Compile Include="Core\damageHandler.cs" />
+    <Compile Include="Core\DelayAction.cs" />
+    <Compile Include="Core\Explore.cs" />
+    <Compile Include="Core\FlowersDrawing.cs" />
+    <Compile Include="Core\GlassWard.cs" />
+    <Compile Include="Core\Humanizer.cs" />
+    <Compile Include="Core\Interface.cs" />
+    <Compile Include="Core\JunglePosition.cs" />
+    <Compile Include="Core\Junglest.cs" />
+    <Compile Include="Core\JungleTimer.cs" />
+    <Compile Include="Core\JungleTracker.cs" />
+    <Compile Include="Core\Others.cs" />
+    <Compile Include="Core\PrintChat.cs" />
+    <Compile Include="Core\SharpExperience.cs" />
+    <Compile Include="Core\ShowTimes.cs" />
+    <Compile Include="Core\ShowWindUp.cs" />
+    <Compile Include="Core\Songrentou.cs" />
+    <Compile Include="Core\TowerHealth.cs" />
+    <Compile Include="Core\TowerRange.cs" />
+    <Compile Include="Core\TrackEnemySpells.cs" />
+    <Compile Include="Core\TrackWards.cs" />
+    <Compile Include="Core\TurnAround.cs" />
+    <Compile Include="Core\WardData.cs" />
+    <Compile Include="Core\WardJump.cs" />
+    <Compile Include="Core\WhereDidHeGo.cs" />
+    <Compile Include="InitializeMenu.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Credit.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
