@@ -17,7 +17,7 @@
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            fl.AddItem(new MenuItem("Disable Drawing", "屏蔽显示[Home]").SetValue(new KeyBind(36, KeyBindType.Toggle, LeagueSharp.Hacks.DisableDrawings)));
+            fl.AddItem(new MenuItem("Disable Drawing", "屏蔽显示[I]").SetValue(new KeyBind('I', KeyBindType.Toggle, LeagueSharp.Hacks.DisableDrawings)));
             fl.AddItem(new MenuItem("zoom hack", "无限视距[危险]").SetValue(false)); 
             fl.AddItem(new MenuItem("disable say", "禁止脚本发话").SetValue(true));
             fl.AddItem(new MenuItem("Tower Ranges", "显示敌方防御塔范围").SetValue(false));
@@ -38,7 +38,7 @@
 					Game.PrintChat("銆€");
 					Game.PrintChat("銆€");
 					Game.PrintChat("銆€");
-					Game.PrintChat("<font color=\"#FFA042\"><b>杈撳嚭/ help鑾峰彇鍛戒护鍒楄〃</b></font>");
+					Game.PrintChat("<font color=\"#FFA042\"><b>杈撳嚭/help鑾峰彇鍛戒护鍒楄〃</b></font>");
 				});
             }
 
