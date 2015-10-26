@@ -10,7 +10,7 @@ namespace 花边_花式多合一.Core
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (InitializeMenu.Menu.Item("zoom hack").IsActive())
+            /*if (InitializeMenu.Menu.Item("zoom hack").IsActive())
             {
                 Lost.ZoomHack = true;
             }
@@ -19,14 +19,14 @@ namespace 花边_花式多合一.Core
                 Lost.ZoomHack = false;
             }
 
-            if (InitializeMenu.Menu.Item("Disable Drawing").GetValue<KeyBind>().Active)
+            if (InitializeMenu.Menu.Item("Tower Ranges").GetValue<KeyBind>().Active)
             {
-                Lost.DisableDrawings = true;
+                Lost.TowerRanges = true;
             }
             else
             {
-                Lost.DisableDrawings = false;
-            }
+                Lost.TowerRanges = false;
+            }*/
 
             if (InitializeMenu.Menu.Item("disable say").GetValue<KeyBind>().Active)
             {
@@ -37,14 +37,6 @@ namespace 花边_花式多合一.Core
                 Lost.DisableSay = false;
             }
 
-            if (InitializeMenu.Menu.Item("Tower Ranges").GetValue<KeyBind>().Active)
-            {
-                Lost.TowerRanges = true;
-            }
-            else
-            {
-                Lost.TowerRanges = false;
-            }
         }
 
         internal static void Game_OnGameLoad(EventArgs args)
@@ -52,11 +44,40 @@ namespace 花边_花式多合一.Core
             try
             {
                 if (!InitializeMenu.Menu.Item("Explore").GetValue<bool>()) return;
+
+                if (InitializeMenu.Menu.Item("SaySomething").GetValue<bool>())
+                {
+                    Utility.DelayAction.Add(1000, () => {
+                        Game.PrintChat("銆€");
+                        Game.PrintChat("銆€");
+                        Game.PrintChat("銆€");
+                        Game.PrintChat("銆€");
+                        Game.PrintChat("銆€");
+                        Game.PrintChat("銆€");
+                        Game.PrintChat("銆€");
+                        Game.PrintChat("銆€");
+                        Game.PrintChat("<font color=\"#FFA042\"><b>杈撳嚭/help鑾峰彇鍛戒护鍒楄〃</b></font>");
+                    });
+                }
+
+
                 Game.OnUpdate += Game_OnUpdate;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Explore error occurred: '{0}'", ex);
+            }
+        }
+
+        internal static void Flowers_ValueChanged(object sender, OnValueChangeEventArgs e)
+        {
+            if (InitializeMenu.Menu.Item("Disable Drawing").GetValue<KeyBind>().Active)
+            {
+                Lost.DisableDrawings = true;
+            }
+            else
+            {
+                Lost.DisableDrawings = false;
             }
         }
     }

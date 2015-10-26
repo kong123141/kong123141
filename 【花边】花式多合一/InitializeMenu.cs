@@ -186,44 +186,43 @@ namespace 花边_花式多合一
 
             }
 
-            #endregion
-
-            #region 其他功能 : 自动加点 检测同行 人性化设置 时间显示 送人头 杀人自动屏蔽线圈 (未知是否工作) 经验分流
-
             #region  自动加点
 
-            Menu.SubMenu("其他功能").SubMenu("自动加点").AddItem(new MenuItem("AutoLevelsEnable", "启动").SetValue(false));
+            Menu.SubMenu("自动功能").SubMenu("自动加点").AddItem(new MenuItem("AutoLevelsEnable", "启动").SetValue(false));
             foreach (var entry in AutoLevels.DefaultSpellSlotPriorities)
             {
                 MenuItem menuItem = AutoLevels.MakeSlider(
                     entry.Key.ToString(), entry.Key.ToString(), entry.Value, 1, AutoLevels.DefaultSpellSlotPriorities.Count);
                 menuItem.ValueChanged += AutoLevels.menuItem_ValueChanged;
-                Menu.SubMenu("其他功能").SubMenu("自动加点").AddItem(menuItem);
+                Menu.SubMenu("自动功能").SubMenu("自动加点").AddItem(menuItem);
 
                 var subMenu = new Menu(entry.Key + " 额外设置", entry.Key + "extra");
                 subMenu.AddItem(AutoLevels.MakeSlider(entry.Key + "extra", "等级达到多少内启动?", 1, 1, 18));
-                Menu.SubMenu("其他功能").SubMenu("自动加点").AddSubMenu(subMenu);
+                Menu.SubMenu("自动功能").SubMenu("自动加点").AddSubMenu(subMenu);
             }
-            AutoLevels._activate = Menu.SubMenu("其他功能").SubMenu("自动加点").AddItem(new MenuItem("activate", "几级后开始自动加点?").SetValue(new StringList(new[] { "2", "3", "4" })));
-            AutoLevels._delay = Menu.SubMenu("其他功能").SubMenu("自动加点").AddItem(new MenuItem("AutoLevelsdelay", "加点延迟 (ms)").SetValue(new Slider(0, 0, 2000)));
+            AutoLevels._activate = Menu.SubMenu("自动功能").SubMenu("自动加点").AddItem(new MenuItem("activate", "几级后开始自动加点?").SetValue(new StringList(new[] { "2", "3", "4" })));
+            AutoLevels._delay = Menu.SubMenu("自动功能").SubMenu("自动加点").AddItem(new MenuItem("AutoLevelsdelay", "加点延迟 (ms)").SetValue(new Slider(0, 0, 2000)));
 
             #endregion
+            #endregion
+
+            #region 其他功能 :  检测同行 人性化设置 时间显示 送人头 杀人自动屏蔽线圈 (未知是否工作) 经验分流
 
             #region 人性化设置 (技能 移动 人性化)
 
-           /* Menu.SubMenu("其他功能").SubMenu("人性化设置").AddItem(new MenuItem("Humanizer", "启动").SetValue(false));
-            for (var i = 0; i <= 3; i++)
-            {
-                var spell = Core.Humanizer.SpellList[i];
-                var spellsmenu = Menu.SubMenu("其他功能").SubMenu("人性化设置").AddSubMenu(new Menu("技能:" + spell, spell));
-                spellsmenu.AddItem(new MenuItem("Enabled" + i, "技能延迟 " + spell, true).SetValue(true));
-                spellsmenu.AddItem(new MenuItem("MinDelay" + i, "最小延迟", true).SetValue(new Slider(80)));
-                spellsmenu.AddItem(new MenuItem("MaxDelay" + i, "最大延迟", true).SetValue(new Slider(200, 100, 400)));
-            }
-            var move = Menu.SubMenu("其他功能").SubMenu("人性化设置").AddSubMenu(new Menu("移动设置", "Movement"));
-            move.AddItem(new MenuItem("MovementEnabled", "启动").SetValue(true));
-            move.AddItem(new MenuItem("MinDelay", "最小延迟")).SetValue(new Slider(80));
-            move.AddItem(new MenuItem("MaxDelay", "最大延迟")).SetValue(new Slider(200, 100, 400));*/
+            /* Menu.SubMenu("其他功能").SubMenu("人性化设置").AddItem(new MenuItem("Humanizer", "启动").SetValue(false));
+             for (var i = 0; i <= 3; i++)
+             {
+                 var spell = Core.Humanizer.SpellList[i];
+                 var spellsmenu = Menu.SubMenu("其他功能").SubMenu("人性化设置").AddSubMenu(new Menu("技能:" + spell, spell));
+                 spellsmenu.AddItem(new MenuItem("Enabled" + i, "技能延迟 " + spell, true).SetValue(true));
+                 spellsmenu.AddItem(new MenuItem("MinDelay" + i, "最小延迟", true).SetValue(new Slider(80)));
+                 spellsmenu.AddItem(new MenuItem("MaxDelay" + i, "最大延迟", true).SetValue(new Slider(200, 100, 400)));
+             }
+             var move = Menu.SubMenu("其他功能").SubMenu("人性化设置").AddSubMenu(new Menu("移动设置", "Movement"));
+             move.AddItem(new MenuItem("MovementEnabled", "启动").SetValue(true));
+             move.AddItem(new MenuItem("MinDelay", "最小延迟")).SetValue(new Slider(80));
+             move.AddItem(new MenuItem("MaxDelay", "最大延迟")).SetValue(new Slider(200, 100, 400));*/
 
             #endregion
 
@@ -319,11 +318,12 @@ namespace 花边_花式多合一
             #region 开发功能 : 无限视距 屏蔽线圈 禁止脚本发言 靠近显示防御塔范围
 
             Menu.SubMenu("开发功能").AddItem(new MenuItem("Explore", "启动").SetValue(false));
-            Menu.SubMenu("开发功能").AddItem(new MenuItem("Disable Drawing", "屏蔽线圈开关").SetValue(new KeyBind(36, KeyBindType.Toggle)));
-            Menu.SubMenu("开发功能").AddItem(new MenuItem("say", "默认按键:Home"));
-            Menu.SubMenu("开发功能").AddItem(new MenuItem("zoom hack", "无限视距").SetValue(false));
+            Menu.SubMenu("开发功能").AddItem(new MenuItem("Disable Drawing", "屏蔽线圈开关 默认按键:Home").SetValue(new KeyBind(36, KeyBindType.Toggle)));
             Menu.SubMenu("开发功能").AddItem(new MenuItem("disable say", "禁止脚本发所有人").SetValue(false));
-            Menu.SubMenu("开发功能").AddItem(new MenuItem("Tower Ranges", "显示防御塔范围(靠近)").SetValue(false));
+            Menu.SubMenu("开发功能").AddItem(new MenuItem("SaySomething", "刷屏阻止脚本载入信息").SetValue(false));
+            //Menu.SubMenu("开发功能").AddItem(new MenuItem("zoom hack", "无限视距").SetValue(false));
+            //Menu.SubMenu("开发功能").AddItem(new MenuItem("Tower Ranges", "显示防御塔范围(靠近)").SetValue(false));
+            Menu.Item("Disable Drawing").ValueChanged += Explore.Flowers_ValueChanged;
 
             #endregion
 

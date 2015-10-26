@@ -45,7 +45,7 @@ namespace 花边_花式多合一.Core
 
         public static MenuItem MakeSlider(string name, string display, int value, int min, int max)
         {
-            var item = InitializeMenu.Menu.SubMenu("自动功能").SubMenu("自动中亚").AddItem(new MenuItem(name + ObjectManager.Player.ChampionName, display));
+            var item = InitializeMenu.Menu.SubMenu("自动功能").SubMenu("自动加点").AddItem(new MenuItem(name + ObjectManager.Player.ChampionName, display));
             item.SetValue(new Slider(value, min, max));
             return item;
         }
@@ -171,7 +171,7 @@ namespace 花边_花式多合一.Core
 
 
             var sl = _activate.GetValue<StringList>();
-            if (args.NewLevel >= Int32.Parse(sl.SList[sl.SelectedIndex]))
+            if (args.NewLevel >= int.Parse(sl.SList[sl.SelectedIndex]))
             {
                 SpellSlot spellSlot = _levelStrategy.GetSpellSlotToLevel(args.NewLevel, _priority, false);
                 if (spellSlot != SpellSlot.Unknown)
@@ -234,7 +234,7 @@ namespace 花边_花式多合一.Core
                 {
                     bool baselevel = ignoreBaseLevel || ((ObjectManager.Player.Spellbook.GetSpell(s).Level == 0 && currentLevel <= 3) ||
                                       currentLevel > 3);
-                    if (baselevel && currentLevel >= AutoLevels.GetMinLevel(s) && CanLevel(currentLevel, s))
+                    if (baselevel && currentLevel >= GetMinLevel(s) && CanLevel(currentLevel, s))
                     {
                         return s;
                     }
