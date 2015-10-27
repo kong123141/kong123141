@@ -237,7 +237,6 @@ namespace 花边_花式多合一
                 我花边不服.OnGameLoad += TowerHealth.Game_OnGameLoad;
                 我花边不服.OnGameLoad += ShowTimes.Game_OnGameLoad;
                 我花边不服.OnGameLoad += JungleTimer.Game_OnGameLoad;
-                我花边不服.OnGameLoad += JunglePosition.Game_OnGameLoad;
                 我花边不服.OnGameLoad += GlassWard.Game_OnGameLoad;
                 我花边不服.OnGameLoad += Explore.Game_OnGameLoad;
                 我花边不服.OnGameLoad += AutoLantern.Game_OnGameLoad;
@@ -255,7 +254,7 @@ namespace 花边_花式多合一
 
                 //我花边不服.OnGameLoad += Humanizer.Game_OnGameLoad;
                 //我花边不服.OnGameLoad += Junglest.Game_OnGameLoad;
-
+                //我花边不服.OnGameLoad += JunglePosition.Game_OnGameLoad;
                 #endregion
 
                 if (InitializeMenu.Menu.Item("Lost").GetValue<bool>())

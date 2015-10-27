@@ -76,10 +76,10 @@
     <Compile Include="Core\Explore.cs" />
     <Compile Include="Core\FlowersDrawing.cs" />
     <Compile Include="Core\GlassWard.cs" />
-    <Compile Include="Core\Humanizer.cs" />
+    <Compile Include="Not Use That\Humanizer.cs" />
     <Compile Include="Core\Interface.cs" />
-    <Compile Include="Core\JunglePosition.cs" />
-    <Compile Include="Core\Junglest.cs" />
+    <Compile Include="Not Use That\JunglePosition.cs" />
+    <Compile Include="Not Use That\Junglest.cs" />
     <Compile Include="Core\JungleTimer.cs" />
     <Compile Include="Core\JungleTracker.cs" />
     <Compile Include="Core\Others.cs" />

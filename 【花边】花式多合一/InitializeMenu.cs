@@ -22,7 +22,7 @@ namespace 花边_花式多合一
             Menu.SubMenu("关于打野").SubMenu("打野计时").AddItem(new MenuItem("JungleTimerFormat", "时间格式:").SetValue(new StringList(new[] { "分:秒", "秒" })));
             Menu.SubMenu("关于打野").SubMenu("打野计时").AddItem(new MenuItem("JungleActive", "启动").SetValue(false));
 
-            Menu.SubMenu("关于打野").SubMenu("远程打野点").AddItem(new MenuItem("wushangdaye", "启动").SetValue(false));
+            //Menu.SubMenu("关于打野").SubMenu("远程打野点").AddItem(new MenuItem("wushangdaye", "启动").SetValue(false));
 
             Menu.SubMenu("关于打野").SubMenu("惩戒使用").AddItem(new MenuItem("AutoSmite", "启动").SetValue(false));
             var mainMenu = Menu.SubMenu("关于打野").SubMenu("惩戒使用").AddSubMenu(new Menu("野怪设置", "野怪设置"));
@@ -288,7 +288,7 @@ namespace 花边_花式多合一
 
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("AutoDisableDrawingEnable", "启动").SetValue(false));
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("死亡屏蔽显示", "死亡屏蔽显示").SetValue(false));
-            Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("已连杀人数", "已连杀人数").SetValue(new Slider(0, 0, 8)));
+            //Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("已连杀人数", "已连杀人数").SetValue(new Slider(0, 0, 8)));
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("超神屏蔽显示", "超神屏蔽显示").SetValue(false));
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("多杀屏蔽显示", "多杀屏蔽显示").SetValue(false));
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("多杀屏蔽时间", "多杀屏蔽时间").SetValue(new Slider(4, 0, 10)));
