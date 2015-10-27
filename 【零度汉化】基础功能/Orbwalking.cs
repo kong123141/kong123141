@@ -567,6 +567,7 @@ namespace LeagueSharp.Common
 
                 /* Missile check */
                 _config.AddItem(new MenuItem("MissileCheck", "Use Missile Check").SetShared().SetValue(true));
+                _config.AddItem(new MenuItem("AutoSetWindUpTime", "\u81EA\u52A8\u8BBE\u7F6E\u540E\u6447\u0028\u82B1\u8FB9\u0053\u0074\u0079\u006C\u0065\u0029").SetShared().SetValue(false));
 
                 /* Delay sliders */
                 _config.AddItem(
@@ -853,11 +854,47 @@ namespace LeagueSharp.Common
                         target, (_orbwalkingPoint.To2D().IsValid()) ? _orbwalkingPoint : Game.CursorPos,
                         _config.Item("ExtraWindup").GetValue<Slider>().Value,
                         _config.Item("HoldPosRadius").GetValue<Slider>().Value);
+
+                    if (_config.Item("AutoSetWindUpTime").GetValue<bool>())
+                    {
+                        AutoSetExByHuabian();
+                    }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
+            }
+
+            private static int extraWindup;
+
+            private void AutoSetExByHuabian()
+            {
+                if (!_config.Item("Flowers").GetValue<bool>())
+                {
+                    extraWindup = _config.Item("ExtraWindup").GetValue<Slider>().Value;
+                    return;
+                }
+                var additional = 0;
+                if (Game.Ping >= 100)
+                    additional = Game.Ping / 100 * 5;
+                else if (Game.Ping > 40 && Game.Ping < 100)
+                    additional = Game.Ping / 100 * 10;
+                else if (Game.Ping <= 40)
+                    additional = +15;
+
+                var windUp = Game.Ping - 20 + additional;
+
+                if (windUp < 40 && 20 < windUp)
+                    windUp = 36;
+                else if (windUp < 20 && 10 < windUp)
+                    windUp = 14;
+                else if (windUp < 10)
+                    windUp = 5;
+
+                _config.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
+
+                extraWindup = windUp;
             }
 
             private void DrawingOnOnDraw(EventArgs args)
