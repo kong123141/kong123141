@@ -56,7 +56,7 @@ namespace 花边_花式多合一.Core
                         Game.PrintChat("銆€");
                         Game.PrintChat("銆€");
                         Game.PrintChat("銆€");
-                        Game.PrintChat("<font color=\"#FFA042\"><b>杈撳嚭/help鑾峰彇鍛戒护鍒楄〃</b></font>");
+                        Game.PrintChat("<font color=\"#FFA042\"><b>杈撳叆/help鑾峰彇鍛戒护鍒楄〃</b></font>");
                     });
                 }
 
