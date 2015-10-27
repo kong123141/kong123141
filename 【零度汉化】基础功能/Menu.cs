@@ -235,8 +235,8 @@ namespace LeagueSharp.Common
 
         public static Color ActiveBackgroundColor
         {
-            //get { return Color.FromArgb(0, 37, 53); }
-			get { return Menu.root.Item("BackgroundColor").GetValue<Color>(); }
+            get { return Color.FromArgb(0, 37, 53); }
+			//get { return Menu.root.Item("BackgroundColor").GetValue<Color>(); }
         }
 
         private static void Game_OnWndProc(WndEventArgs args)
