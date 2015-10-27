@@ -8,7 +8,7 @@
     {
         public static bool duramk = false;
         public static float gameTime1 = 0;
-        public static readonly Menu fl = new Menu("实用功能", "Flowers Utility");
+        public static readonly Menu fl = new Menu("Flowers Utility", "Flowers Utility");
 
         internal static void Initilalize()
         {
@@ -17,12 +17,12 @@
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            fl.AddItem(new MenuItem("Disable Drawing", "屏蔽显示[I]").SetValue(new KeyBind('I', KeyBindType.Toggle, LeagueSharp.Hacks.DisableDrawings)));
-            //fl.AddItem(new MenuItem("zoom hack", "无限视距[危险]").SetValue(false)); 
-            fl.AddItem(new MenuItem("disable say", "禁止脚本发话").SetValue(true));
-            //fl.AddItem(new MenuItem("Tower Ranges", "显示敌方防御塔范围").SetValue(false));
-            fl.AddItem(new MenuItem("SaySomething", "刷屏阻止脚本载入信息").SetValue(false));
-            fl.AddItem(new MenuItem("SaySomething1", "By 花边"));
+            fl.AddItem(new MenuItem("Disable Drawing", "Screen display [I]").SetValue(new KeyBind('I', KeyBindType.Toggle, LeagueSharp.Hacks.DisableDrawings)));
+            //fl.AddItem(new MenuItem("zoom hack", "Infinite horizon [danger]").SetValue(false)); 
+            fl.AddItem(new MenuItem("disable say", "Ban said the script").SetValue(true));
+            //fl.AddItem(new MenuItem("Tower Ranges", "Show enemy tower range").SetValue(false));
+            fl.AddItem(new MenuItem("SaySomething", "Stop script loading information").SetValue(false));
+            fl.AddItem(new MenuItem("SaySomething1", "By huabian"));
             CommonMenu.Config.AddSubMenu(fl);
 
 			fl.Item("Disable Drawing").ValueChanged += Flowers_ValueChanged;

@@ -209,11 +209,6 @@ namespace LeagueSharp.Common
                 "Zed", "Ziggs"
             };
 
-            string[] p5 =
-            {
-                "Soraka"
-            };
-
             if (p1.Contains(championName))
             {
                 return 1;
@@ -226,22 +221,7 @@ namespace LeagueSharp.Common
             {
                 return 3;
             }
-            if (_configMenu.Item("FuckSoraka").GetValue<bool>())
-            {
-                if (p5.Contains(championName))
-                {
-                    return 4;
-                }
-            }
-            else
-            {
-                if (p5.Contains(championName))
-                {
-                    return 1;
-                }
-            }
             return p4.Contains(championName) ? 4 : 1;
-
         }
 
 
@@ -249,19 +229,19 @@ namespace LeagueSharp.Common
         {
             CustomEvents.Game.OnGameLoad += args =>
             {
-                Menu config = new Menu("目标选择", "TargetSelector");
+                Menu config = new Menu("Target Selector", "TargetSelector");
 
                 _configMenu = config;
 
-                config.AddItem(new MenuItem("FocusSelected", "集中攻击选择的目标").SetShared().SetValue(true));
+                config.AddItem(new MenuItem("FocusSelected", "Focus selected target").SetShared().SetValue(true));
                 config.AddItem(
-                    new MenuItem("ForceFocusSelected", "仅攻击被选择的目标").SetShared().SetValue(false))
+                    new MenuItem("ForceFocusSelected", "Only attack selected target").SetShared().SetValue(false))
                     .Permashow();
                 config.AddItem(
-                    new MenuItem("SelTColor", "被选择目标地下线圈颜色").SetShared().SetValue(new Circle(true, Color.Red)));
-                config.AddItem(new MenuItem("FuckSoraka", "自动提高索拉卡目标选择位置").SetShared().SetValue(false));
+                    new MenuItem("SelTColor", "Selected target color").SetShared().SetValue(new Circle(true, Color.Red)));
+                config.AddItem(new MenuItem("Sep", "").SetShared());
                 var autoPriorityItem =
-                    new MenuItem("AutoPriority", "自动排列顺序").SetShared().SetValue(false);
+                    new MenuItem("AutoPriority", "Auto arrange priorities").SetShared().SetValue(false);
                 autoPriorityItem.ValueChanged += autoPriorityItem_ValueChanged;
 
                 foreach (var enemy in HeroManager.Enemies)
@@ -281,16 +261,16 @@ namespace LeagueSharp.Common
                 }
                 config.AddItem(autoPriorityItem);
                 config.AddItem(
-                    new MenuItem("TargetingMode", "目标模式").SetShared()
+                    new MenuItem("TargetingMode", "Target Mode").SetShared()
                         .SetValue(new StringList(Enum.GetNames(typeof (TargetingMode)))));
-                config.AddItem(new MenuItem("Flowers", "汉化-花边"));
+
                 CommonMenu.Config.AddSubMenu(config);
             };
         }
 
         public static void AddToMenu(Menu config)
         {
-            config.AddItem(new MenuItem("Alert", "----目标选择请在基础功能菜单设置----"));
+            config.AddItem(new MenuItem("Alert", "----Use TS in Common Menu----"));
         }
 
         private static void autoPriorityItem_ValueChanged(object sender, OnValueChangeEventArgs e)

@@ -343,7 +343,7 @@ namespace LeagueSharp.Common
         internal static void DrawOnOff(bool on, Vector2 position, MenuItem item)
         {
             DrawBox(position, item.Height, item.Height, on ? Color.FromArgb(1, 169, 234) : Color.FromArgb(37, 37, 37), 1, Color.Black);
-            var s = on ? "开" : "关";
+            var s = on ? "ON" : "OFF";
             Font.DrawText(
                 null, s,
                 new Rectangle(
@@ -414,8 +414,8 @@ namespace LeagueSharp.Common
 
             DrawBox(new Vector2(position.X + item.Height - 28, position.Y + 1),
                 (int) Font.MeasureText(item.Tooltip).Width + 8, item.Height, MenuSettings.BackgroundColor, 1, Color.Black);
-			
-			var s = item.Tooltip;
+
+            var s = item.Tooltip;
             Font.DrawText(
                 null, s,
                 new Rectangle(
@@ -445,9 +445,9 @@ namespace LeagueSharp.Common
         static Menu()
         {
 			root.AddItem(
-				new MenuItem("Language", "选择语言:").SetValue(
-					new StringList(new[] { "默认", "中文", "英语" }, 1)));
-			root.AddItem(new MenuItem("BackgroundColor", "背景颜色").SetValue(System.Drawing.Color.Black));
+				new MenuItem("Language", "Select language:").SetValue(
+					new StringList(new[] { "The default", "Chinese", "English" }, 1)));
+			root.AddItem(new MenuItem("BackgroundColor", "Background color").SetValue(System.Drawing.Color.Black));
 			root.AddItem(new MenuItem("BackgroundAlpha", "Background Opacity")).SetValue(new Slider(165, 55, 255));
 			root.AddItem(
                 new MenuItem("FontName", "Font Name:").SetValue(
@@ -1619,18 +1619,17 @@ namespace LeagueSharp.Common
 
                 case MenuValueType.KeyBind:
                     var val = GetValue<KeyBind>();
-                    //s += " (" + Utils.KeyToText(val.Key) + ")";
 
                     if (Interacting)
                     {
                         s = MultiLanguage._("Press new key");
                     }
 
-					var x = !string.IsNullOrEmpty(this.Tooltip)
-					    ? (int) Position.X + Width - Height -
-					     font.MeasureText("[" + Utils.KeyToText(val.Key) + "]").Width - 25
-				    	: (int) Position.X + Width - Height -
-				         font.MeasureText("[" + Utils.KeyToText(val.Key) + "]").Width - 10;
+                    var x = !string.IsNullOrEmpty(this.Tooltip)
+                        ? (int) Position.X + Width - Height -
+                          font.MeasureText("[" + Utils.KeyToText(val.Key) + "]").Width - 35
+                        : (int) Position.X + Width - Height -
+                          font.MeasureText("[" + Utils.KeyToText(val.Key) + "]").Width - 10;
 
                     font.DrawText(null, "[" + Utils.KeyToText(val.Key) + "]", new Rectangle(x, (int)Position.Y, Width, Height), FontDrawFlags.VerticalCenter, new ColorBGRA(1, 169, 234, 255));
                     MenuDrawHelper.DrawOnOff(val.Active, new Vector2(Position.X + Width - Height, Position.Y), this);

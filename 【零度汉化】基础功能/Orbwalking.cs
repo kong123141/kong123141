@@ -539,52 +539,51 @@ namespace LeagueSharp.Common
             {
                 _config = attachToMenu;
                 /* Drawings submenu */
-                var drawings = new Menu("显示设置", "drawings");
+                var drawings = new Menu("Drawings", "drawings");
                 drawings.AddItem(
-                    new MenuItem("AACircle", "自己AA范围").SetShared()
+                    new MenuItem("AACircle", "AACircle").SetShared()
                         .SetValue(new Circle(true, Color.FromArgb(155, 255, 255, 0))));
                 drawings.AddItem(
-                    new MenuItem("AACircle2", "敌人AA范围").SetShared()
+                    new MenuItem("AACircle2", "Enemy AA circle").SetShared()
                         .SetValue(new Circle(false, Color.FromArgb(155, 255, 255, 0))));
                 drawings.AddItem(
-                    new MenuItem("HoldZone", "控制区域").SetShared()
+                    new MenuItem("HoldZone", "HoldZone").SetShared()
                         .SetValue(new Circle(false, Color.FromArgb(155, 255, 255, 0))));
                 drawings.AddItem(
-                    new MenuItem("AALineWidth", "线条宽度")).SetShared()
+                    new MenuItem("AALineWidth", "Line Width")).SetShared()
                         .SetValue(new Slider(2, 1, 6));
                 _config.AddSubMenu(drawings);
 
                 /* Misc options */
-                var misc = new Menu("杂项设置", "Misc");
+                var misc = new Menu("Misc", "Misc");
                 misc.AddItem(
-                    new MenuItem("HoldPosRadius", "控制区域半径").SetShared().SetValue(new Slider(0, 0, 250)));
-                misc.AddItem(new MenuItem("PriorizeFarm", "骚扰时优先打钱").SetShared().SetValue(true));
-                misc.AddItem(new MenuItem("AttackWards", "自动A眼").SetShared().SetValue(false));
-                misc.AddItem(new MenuItem("AttackPetsnTraps", "自动打召唤物").SetShared().SetValue(true));
-				misc.AddItem(new MenuItem("Smallminionsprio", "清野时先把小的草了").SetShared().SetValue(false));
-                _config.AddSubMenu(misc);
+                    new MenuItem("HoldPosRadius", "Hold Position Radius").SetShared().SetValue(new Slider(0, 0, 250)));
+                misc.AddItem(new MenuItem("PriorizeFarm", "Priorize farm over harass").SetShared().SetValue(true));
+                misc.AddItem(new MenuItem("AttackWards", "Auto attack wards").SetShared().SetValue(false));
+                misc.AddItem(new MenuItem("AttackPetsnTraps", "Auto attack pets & traps").SetShared().SetValue(true));
+				misc.AddItem(new MenuItem("Smallminionsprio", "Jungle clear small first").SetShared().SetValue(false));
+
+				_config.AddSubMenu(misc);
 
                 /* Missile check */
-                _config.AddItem(new MenuItem("MissileCheck", "开启碰撞检测").SetShared().SetValue(true));
-                _config.AddItem(new MenuItem("Flowers", "自动设置AA后摇(花边)").SetShared().SetValue(false));
+                _config.AddItem(new MenuItem("MissileCheck", "Use Missile Check").SetShared().SetValue(true));
+
                 /* Delay sliders */
                 _config.AddItem(
-                    new MenuItem("ExtraWindup", "AA后摇设置").SetShared().SetValue(new Slider(80, 0, 200)));
-                _config.AddItem(new MenuItem("FarmDelay", "打钱延迟").SetShared().SetValue(new Slider(30, 0, 200)));
+                    new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 0, 200)));
+                _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(30, 0, 200)));
 
                 /*Load the menu*/
                 _config.AddItem(
-                    new MenuItem("LastHit", "补刀按键").SetShared().SetValue(new KeyBind('X', KeyBindType.Press)));
+                    new MenuItem("LastHit", "Last hit").SetShared().SetValue(new KeyBind('X', KeyBindType.Press)));
 
-                _config.AddItem(new MenuItem("Farm", "骚扰按键").SetShared().SetValue(new KeyBind('C', KeyBindType.Press)));
-
-                _config.AddItem(
-                    new MenuItem("LaneClear", "清线按键").SetShared().SetValue(new KeyBind('V', KeyBindType.Press)));
+                _config.AddItem(new MenuItem("Farm", "Mixed").SetShared().SetValue(new KeyBind('C', KeyBindType.Press)));
 
                 _config.AddItem(
-                    new MenuItem("Orbwalk", "连招按键").SetShared().SetValue(new KeyBind(32, KeyBindType.Press)));
+                    new MenuItem("LaneClear", "LaneClear").SetShared().SetValue(new KeyBind('V', KeyBindType.Press)));
 
-                _config.AddItem(new MenuItem("Flowers", "汉化-花边"));
+                _config.AddItem(
+                    new MenuItem("Orbwalk", "Combo").SetShared().SetValue(new KeyBind(32, KeyBindType.Press)));
 
                 Player = ObjectManager.Player;
                 Game.OnUpdate += GameOnOnGameUpdate;
@@ -834,49 +833,6 @@ namespace LeagueSharp.Common
                 return result;
             }
 
-            private static int ExtraWindupTime;
-
-            private void AutoSetExByHuabian()
-            {
-                if (!_config.Item("Flowers").GetValue<bool>())
-                {
-                    ExtraWindupTime = _config.Item("ExtraWindup").GetValue<Slider>().Value;
-                    return;
-                }
-
-                var additional = 0;
-                if (Game.Ping >= 100)
-                {
-                    additional = Game.Ping / 100 * 5;
-                }
-                else if (Game.Ping > 40 && Game.Ping < 100)
-                {
-                    additional = Game.Ping / 100 * 10;
-                }
-                else if (Game.Ping <= 40)
-                {
-                    additional = +15;
-                }
-
-                var windUp = Game.Ping - 20 + additional;
-
-                if (windUp < 40 && 20 < windUp)
-                {
-                    windUp = 36;
-                }
-                else if (windUp < 20 && 10 < windUp)
-                {
-                    windUp = 14;
-                }
-                else if (windUp < 10)
-                {
-                    windUp = 5;
-                }
-
-                _config.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
-                ExtraWindupTime = windUp;
-            }
-
             private void GameOnOnGameUpdate(EventArgs args)
             {
                 try
@@ -897,12 +853,6 @@ namespace LeagueSharp.Common
                         target, (_orbwalkingPoint.To2D().IsValid()) ? _orbwalkingPoint : Game.CursorPos,
                         _config.Item("ExtraWindup").GetValue<Slider>().Value,
                         _config.Item("HoldPosRadius").GetValue<Slider>().Value);
-
-                    if (_config.Item("Flowers").GetValue<bool>())
-                    {
-                        AutoSetExByHuabian();
-                    }
-
                 }
                 catch (Exception e)
                 {

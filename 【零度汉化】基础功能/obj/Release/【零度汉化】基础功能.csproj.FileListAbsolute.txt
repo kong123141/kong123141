@@ -1,0 +1,2 @@
+C:\Users\imac\Desktop\CN\【零度汉化】基础功能\obj\Release\LeagueSharp.Common.Properties.Resources.resources
+C:\Users\imac\Desktop\CN\【零度汉化】基础功能\obj\Release\【零度汉化】基础功能.csproj.GenerateResource.Cache
