@@ -163,7 +163,7 @@ namespace LeagueSharp.Common
             {
                 var menu = new Menu("CastFunction", "CastFunction");
                 var slider = new MenuItem("LimitCastingAttempts", "Limit Casting Attempts").SetValue(true)
-                    .SetTooltip("Prevent Cast Flooding");
+                    .SetTooltip("\u9632\u6b62\u6295\u63b7\u6cdb\u6ee5");
                 menu.AddItem(slider);
                 CommonMenu.Config.AddSubMenu(menu);
             };
