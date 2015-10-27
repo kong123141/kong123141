@@ -343,7 +343,7 @@ namespace LeagueSharp.Common
         internal static void DrawOnOff(bool on, Vector2 position, MenuItem item)
         {
             DrawBox(position, item.Height, item.Height, on ? Color.FromArgb(1, 169, 234) : Color.FromArgb(37, 37, 37), 1, Color.Black);
-            var s = on ? "ON" : "OFF";
+            var s = on ? "\u5f00" : "\u5173";
             Font.DrawText(
                 null, s,
                 new Rectangle(
