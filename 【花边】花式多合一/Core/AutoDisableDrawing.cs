@@ -7,7 +7,7 @@ namespace 花边_花式多合一.Core
 {
     class AutoDisableDrawing
     {
-        static int 杀人数 = 0;
+        static int 杀人数 = InitializeMenu.Menu.Item("已连杀人数").GetValue<Slider>().Value;
 
         private static void Game_OnStart(EventArgs args)
         {
@@ -49,7 +49,7 @@ namespace 花边_花式多合一.Core
 
             if (args.EventId == GameEventId.OnChampionDie && args.NetworkId == ObjectManager.Player.NetworkId)
             {
-                杀人数 += 1;
+                杀人数 += InitializeMenu.Menu.Item("已连杀人数").GetValue<Slider>().Value + 1;
 
                 if (杀人数 >= 8
                     && InitializeMenu.Menu.Item("超神屏蔽显示").GetValue<bool>()
