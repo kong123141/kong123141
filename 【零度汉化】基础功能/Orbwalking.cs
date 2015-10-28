@@ -870,7 +870,7 @@ namespace LeagueSharp.Common
 
             private void AutoSetExByHuabian()
             {
-                if (!_config.Item("Flowers").GetValue<bool>())
+                if (!_config.Item("AutoSetWindUpTime").GetValue<bool>())
                 {
                     extraWindup = _config.Item("ExtraWindup").GetValue<Slider>().Value;
                     return;
