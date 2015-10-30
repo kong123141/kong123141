@@ -26,35 +26,37 @@ namespace 花边_花式多合一.Core
             public int StealthDetectionLevel;
             public bool SelfCast;
         }
-
-        internal static void Game_OnGameLoad(EventArgs args)
+        internal class Load
         {
-            try
+            public Load()
             {
-                StealthSpells.Add(new Tuple<int, string>(3, "akalismokebomb"));
-                StealthSpells.Add(new Tuple<int, string>(1, "khazixr"));
-                StealthSpells.Add(new Tuple<int, string>(1, "khazixrlong"));
-                StealthSpells.Add(new Tuple<int, string>(3, "talonshadowassault"));
-                StealthSpells.Add(new Tuple<int, string>(1, "monkeykingdecoy"));
-                StealthSpells.Add(new Tuple<int, string>(1, "hideinshadows"));
+                try
+                {
+                    StealthSpells.Add(new Tuple<int, string>(3, "akalismokebomb"));
+                    StealthSpells.Add(new Tuple<int, string>(1, "khazixr"));
+                    StealthSpells.Add(new Tuple<int, string>(1, "khazixrlong"));
+                    StealthSpells.Add(new Tuple<int, string>(3, "talonshadowassault"));
+                    StealthSpells.Add(new Tuple<int, string>(1, "monkeykingdecoy"));
+                    StealthSpells.Add(new Tuple<int, string>(1, "hideinshadows"));
 
-                AntiStealthSpells.Add(new _sdata { ChampionName = "caitlyn", Spell = SpellSlot.W, SpellRange = 800, StealthDetectionLevel = 1 });
-                AntiStealthSpells.Add(new _sdata { ChampionName = "kogmaw", Spell = SpellSlot.R, SpellRange = 1200, StealthDetectionLevel = 1 }); //range + level * 300
-                AntiStealthSpells.Add(new _sdata { ChampionName = "leesin", Spell = SpellSlot.Q, SpellRange = 1100, StealthDetectionLevel = 1 });
-                AntiStealthSpells.Add(new _sdata { ChampionName = "nidalee", Spell = SpellSlot.W, SpellRange = 900, StealthDetectionLevel = 1 });
-                AntiStealthSpells.Add(new _sdata { ChampionName = "nocturne", Spell = SpellSlot.Q, SpellRange = 1200, StealthDetectionLevel = 1 });
-                AntiStealthSpells.Add(new _sdata { ChampionName = "twistedfate", Spell = SpellSlot.R, SpellRange = 4000, StealthDetectionLevel = 3, SelfCast = true });
-                AntiStealthSpells.Add(new _sdata { ChampionName = "fizz", Spell = SpellSlot.W, SpellRange = 1275, StealthDetectionLevel = 2 });
+                    AntiStealthSpells.Add(new _sdata { ChampionName = "caitlyn", Spell = SpellSlot.W, SpellRange = 800, StealthDetectionLevel = 1 });
+                    AntiStealthSpells.Add(new _sdata { ChampionName = "kogmaw", Spell = SpellSlot.R, SpellRange = 1200, StealthDetectionLevel = 1 }); //range + level * 300
+                    AntiStealthSpells.Add(new _sdata { ChampionName = "leesin", Spell = SpellSlot.Q, SpellRange = 1100, StealthDetectionLevel = 1 });
+                    AntiStealthSpells.Add(new _sdata { ChampionName = "nidalee", Spell = SpellSlot.W, SpellRange = 900, StealthDetectionLevel = 1 });
+                    AntiStealthSpells.Add(new _sdata { ChampionName = "nocturne", Spell = SpellSlot.Q, SpellRange = 1200, StealthDetectionLevel = 1 });
+                    AntiStealthSpells.Add(new _sdata { ChampionName = "twistedfate", Spell = SpellSlot.R, SpellRange = 4000, StealthDetectionLevel = 3, SelfCast = true });
+                    AntiStealthSpells.Add(new _sdata { ChampionName = "fizz", Spell = SpellSlot.W, SpellRange = 1275, StealthDetectionLevel = 2 });
 
-                Teemo = HeroManager.Enemies.FirstOrDefault(p => p.ChampionName.ToLower() == "teemo");
+                    Teemo = HeroManager.Enemies.FirstOrDefault(p => p.ChampionName.ToLower() == "teemo");
 
-                Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast; //for stealth spells
-                GameObject.OnCreate += Obj_AI_Base_OnCreate; //for lb passive & rengar ult
-                Drawing.OnDraw += Drawing_OnDraw;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("WhereDidHeGo error occurred: '{0}'", ex);
+                    Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast; //for stealth spells
+                    GameObject.OnCreate += Obj_AI_Base_OnCreate; //for lb passive & rengar ult
+                    Drawing.OnDraw += Drawing_OnDraw;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("WhereDidHeGo error occurred: '{0}'", ex);
+                }
             }
         }
 

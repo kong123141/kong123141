@@ -15,7 +15,7 @@ namespace 花边_花式多合一
         {
             Menu = new Menu("花边-功能合集", "Credit : NightMoon", true);
 
-            #region 打野选项 : 打野计时 远程打野点 惩戒使用
+            #region 打野选项 : 打野计时 远程打野点//已取消 惩戒使用
 
             Menu.SubMenu("关于打野").SubMenu("打野计时").AddItem(new MenuItem("Timer", "大地图显示").SetValue(true));
             Menu.SubMenu("关于打野").SubMenu("打野计时").AddItem(new MenuItem("Timer1", "小地图显示").SetValue(true));
@@ -204,11 +204,12 @@ namespace 花边_花式多合一
             AutoLevels._delay = Menu.SubMenu("自动功能").SubMenu("自动加点").AddItem(new MenuItem("AutoLevelsdelay", "加点延迟 (ms)").SetValue(new Slider(0, 0, 2000)));
 
             #endregion
+
             #endregion
 
-            #region 其他功能 :  检测同行 人性化设置 时间显示 送人头 杀人自动屏蔽线圈 (未知是否工作) 经验分流
+            #region 其他功能 :  检测同行//已取消 人性化设置//已取消 时间显示 送人头 杀人自动屏蔽线圈 (未知是否工作) 经验分流
 
-            #region 人性化设置 (技能 移动 人性化)
+            #region 人性化设置 (技能 移动 人性化)//已取消
 
             /* Menu.SubMenu("其他功能").SubMenu("人性化设置").AddItem(new MenuItem("Humanizer", "启动").SetValue(false));
              for (var i = 0; i <= 3; i++)
@@ -234,9 +235,9 @@ namespace 花边_花式多合一
 
             #endregion
 
-            #region 检测同行 (检测Bol 和 L#)
+            #region 检测同行 (检测Bol 和 L#)//已取消
 
-            Menu.SubMenu("其他功能").SubMenu("检测同行").AddItem(new MenuItem("CheckEnable", "启动").SetValue(false));
+            /*Menu.SubMenu("其他功能").SubMenu("检测同行").AddItem(new MenuItem("CheckEnable", "启动").SetValue(false));
              var detectionType = Menu.SubMenu("其他功能").SubMenu("检测外挂").AddItem(new MenuItem("detection", "检测").SetValue(new StringList(new[] { "Preferred", "Safe", "AntiHumanizer" })));
              detectionType.ValueChanged += (sender, args) =>
              {
@@ -248,7 +249,7 @@ namespace 花边_花式多合一
              Menu.SubMenu("其他功能").SubMenu("检测同行").AddItem(new MenuItem("1", "提示:"));
              Menu.SubMenu("其他功能").SubMenu("检测同行").AddItem(new MenuItem("2", "一旦关闭右上角的提示，就只"));
              Menu.SubMenu("其他功能").SubMenu("检测同行").AddItem(new MenuItem("3", "有重新载入脚本才会再次显示"));
-
+             */
             #endregion
 
             #region 显示最佳AA后摇
@@ -288,7 +289,7 @@ namespace 花边_花式多合一
 
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("AutoDisableDrawingEnable", "启动").SetValue(false));
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("死亡屏蔽显示", "死亡屏蔽显示").SetValue(false));
-            Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("已连杀人数", "已连杀人数(请勿随意更改)").SetValue(new Slider(0, 0, 8)));
+            Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("已连杀人数", "已连杀人数(请勿随意更改)").SetValue(new Slider(0, 0, 100)));
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("超神屏蔽显示", "超神屏蔽显示").SetValue(false));
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("多杀屏蔽显示", "多杀屏蔽显示").SetValue(false));
             Menu.SubMenu("其他功能").SubMenu("杀人自动屏蔽线圈").AddItem(new MenuItem("多杀屏蔽时间", "多杀屏蔽时间").SetValue(new Slider(4, 0, 10)));

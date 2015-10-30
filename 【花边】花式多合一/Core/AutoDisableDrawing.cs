@@ -49,7 +49,7 @@ namespace 花边_花式多合一.Core
 
             if (args.EventId == GameEventId.OnChampionDie && args.NetworkId == ObjectManager.Player.NetworkId)
             {
-                杀人数 += InitializeMenu.Menu.Item("已连杀人数").GetValue<Slider>().Value + 1;
+                InitializeMenu.Menu.Item("已连杀人数").SetValue(杀人数);
 
                 if (杀人数 >= 8
                     && InitializeMenu.Menu.Item("超神屏蔽显示").GetValue<bool>()
@@ -63,6 +63,15 @@ namespace 花边_花式多合一.Core
                         Lost.DisableDrawings = false;
                     });
                 }
+            }
+
+            if (ObjectManager.Player.IsDead && InitializeMenu.Menu.Item("死亡屏蔽显示").GetValue<bool>())
+            {
+                Lost.DisableDrawings = true;
+            }
+            else
+            {
+                Lost.DisableDrawings = false;
             }
         }
 

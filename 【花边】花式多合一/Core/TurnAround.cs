@@ -57,17 +57,20 @@ namespace 花边_花式多合一.Core
             }
         }
 
-        internal static void Game_OnGameLoad(EventArgs args)
+        internal class Load
         {
-            try
+            public Load()
             {
-                if (!InitializeMenu.Menu.Item("AutoTurnAround").GetValue<bool>()) return;
-                AddChampions();
-                Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("TrunAround error occurred: '{0}'", ex);
+                try
+                {
+                    if (!InitializeMenu.Menu.Item("AutoTurnAround").GetValue<bool>()) return;
+                    AddChampions();
+                    Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("TrunAround error occurred: '{0}'", ex);
+                }
             }
         }
 
