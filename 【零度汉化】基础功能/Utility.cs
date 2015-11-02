@@ -74,12 +74,20 @@ namespace LeagueSharp.Common
                 return false;
             }
 
+            var @base = unit as Obj_AI_Base;
+            if (@base != null)
+            {
+                if (@base.HasBuff("kindredrnodeathbuff") && @base.HealthPercent <= 10)
+                {
+                    return false;
+                }
+            }
+
             if (checkTeam && unit.Team == ObjectManager.Player.Team)
             {
                 return false;
             }
 
-            var @base = unit as Obj_AI_Base;
             var unitPosition = @base != null ? @base.ServerPosition : unit.Position;
 
             return !(range < float.MaxValue) ||
@@ -550,21 +558,6 @@ namespace LeagueSharp.Common
             }
 
             return ObjectManager.Get<T>().Where(x => rangeCheckFrom.Distance(x.Position, true) < range * range).ToList();
-        }
-
-        internal static int GetVenomStacks(this Obj_AI_Base target)
-        {
-            for (var i = 1; i < 7; i++)
-            {
-                if (ObjectManager.Get<Obj_GeneralParticleEmitter>()
-                        .Any(e => e.Position.Distance(target.ServerPosition) <= 70 &&
-                                  e.Name == "twitch_poison_counter_0" + i + ".troy"))
-                {
-                    return i;
-                }
-            }
-
-            return 0;
         }
 
         public static bool IsMovementImpaired(this Obj_AI_Hero hero)

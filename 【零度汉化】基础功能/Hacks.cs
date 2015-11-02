@@ -1,26 +1,25 @@
 ﻿namespace LeagueSharp.Common
 {
+    /// <summary>
+    /// Adds hacks to the menu.
+    /// </summary>
     internal class Hacks
     {
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
         internal static void Initialize()
         {
             CustomEvents.Game.OnGameLoad += eventArgs =>
             {
                 var menu = new Menu("Hacks", "Hacks");
 
-                var draw = menu.AddItem(new MenuItem("DrawingHack", "Disable Drawing").SetValue<KeyBind>(new KeyBind('I',KeyBindType.Toggle, LeagueSharp.Hacks.DisableDrawings)));
+                var draw = menu.AddItem(new MenuItem("DrawingHack", "Disable Drawing").SetValue(false));
+                draw.SetValue(LeagueSharp.Hacks.DisableDrawings);
                 draw.ValueChanged +=
                     delegate(object sender, OnValueChangeEventArgs args)
                     {
-                        
-						if (args.GetNewValue<KeyBind>().Active)
-						{
-							LeagueSharp.Hacks.DisableDrawings = true;
-						}
-						else
-						{
-							LeagueSharp.Hacks.DisableDrawings = false;
-						}
+                        LeagueSharp.Hacks.DisableDrawings = args.GetNewValue<bool>();
                     };
 
                 var say = menu.AddItem(new MenuItem("SayHack", "Disable L# Send Chat").SetValue(false)

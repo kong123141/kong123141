@@ -32,10 +32,19 @@ using LeagueSharp.Common.Properties;
 
 namespace LeagueSharp.Common
 {
+    /// <summary>
+    /// Provides multi-lingual strings.
+    /// </summary>
     public static class MultiLanguage
     {
+        /// <summary>
+        /// The translations
+        /// </summary>
         private static Dictionary<string, string> Translations = new Dictionary<string, string>();
 
+        /// <summary>
+        /// Initializes static members of the <see cref="MultiLanguage"/> class.
+        /// </summary>
         static MultiLanguage()
         {
             switch (CommonMenu.Config.Item("Language").GetValue<StringList>().SelectedIndex)
@@ -54,13 +63,22 @@ namespace LeagueSharp.Common
 					break;
 			}
         }
-
+        /// <summary>
+        /// Translates the text into the loaded language.
+        /// </summary>
+        /// <param name="textToTranslate">The text to translate.</param>
+        /// <returns>System.String.</returns>
         public static string _(string textToTranslate)
         {
             var textToTranslateToLower = textToTranslate.ToLower();
             return Translations.ContainsKey(textToTranslateToLower) ? Translations[textToTranslateToLower] : textToTranslate;
         }
-      
+
+        /// <summary>
+        /// Loads the language.
+        /// </summary>
+        /// <param name="languageName">Name of the language.</param>
+        /// <returns><c>true</c> if the operation succeeded, <c>false</c> otherwise false.</returns>
         public static bool LoadLanguage(string languageName)
         {
             try

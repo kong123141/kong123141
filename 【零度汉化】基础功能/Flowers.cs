@@ -25,38 +25,39 @@
             fl.AddItem(new MenuItem("SaySomething1", "By huabian"));
             CommonMenu.Config.AddSubMenu(fl);
 
-			fl.Item("Disable Drawing").ValueChanged += Flowers_ValueChanged;
+            fl.Item("Disable Drawing").ValueChanged += Flowers_ValueChanged;
 
-			if (fl.Item("SaySomething").GetValue<bool>())
+            if (fl.Item("SaySomething").GetValue<bool>())
             {
-				Utility.DelayAction.Add(1000,() => {
-					Game.PrintChat("銆€"); 
-					Game.PrintChat("銆€");
-					Game.PrintChat("銆€");
-					Game.PrintChat("銆€");
-					Game.PrintChat("銆€");
-					Game.PrintChat("銆€");
-					Game.PrintChat("銆€");
-					Game.PrintChat("銆€");
-					Game.PrintChat("<font color=\"#FFA042\"><b>杈撳嚭/help鑾峰彇鍛戒护鍒楄〃</b></font>");
-				});
+                Utility.DelayAction.Add(1000, () => {
+                    Game.PrintChat("銆€");
+                    Game.PrintChat("銆€");
+                    Game.PrintChat("銆€");
+                    Game.PrintChat("銆€");
+                    Game.PrintChat("銆€");
+                    Game.PrintChat("銆€");
+                    Game.PrintChat("銆€");
+                    Game.PrintChat("銆€");
+                    Game.PrintChat("<font color=\"#FFA042\"><b>杈撳嚭/help鑾峰彇鍛戒护鍒楄〃</b></font>");
+                });
             }
 
             Game.OnUpdate += Game_OnUpdate;
         }
 
-		private static void Flowers_ValueChanged(object sender, OnValueChangeEventArgs e) {
-			if (fl.Item("Disable Drawing").GetValue<KeyBind>().Active)
-			{
-				LeagueSharp.Hacks.DisableDrawings = true;
+        private static void Flowers_ValueChanged(object sender, OnValueChangeEventArgs e)
+        {
+            if (fl.Item("Disable Drawing").GetValue<KeyBind>().Active)
+            {
+                LeagueSharp.Hacks.DisableDrawings = true;
             }
-			else
-			{
-				LeagueSharp.Hacks.DisableDrawings = false;
-			}
-		}
+            else
+            {
+                LeagueSharp.Hacks.DisableDrawings = false;
+            }
+        }
 
-		private static void Game_OnUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             /*if (fl.Item("zoom hack").IsActive())
             {
