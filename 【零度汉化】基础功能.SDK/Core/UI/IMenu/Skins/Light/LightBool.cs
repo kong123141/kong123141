@@ -1,34 +1,29 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LightBool.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="LightBool.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   A default implementation of a <see cref="ADrawable{MenuBool}" />
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core.UI.IMenu.Skins.Light
 {
-    using LeagueSharp.SDK.Core.Enumerations;
-    using LeagueSharp.SDK.Core.Extensions.SharpDX;
-    using LeagueSharp.SDK.Core.Math;
-    using LeagueSharp.SDK.Core.UI.IMenu.Values;
-    using LeagueSharp.SDK.Core.Utils;
-
+    using Core.Utils;
+    using Enumerations;
+    using Extensions.SharpDX;
+    using Math;
     using SharpDX;
     using SharpDX.Direct3D9;
+    using Values;
 
     /// <summary>
     ///     A blue implementation of a <see cref="ADrawable{MenuBool}" />
@@ -47,7 +42,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Skins.Light
         #region Constructors and Destructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="BlueBool" /> class.
+        ///     Initializes a new instance of the <see cref="LightBool"/> class.
         /// </summary>
         /// <param name="component">
         ///     The component
@@ -108,11 +103,11 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Skins.Light
                     {
                         new Vector2(
                             (this.Component.Position.X + this.Component.MenuWidth - MenuSettings.ContainerHeight - 1)
-                            + MenuSettings.ContainerHeight / 2f, 
+                            + (MenuSettings.ContainerHeight / 2f), 
                             this.Component.Position.Y + 1 + 3), 
                         new Vector2(
                             (this.Component.Position.X + this.Component.MenuWidth - MenuSettings.ContainerHeight - 1)
-                            + MenuSettings.ContainerHeight / 2f, 
+                            + (MenuSettings.ContainerHeight / 2f), 
                             this.Component.Position.Y + MenuSettings.ContainerHeight - 3)
                     }, 
                 this.Component.Value ? new ColorBGRA(68, 160, 255, 255) : new ColorBGRA(151, 151, 151, 255));

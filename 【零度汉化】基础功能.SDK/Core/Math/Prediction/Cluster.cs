@@ -1,32 +1,28 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Cluster.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="Cluster.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   Cluster (Area of Effect) Prediction class.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core.Math.Prediction
 {
     using System.Collections.Generic;
     using System.Linq;
 
-    using LeagueSharp.SDK.Core.Enumerations;
-    using LeagueSharp.SDK.Core.Extensions;
-    using LeagueSharp.SDK.Core.Extensions.SharpDX;
+    using Enumerations;
+    using Extensions;
+    using Extensions.SharpDX;
 
     using SharpDX;
 
@@ -227,7 +223,7 @@ namespace LeagueSharp.SDK.Core.Math.Prediction
                     }
 
                     var bestCandidateHits = -1;
-                    var bestCandidate = new Vector2();
+                    var bestCandidate = default(Vector2);
                     var positionsList = posibleTargets.Select(t => t.Position).ToList();
 
                     foreach (var candidate in candidates)
@@ -272,7 +268,7 @@ namespace LeagueSharp.SDK.Core.Math.Prediction
                         let edge1 = end.Rotated(-angle / 2)
                         let edge2 = edge1.Rotated(angle)
                         where
-                            point.DistanceSquared(new Vector2()) < range * range && edge1.CrossProduct(point) > 0
+                            point.DistanceSquared(default(Vector2)) < range * range && edge1.CrossProduct(point) > 0
                             && point.CrossProduct(edge2) > 0
                         select point).Count();
             }
@@ -325,7 +321,7 @@ namespace LeagueSharp.SDK.Core.Math.Prediction
                     }
 
                     var bestCandidateHits = -1;
-                    var bestCandidate = new Vector2();
+                    var bestCandidate = default(Vector2);
                     var bestCandidateHitPoints = new List<Vector2>();
                     var positionsList = posibleTargets.Select(t => t.Position).ToList();
 
@@ -335,7 +331,7 @@ namespace LeagueSharp.SDK.Core.Math.Prediction
                             GetHits(
                                 input.From.ToVector2(), 
                                 candidate, 
-                                input.Radius + input.Unit.BoundingRadius / 3 - 10, 
+                                input.Radius + (input.Unit.BoundingRadius / 3) - 10, 
                                 new List<Vector2> { posibleTargets[0].Position }).Count() == 1)
                         {
                             var hits = GetHits(input.From.ToVector2(), candidate, input.Radius, positionsList).ToList();
@@ -352,7 +348,7 @@ namespace LeagueSharp.SDK.Core.Math.Prediction
                     if (bestCandidateHits > 1)
                     {
                         float maxDistance = -1;
-                        Vector2 p1 = new Vector2(), p2 = new Vector2();
+                        Vector2 p1 = default(Vector2), p2 = default(Vector2);
 
                         // Center the position
                         for (var i = 0; i < bestCandidateHitPoints.Count; i++)
@@ -410,8 +406,8 @@ namespace LeagueSharp.SDK.Core.Math.Prediction
                     var c1 = intersections[0];
                     var c2 = intersections[1];
 
-                    c1 = from + range * (to - c1).Normalized();
-                    c2 = from + range * (to - c2).Normalized();
+                    c1 = from + (range * (to - c1).Normalized());
+                    c2 = from + (range * (to - c2).Normalized());
 
                     return new[] { c1, c2 };
                 }

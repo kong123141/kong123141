@@ -1,25 +1,20 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Cache.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="Cache.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   Provides an implementation of ObjectCache, for any object. Check <see cref="DefaultCacheCapabilities" /> for
-//   implemented abilities.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core.Utils
 {
     using System;
@@ -27,7 +22,7 @@ namespace LeagueSharp.SDK.Core.Utils
     using System.Linq;
     using System.Runtime.Caching;
 
-    using LeagueSharp.SDK.Core.Enumerations;
+    using Enumerations;
 
     /// <summary>
     ///     Provides an implementation of ObjectCache, for any object. Check <see cref="DefaultCacheCapabilities" /> for
@@ -114,30 +109,6 @@ namespace LeagueSharp.SDK.Core.Utils
         #region Public Properties
 
         /// <summary>
-        ///     The capabilities of this implementation of ObjectCache.
-        /// </summary>
-        public override DefaultCacheCapabilities DefaultCacheCapabilities
-        {
-            get
-            {
-                return DefaultCacheCapabilities.AbsoluteExpirations | DefaultCacheCapabilities.CacheRegions
-                       | DefaultCacheCapabilities.CacheEntryRemovedCallback
-                       | DefaultCacheCapabilities.CacheEntryUpdateCallback;
-            }
-        }
-
-        /// <summary>
-        ///     Returns the name of the Cache.
-        /// </summary>
-        public override string Name
-        {
-            get
-            {
-                return "SDK Cache";
-            }
-        }
-
-        /// <summary>
         ///     Gets the instance of Cache
         /// </summary>
         public static Cache Instance
@@ -153,6 +124,20 @@ namespace LeagueSharp.SDK.Core.Utils
                 return instance;
             }
         }
+
+        /// <summary>
+        ///     The capabilities of this implementation of ObjectCache.
+        /// </summary>
+        public override DefaultCacheCapabilities DefaultCacheCapabilities
+            =>
+                DefaultCacheCapabilities.AbsoluteExpirations | DefaultCacheCapabilities.CacheRegions
+                | DefaultCacheCapabilities.CacheEntryRemovedCallback | DefaultCacheCapabilities.CacheEntryUpdateCallback
+            ;
+
+        /// <summary>
+        ///     Returns the name of the Cache.
+        /// </summary>
+        public override string Name => "SDK Cache";
 
         #endregion
 
@@ -202,10 +187,7 @@ namespace LeagueSharp.SDK.Core.Utils
             var result = function();
             this.InternalCache[regionName].Add(key, result);
 
-            if (OnEntryAdded != null)
-            {
-                OnEntryAdded(this, new EntryAddedArgs { Key = key, Value = result, RegionName = regionName });
-            }
+            OnEntryAdded?.Invoke(this, new EntryAddedArgs { Key = key, Value = result, RegionName = regionName });
 
             return result;
         }
@@ -233,9 +215,9 @@ namespace LeagueSharp.SDK.Core.Utils
         /// <param name="regionName">The name of the region in the InternalCache</param>
         /// <returns>The object stored in the InternalCache</returns>
         public override object AddOrGetExisting(
-            string key, 
-            object value, 
-            DateTimeOffset absoluteExpiration, 
+            string key,
+            object value,
+            DateTimeOffset absoluteExpiration,
             string regionName = null)
         {
             regionName = regionName ?? "Default";
@@ -248,27 +230,24 @@ namespace LeagueSharp.SDK.Core.Utils
                 return internalValue;
             }
 
-            if (OnEntryAdded != null)
-            {
-                OnEntryAdded(this, new EntryAddedArgs { Key = key, Value = value, RegionName = regionName });
-            }
+            OnEntryAdded?.Invoke(this, new EntryAddedArgs { Key = key, Value = value, RegionName = regionName });
 
             this.InternalCache[regionName].Add(key, value);
 
             DelayAction.Add(
-                (int)(absoluteExpiration - DateTime.Now).TotalMilliseconds, 
-                delegate
+                (int)(absoluteExpiration - DateTime.Now).TotalMilliseconds,
+                () =>
                     {
-                        if (!InternalCache[regionName].ContainsKey(key))
+                        if (!this.InternalCache[regionName].ContainsKey(key))
                         {
                             return;
                         }
 
-                        var cacheValue = InternalCache[regionName][key];
+                        var cacheValue = this.InternalCache[regionName][key];
 
-                        CallEntryUpdates(key, CacheEntryRemovedReason.Expired, regionName);
-                        InternalCache[regionName].Remove(key);
-                        CallEntryRemoved(key, cacheValue, CacheEntryRemovedReason.Expired, regionName);
+                        this.CallEntryUpdates(key, CacheEntryRemovedReason.Expired, regionName);
+                        this.InternalCache[regionName].Remove(key);
+                        this.CallEntryRemoved(key, cacheValue, CacheEntryRemovedReason.Expired, regionName);
                     });
 
             return value;
@@ -292,10 +271,9 @@ namespace LeagueSharp.SDK.Core.Utils
                 return new CacheItem(value.Key, internalValue, regionName);
             }
 
-            if (OnEntryAdded != null)
-            {
-                OnEntryAdded(this, new EntryAddedArgs { Key = value.Key, Value = value.Value, RegionName = regionName });
-            }
+            OnEntryAdded?.Invoke(
+                this,
+                new EntryAddedArgs { Key = value.Key, Value = value.Value, RegionName = regionName });
 
             this.InternalCache[regionName].Add(value.Key, value.Value);
 
@@ -303,19 +281,19 @@ namespace LeagueSharp.SDK.Core.Utils
             this.cacheRemovedCallbacks[value.Key + value.RegionName] = policy.RemovedCallback;
 
             DelayAction.Add(
-                (int)(policy.AbsoluteExpiration - DateTime.Now).TotalMilliseconds, 
-                delegate
+                (int)(policy.AbsoluteExpiration - DateTime.Now).TotalMilliseconds,
+                () =>
                     {
-                        if (!InternalCache[regionName].ContainsKey(value.Key))
+                        if (!this.InternalCache[regionName].ContainsKey(value.Key))
                         {
                             return;
                         }
 
-                        var cachedValue = InternalCache[regionName][value.Key];
+                        var cachedValue = this.InternalCache[regionName][value.Key];
 
-                        CallEntryUpdates(value.Key, CacheEntryRemovedReason.Expired, value.RegionName);
-                        InternalCache[regionName].Remove(value.Key);
-                        CallEntryRemoved(value.Key, cachedValue, CacheEntryRemovedReason.Expired, value.RegionName);
+                        this.CallEntryUpdates(value.Key, CacheEntryRemovedReason.Expired, value.RegionName);
+                        this.InternalCache[regionName].Remove(value.Key);
+                        this.CallEntryRemoved(value.Key, cachedValue, CacheEntryRemovedReason.Expired, value.RegionName);
                     });
 
             return new CacheItem(value.Key, value.Value, regionName);
@@ -330,9 +308,9 @@ namespace LeagueSharp.SDK.Core.Utils
         /// <param name="regionName">The name of the region in the InternalCache</param>
         /// <returns>Cached value</returns>
         public override object AddOrGetExisting(
-            string key, 
-            object value, 
-            CacheItemPolicy policy, 
+            string key,
+            object value,
+            CacheItemPolicy policy,
             string regionName = null)
         {
             regionName = regionName ?? "Default";
@@ -345,10 +323,7 @@ namespace LeagueSharp.SDK.Core.Utils
                 return internalValue;
             }
 
-            if (OnEntryAdded != null)
-            {
-                OnEntryAdded(this, new EntryAddedArgs { Key = key, Value = value, RegionName = regionName });
-            }
+            OnEntryAdded?.Invoke(this, new EntryAddedArgs { Key = key, Value = value, RegionName = regionName });
 
             this.InternalCache[regionName].Add(key, value);
 
@@ -356,19 +331,19 @@ namespace LeagueSharp.SDK.Core.Utils
             this.cacheRemovedCallbacks[key + regionName] = policy.RemovedCallback;
 
             DelayAction.Add(
-                (int)(policy.AbsoluteExpiration - DateTime.Now).TotalMilliseconds, 
-                delegate
+                (int)(policy.AbsoluteExpiration - DateTime.Now).TotalMilliseconds,
+                () =>
                     {
-                        if (!InternalCache[regionName].ContainsKey(key))
+                        if (!this.InternalCache[regionName].ContainsKey(key))
                         {
                             return;
                         }
 
-                        var cachedValue = InternalCache[regionName][key];
+                        var cachedValue = this.InternalCache[regionName][key];
 
-                        CallEntryUpdates(key, CacheEntryRemovedReason.Expired, regionName);
-                        InternalCache[regionName].Remove(key);
-                        CallEntryRemoved(key, cachedValue, CacheEntryRemovedReason.Expired, regionName);
+                        this.CallEntryUpdates(key, CacheEntryRemovedReason.Expired, regionName);
+                        this.InternalCache[regionName].Remove(key);
+                        this.CallEntryRemoved(key, cachedValue, CacheEntryRemovedReason.Expired, regionName);
                     });
 
             return value;
@@ -393,7 +368,7 @@ namespace LeagueSharp.SDK.Core.Utils
         /// <param name="regionName">The name of the region in the InternalCache</param>
         /// <returns><see cref="CacheEntryChangeMonitor" /> instance</returns>
         public override CacheEntryChangeMonitor CreateCacheEntryChangeMonitor(
-            IEnumerable<string> keys, 
+            IEnumerable<string> keys,
             string regionName = null)
         {
             throw new NotSupportedException("CacheEntryChangeMonitors are not implemented.");
@@ -499,8 +474,8 @@ namespace LeagueSharp.SDK.Core.Utils
             {
                 this.cacheRemovedCallbacks[key + regionName].Invoke(
                     new CacheEntryRemovedArguments(
-                        this, 
-                        CacheEntryRemovedReason.Removed, 
+                        this,
+                        CacheEntryRemovedReason.Removed,
                         new CacheItem(key, value, regionName)));
             }
 
@@ -526,19 +501,19 @@ namespace LeagueSharp.SDK.Core.Utils
             this.InternalCache[regionName][key] = value;
 
             DelayAction.Add(
-                (int)(absoluteExpiration - DateTime.Now).TotalMilliseconds, 
-                delegate
+                (int)(absoluteExpiration - DateTime.Now).TotalMilliseconds,
+                () =>
                     {
-                        if (!InternalCache[regionName].ContainsKey(key))
+                        if (!this.InternalCache[regionName].ContainsKey(key))
                         {
                             return;
                         }
 
-                        var cachedValue = InternalCache[regionName][key];
+                        var cachedValue = this.InternalCache[regionName][key];
 
-                        CallEntryUpdates(key, CacheEntryRemovedReason.Expired, regionName);
-                        InternalCache[regionName].Remove(key);
-                        CallEntryRemoved(key, cachedValue, CacheEntryRemovedReason.Expired, regionName);
+                        this.CallEntryUpdates(key, CacheEntryRemovedReason.Expired, regionName);
+                        this.InternalCache[regionName].Remove(key);
+                        this.CallEntryRemoved(key, cachedValue, CacheEntryRemovedReason.Expired, regionName);
                     });
         }
 
@@ -554,26 +529,26 @@ namespace LeagueSharp.SDK.Core.Utils
             if (OnValueChanged != null && this.InternalCache[regionName].ContainsKey(item.Key))
             {
                 OnValueChanged(
-                    this, 
+                    this,
                     new ValueChangedArgs(item.Key, this.InternalCache[regionName][item.Key], item.Value, regionName));
             }
 
             this.InternalCache[regionName][item.Key] = item.Value;
 
             DelayAction.Add(
-                (int)(policy.AbsoluteExpiration - DateTime.Now).TotalMilliseconds, 
-                delegate
+                (int)(policy.AbsoluteExpiration - DateTime.Now).TotalMilliseconds,
+                () =>
                     {
-                        if (!InternalCache[regionName].ContainsKey(item.Key))
+                        if (!this.InternalCache[regionName].ContainsKey(item.Key))
                         {
                             return;
                         }
 
-                        var cachedValue = InternalCache[regionName][item.Key];
+                        var cachedValue = this.InternalCache[regionName][item.Key];
 
-                        CallEntryUpdates(item.Key, CacheEntryRemovedReason.Expired, item.RegionName);
-                        InternalCache[regionName].Remove(item.Key);
-                        CallEntryRemoved(item.Key, cachedValue, CacheEntryRemovedReason.Expired, item.RegionName);
+                        this.CallEntryUpdates(item.Key, CacheEntryRemovedReason.Expired, item.RegionName);
+                        this.InternalCache[regionName].Remove(item.Key);
+                        this.CallEntryRemoved(item.Key, cachedValue, CacheEntryRemovedReason.Expired, item.RegionName);
                     });
         }
 
@@ -596,19 +571,19 @@ namespace LeagueSharp.SDK.Core.Utils
             this.InternalCache[regionName][key] = value;
 
             DelayAction.Add(
-                (int)(policy.AbsoluteExpiration - DateTime.Now).TotalMilliseconds, 
-                delegate
+                (int)(policy.AbsoluteExpiration - DateTime.Now).TotalMilliseconds,
+                () =>
                     {
-                        if (!InternalCache[regionName].ContainsKey(key))
+                        if (!this.InternalCache[regionName].ContainsKey(key))
                         {
                             return;
                         }
 
-                        var cachedValue = InternalCache[regionName][key];
+                        var cachedValue = this.InternalCache[regionName][key];
 
-                        CallEntryUpdates(key, CacheEntryRemovedReason.Expired, regionName);
-                        InternalCache[regionName].Remove(key);
-                        CallEntryRemoved(key, cachedValue, CacheEntryRemovedReason.Expired, regionName);
+                        this.CallEntryUpdates(key, CacheEntryRemovedReason.Expired, regionName);
+                        this.InternalCache[regionName].Remove(key);
+                        this.CallEntryRemoved(key, cachedValue, CacheEntryRemovedReason.Expired, regionName);
                     });
         }
 
@@ -620,10 +595,7 @@ namespace LeagueSharp.SDK.Core.Utils
         /// <param name="regionName">The name of the region in the InternalCache</param>
         /// <returns>If the InternalCache contains the value</returns>
         public bool TryGetValue(string key, out object value, string regionName = null)
-        {
-            regionName = regionName ?? "Default";
-            return this.InternalCache[regionName].TryGetValue(key, out value);
-        }
+            => this.InternalCache[regionName ?? "Default"].TryGetValue(key, out value);
 
         #endregion
 
@@ -634,9 +606,7 @@ namespace LeagueSharp.SDK.Core.Utils
         /// </summary>
         /// <returns>Enumerator of InternalCache</returns>
         protected override IEnumerator<KeyValuePair<string, object>> GetEnumerator()
-        {
-            return this.InternalCache["Default"].GetEnumerator();
-        }
+            => this.InternalCache["Default"].GetEnumerator();
 
         /// <summary>
         ///     Calls the <see cref="CacheEntryRemovedCallback" /> for the selected key.
@@ -646,9 +616,9 @@ namespace LeagueSharp.SDK.Core.Utils
         /// <param name="reason">Reason why the value was removed</param>
         /// <param name="regionName">The name of the region in the InternalCache</param>
         private void CallEntryRemoved(
-            string key, 
-            object value, 
-            CacheEntryRemovedReason reason = CacheEntryRemovedReason.Removed, 
+            string key,
+            object value,
+            CacheEntryRemovedReason reason = CacheEntryRemovedReason.Removed,
             string regionName = null)
         {
             CacheEntryRemovedCallback callback;
@@ -666,8 +636,8 @@ namespace LeagueSharp.SDK.Core.Utils
             catch (Exception e)
             {
                 Logging.Write()(
-                    LogLevel.Error, 
-                    "An exception occured while invoking the CacheEntryRemovedCallback: {0}", 
+                    LogLevel.Error,
+                    "An exception occured while invoking the CacheEntryRemovedCallback: {0}",
                     e);
             }
         }
@@ -679,8 +649,8 @@ namespace LeagueSharp.SDK.Core.Utils
         /// <param name="reason">Reason why the value was removed</param>
         /// <param name="regionName">The name of the region in the InternalCache</param>
         private void CallEntryUpdates(
-            string key, 
-            CacheEntryRemovedReason reason = CacheEntryRemovedReason.Removed, 
+            string key,
+            CacheEntryRemovedReason reason = CacheEntryRemovedReason.Removed,
             string regionName = null)
         {
             CacheEntryUpdateCallback callback;

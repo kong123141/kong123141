@@ -1,39 +1,32 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Notification.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="Notification.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   The notification.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core.UI.INotifications
 {
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-
-    using LeagueSharp.SDK.Core.Enumerations;
-    using LeagueSharp.SDK.Core.Extensions.SharpDX;
-    using LeagueSharp.SDK.Core.Math;
-    using LeagueSharp.SDK.Core.Utils;
-    using LeagueSharp.SDK.Properties;
-
+    using Core.Utils;
+    using Enumerations;
+    using Extensions.SharpDX;
+    using Math;
+    using Properties;
     using SharpDX;
     using SharpDX.Direct3D9;
-
     using Color = SharpDX.Color;
     using Font = SharpDX.Direct3D9.Font;
     using Rectangle = SharpDX.Rectangle;
@@ -282,13 +275,7 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
         /// <summary>
         ///     Gets the footer height.
         /// </summary>
-        public float FooterHeight
-        {
-            get
-            {
-                return 20f;
-            }
-        }
+        public float FooterHeight => 20f;
 
         /// <summary>
         ///     Gets or sets the footer text color.
@@ -411,13 +398,7 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
         /// <summary>
         ///     Gets the width.
         /// </summary>
-        public float Width
-        {
-            get
-            {
-                return Line.Width;
-            }
-        }
+        public float Width => Line.Width;
 
         #endregion
 
@@ -446,13 +427,7 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
         /// <summary>
         ///     Gets the hide icon bitmap.
         /// </summary>
-        private static Bitmap HideBitmap
-        {
-            get
-            {
-                return Resources.notifications_arrow;
-            }
-        }
+        private static Bitmap HideBitmap => Resources.notifications_arrow;
 
         #endregion
 
@@ -472,7 +447,7 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
         /// </returns>
         public List<string> FormatText(string value, bool htmlSupport)
         {
-            var lines = BodyFont.MeasureText(Sprite, value, 0).Width / MaximumBodyLineLength + 1;
+            var lines = (BodyFont.MeasureText(Sprite, value, 0).Width / MaximumBodyLineLength) + 1;
             var lastIndex = 0;
             var format = false;
             var linesList = new List<string>();
@@ -602,8 +577,8 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
                 Line.Draw(
                     new[]
                         {
-                            new Vector2(basePosition.X - this.Width / 2f, basePosition.Y), 
-                            new Vector2(basePosition.X - this.Width / 2f, basePosition.Y + this.HeaderHeight)
+                            new Vector2(basePosition.X - (this.Width / 2f), basePosition.Y), 
+                            new Vector2(basePosition.X - (this.Width / 2f), basePosition.Y + this.HeaderHeight)
                         }, 
                     new ColorBGRA(0, 0, 0, 255 / 2));
 
@@ -612,9 +587,9 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
                     Line.Draw(
                         new[]
                             {
-                                new Vector2(basePosition.X - this.Width / 2f, basePosition.Y + this.HeaderHeight), 
+                                new Vector2(basePosition.X - (this.Width / 2f), basePosition.Y + this.HeaderHeight), 
                                 new Vector2(
-                                    basePosition.X - this.Width / 2f, 
+                                    basePosition.X - (this.Width / 2f), 
                                     basePosition.Y + this.HeaderHeight + this.DrawBodyHeight)
                             }, 
                         new ColorBGRA(0, 0, 0, (byte)(255 / 1.5f)));
@@ -622,10 +597,10 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
                         new[]
                             {
                                 new Vector2(
-                                    basePosition.X - this.Width / 2f, 
+                                    basePosition.X - (this.Width / 2f), 
                                     basePosition.Y + this.HeaderHeight + this.DrawBodyHeight), 
                                 new Vector2(
-                                    basePosition.X - this.Width / 2f, 
+                                    basePosition.X - (this.Width / 2f), 
                                     basePosition.Y + this.HeaderHeight + this.DrawFooterHeight + this.DrawBodyHeight)
                             }, 
                         new ColorBGRA(0, 0, 0, (byte)(255 / 1.25f)));
@@ -792,7 +767,7 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
         {
             const int BaseLeftPosition = 144;
 
-            var x = basePosition.X - this.Width / 2f - BaseLeftPosition;
+            var x = basePosition.X - (this.Width / 2f) - BaseLeftPosition;
             var y = basePosition.Y + this.HeaderHeight + 2f;
 
             return new Rectangle((int)x, (int)y, (int)this.Width, (int)this.DrawBodyHeight);
@@ -811,7 +786,7 @@ namespace LeagueSharp.SDK.Core.UI.INotifications
         {
             const int BaseLeftPosition = 140;
 
-            var x = basePosition.X - this.Width / 2f - BaseLeftPosition;
+            var x = basePosition.X - (this.Width / 2f) - BaseLeftPosition;
             var y = basePosition.Y
                     + new Rectangle(0, 0, 0, (int)this.HeaderHeight).GetCenteredText(
                         Sprite, 

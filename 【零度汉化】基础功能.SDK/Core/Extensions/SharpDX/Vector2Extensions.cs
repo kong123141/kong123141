@@ -1,24 +1,20 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Vector2Extensions.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="Vector2Extensions.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   SharpDX/Vector2 Extensions.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core.Extensions.SharpDX
 {
     using System;
@@ -58,10 +54,12 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
             {
                 theta = theta + 360;
             }
+
             if (theta > 180)
             {
                 theta = 360 - theta;
             }
+
             return theta;
         }
 
@@ -85,9 +83,9 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <param name="radius2">Circle 2 Radius</param>
         /// <returns>Array of <see cref="Vector2" /> that contains the intersection points.</returns>
         public static Vector2[] CircleCircleIntersection(
-            this Vector2 center1, 
-            Vector2 center2, 
-            float radius1, 
+            this Vector2 center1,
+            Vector2 center2,
+            float radius1,
             float radius2)
         {
             var d = center1.Distance(center2);
@@ -97,12 +95,12 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
                 return new Vector2[] { };
             }
 
-            var a = (radius1 * radius1 - radius2 * radius2 + d * d) / (2 * d);
-            var h = (float)Math.Sqrt(radius1 * radius1 - a * a);
+            var a = ((radius1 * radius1) - (radius2 * radius2) + (d * d)) / (2 * d);
+            var h = (float)Math.Sqrt((radius1 * radius1) - (a * a));
             var direction = (center2 - center1).Normalized();
-            var pa = center1 + a * direction;
-            var s1 = pa + h * direction.Perpendicular();
-            var s2 = pa - h * direction.Perpendicular();
+            var pa = center1 + (a * direction);
+            var s1 = pa + (h * direction.Perpendicular());
+            var s2 = pa - (h * direction.Perpendicular());
             return new[] { s1, s2 };
         }
 
@@ -192,7 +190,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// </returns>
         public static float CrossProduct(this Vector2 self, Vector2 other)
         {
-            return other.Y * self.X - other.X * self.Y;
+            return (other.Y * self.X) - (other.X * self.Y);
         }
 
         /// <summary>
@@ -237,9 +235,9 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <param name="onlyIfOnSegment">Only if Segment</param>
         /// <returns>The distance between the point and the segment.</returns>
         public static float Distance(
-            this Vector2 point, 
-            Vector2 segmentStart, 
-            Vector2 segmentEnd, 
+            this Vector2 point,
+            Vector2 segmentStart,
+            Vector2 segmentEnd,
             bool onlyIfOnSegment = false)
         {
             var objects = point.ProjectOn(segmentStart, segmentEnd);
@@ -291,9 +289,9 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <param name="onlyIfOnSegment">Only if Segment</param>
         /// <returns>The squared distance between the point and the segment.</returns>
         public static float DistanceSquared(
-            this Vector2 point, 
-            Vector2 segmentStart, 
-            Vector2 segmentEnd, 
+            this Vector2 point,
+            Vector2 segmentStart,
+            Vector2 segmentEnd,
             bool onlyIfOnSegment = false)
         {
             var objects = point.ProjectOn(segmentStart, segmentEnd);
@@ -312,7 +310,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Extended Vector2</returns>
         public static Vector2 Extend(this Vector2 vector2, Vector2 toVector2, float distance)
         {
-            return vector2 + distance * (toVector2 - vector2).Normalized();
+            return vector2 + (distance * (toVector2 - vector2).Normalized());
         }
 
         /// <summary>
@@ -324,7 +322,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Extended Vector2</returns>
         public static Vector2 Extend(this Vector2 vector2, Vector3 toVector3, float distance)
         {
-            return vector2 + distance * (toVector3.ToVector2() - vector2).Normalized();
+            return vector2 + (distance * (toVector3.ToVector2() - vector2).Normalized());
         }
 
         /// <summary>
@@ -336,7 +334,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Extended Vector2</returns>
         public static Vector2 Extend(this Vector2 vector2, Vector4 toVector4, float distance)
         {
-            return vector2 + distance * (toVector4.ToVector2() - vector2).Normalized();
+            return vector2 + (distance * (toVector4.ToVector2() - vector2).Normalized());
         }
 
         /// <summary>
@@ -365,9 +363,9 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <param name="lineSegment2End">Line Segment 2 (End)</param>
         /// <returns>The intersection result, <seealso cref="IntersectionResult" /></returns>
         public static IntersectionResult Intersection(
-            this Vector2 lineSegment1Start, 
-            Vector2 lineSegment1End, 
-            Vector2 lineSegment2Start, 
+            this Vector2 lineSegment1Start,
+            Vector2 lineSegment1End,
+            Vector2 lineSegment2Start,
             Vector2 lineSegment2End)
         {
             double deltaACy = lineSegment1Start.Y - lineSegment2Start.Y;
@@ -377,8 +375,8 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
             double deltaBAx = lineSegment1End.X - lineSegment1Start.X;
             double deltaBAy = lineSegment1End.Y - lineSegment1Start.Y;
 
-            var denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
-            var numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
+            var denominator = (deltaBAx * deltaDCy) - (deltaBAy * deltaDCx);
+            var numerator = (deltaACy * deltaDCx) - (deltaACx * deltaDCy);
 
             if (Math.Abs(denominator) < float.Epsilon)
             {
@@ -396,28 +394,30 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
                         return new IntersectionResult(true, lineSegment2Start);
                     }
 
-                    return new IntersectionResult();
+                    return default(IntersectionResult);
                 }
 
                 // parallel
-                return new IntersectionResult();
+                return default(IntersectionResult);
             }
 
             var r = numerator / denominator;
             if (r < 0 || r > 1)
             {
-                return new IntersectionResult();
+                return default(IntersectionResult);
             }
 
-            var s = (deltaACy * deltaBAx - deltaACx * deltaBAy) / denominator;
+            var s = ((deltaACy * deltaBAx) - (deltaACx * deltaBAy)) / denominator;
             if (s < 0 || s > 1)
             {
-                return new IntersectionResult();
+                return default(IntersectionResult);
             }
 
             return new IntersectionResult(
-                true, 
-                new Vector2((float)(lineSegment1Start.X + r * deltaBAx), (float)(lineSegment1Start.Y + r * deltaBAy)));
+                true,
+                new Vector2(
+                    (float)(lineSegment1Start.X + (r * deltaBAx)),
+                    (float)(lineSegment1Start.Y + (r * deltaBAy))));
         }
 
         /// <summary>
@@ -613,9 +613,9 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
             var ay = segmentStart.Y;
             var bx = segmentEnd.X;
             var by = segmentEnd.Y;
-            var rL = ((cx - ax) * (bx - ax) + (cy - ay) * (by - ay))
+            var rL = (((cx - ax) * (bx - ax)) + ((cy - ay) * (by - ay)))
                      / ((float)Math.Pow(bx - ax, 2) + (float)Math.Pow(by - ay, 2));
-            var pointLine = new Vector2(ax + rL * (bx - ax), ay + rL * (by - ay));
+            var pointLine = new Vector2(ax + (rL * (bx - ax)), ay + (rL * (by - ay)));
             float rS;
             if (rL < 0)
             {
@@ -631,7 +631,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
             }
 
             var isOnSegment = rS.CompareTo(rL) == 0;
-            var pointSegment = isOnSegment ? pointLine : new Vector2(ax + rS * (bx - ax), ay + rS * (@by - ay));
+            var pointSegment = isOnSegment ? pointLine : new Vector2(ax + (rS * (bx - ax)), ay + (rS * (@by - ay)));
             return new ProjectionInfo(isOnSegment, pointSegment, pointLine);
         }
 
@@ -646,7 +646,9 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
             var cos = Math.Cos(angle);
             var sin = Math.Sin(angle);
 
-            return new Vector2((float)(vector2.X * cos - vector2.Y * sin), (float)(vector2.Y * cos + vector2.X * sin));
+            return new Vector2(
+                (float)((vector2.X * cos) - (vector2.Y * sin)),
+                (float)((vector2.Y * cos) + (vector2.X * sin)));
         }
 
         /// <summary>
@@ -725,17 +727,17 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         ///     The <see cref="MovementCollisionInfo" />.
         /// </returns>
         public static MovementCollisionInfo VectorMovementCollision(
-            this Vector2 pointStartA, 
-            Vector2 pointEndA, 
-            float pointVelocityA, 
-            Vector2 pointB, 
-            float pointVelocityB, 
+            this Vector2 pointStartA,
+            Vector2 pointEndA,
+            float pointVelocityA,
+            Vector2 pointB,
+            float pointVelocityB,
             float delay = 0f)
         {
             return new[] { pointStartA, pointEndA }.VectorMovementCollision(
-                pointVelocityA, 
-                pointB, 
-                pointVelocityB, 
+                pointVelocityA,
+                pointB,
+                pointVelocityB,
                 delay);
         }
 
@@ -761,31 +763,31 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         ///     The <see cref="MovementCollisionInfo" />.
         /// </returns>
         public static MovementCollisionInfo VectorMovementCollision(
-            this Vector2[] pointA, 
-            float pointVelocityA, 
-            Vector2 pointB, 
-            float pointVelocityB, 
+            this Vector2[] pointA,
+            float pointVelocityA,
+            Vector2 pointB,
+            float pointVelocityB,
             float delay = 0f)
         {
             if (pointA.Length < 1)
             {
-                return new MovementCollisionInfo();
+                return default(MovementCollisionInfo);
             }
 
-            float sP1X = pointA[0].X, 
-                  sP1Y = pointA[0].Y, 
-                  eP1X = pointA[1].X, 
-                  eP1Y = pointA[1].Y, 
-                  sP2X = pointB.X, 
+            float sP1X = pointA[0].X,
+                  sP1Y = pointA[0].Y,
+                  eP1X = pointA[1].X,
+                  eP1Y = pointA[1].Y,
+                  sP2X = pointB.X,
                   sP2Y = pointB.Y;
 
             float d = eP1X - sP1X, e = eP1Y - sP1Y;
-            float dist = (float)Math.Sqrt(d * d + e * e), t1 = float.NaN;
-            float s = Math.Abs(dist) > float.Epsilon ? pointVelocityA * d / dist : 0, 
+            float dist = (float)Math.Sqrt((d * d) + (e * e)), t1 = float.NaN;
+            float s = Math.Abs(dist) > float.Epsilon ? pointVelocityA * d / dist : 0,
                   k = (Math.Abs(dist) > float.Epsilon) ? pointVelocityA * e / dist : 0f;
 
             float r = sP2X - sP1X, j = sP2Y - sP1Y;
-            var c = r * r + j * j;
+            var c = (r * r) + (j * j);
 
             if (dist > 0f)
             {
@@ -800,7 +802,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
                 }
                 else
                 {
-                    float a = s * s + k * k - pointVelocityB * pointVelocityB, b = -r * s - j * k;
+                    float a = (s * s) + (k * k) - (pointVelocityB * pointVelocityB), b = (-r * s) - (j * k);
 
                     if (Math.Abs(a) < float.Epsilon)
                     {
@@ -816,7 +818,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
                     }
                     else
                     {
-                        var sqr = b * b - a * c;
+                        var sqr = (b * b) - (a * c);
                         if (sqr >= 0)
                         {
                             var nom = (float)Math.Sqrt(sqr);
@@ -846,8 +848,8 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
             }
 
             return new MovementCollisionInfo(
-                t1, 
-                (!float.IsNaN(t1)) ? new Vector2(sP1X + s * t1, sP1Y + k * t1) : new Vector2());
+                t1,
+                (!float.IsNaN(t1)) ? new Vector2(sP1X + (s * t1), sP1Y + (k * t1)) : default(Vector2));
         }
 
         #endregion
@@ -950,13 +952,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>
         ///     The <see cref="object" />.
         /// </returns>
-        public object this[int i]
-        {
-            get
-            {
-                return i == 0 ? this.CollisionTime : (object)this.CollisionPosition;
-            }
-        }
+        public object this[int i] => i == 0 ? this.CollisionTime : (object)this.CollisionPosition;
 
         #endregion
     }
@@ -992,7 +988,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <param name="point">
         ///     Intersection Point
         /// </param>
-        public IntersectionResult(bool intersects = false, Vector2 point = new Vector2())
+        public IntersectionResult(bool intersects = false, Vector2 point = default(Vector2))
         {
             this.Intersects = intersects;
             this.Point = point;

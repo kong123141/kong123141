@@ -1,36 +1,29 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AMenuComponent.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="AMenuComponent.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   Abstract build of a menu component.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace LeagueSharp.SDK.Core.UI.IMenu.Abstracts
 {
     using System;
     using System.Dynamic;
     using System.Linq;
-
-    using LeagueSharp.SDK.Core.UI.IMenu.Skins;
-    using LeagueSharp.SDK.Core.UI.IMenu.Values;
-    using LeagueSharp.SDK.Core.Utils;
-
+    using Core.Utils;
     using SharpDX;
+    using Skins;
+    using Values;
 
     /// <summary>
     ///     Abstract build of a menu component.
@@ -128,9 +121,8 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Abstracts
             {
                 if (this.resetWidth)
                 {
-                    this.menuWidthCached = this.Parent != null
-                                               ? this.Parent.Components.Max(comp => comp.Value.Width)
-                                               : MenuManager.Instance.Menus.Max(menu => menu.Width);
+                    this.menuWidthCached = this.Parent?.Components.Max(comp => comp.Value.Width)
+                                           ?? MenuManager.Instance.Menus.Max(menu => menu.Width);
                     this.resetWidth = false;
                 }
 

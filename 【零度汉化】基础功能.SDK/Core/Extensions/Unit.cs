@@ -1,34 +1,28 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Unit.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="Unit.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   Provides helpful extensions to Units.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core.Extensions
 {
     using System;
     using System.Linq;
-
+    using Enumerations;
     using global::SharpDX;
-
-    using LeagueSharp.SDK.Core.Enumerations;
-    using LeagueSharp.SDK.Core.Extensions.SharpDX;
-    using LeagueSharp.SDK.Core.Wrappers;
+    using SharpDX;
+    using Wrappers;
 
     /// <summary>
     ///     Provides helpful extensions to Units.
@@ -379,7 +373,7 @@ namespace LeagueSharp.SDK.Core.Extensions
             this AttackableUnit unit, 
             float range = float.MaxValue, 
             bool checkTeam = true, 
-            Vector3 from = new Vector3())
+            Vector3 from = default(Vector3))
         {
             if (unit == null || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable
                 || unit.IsInvulnerable)
@@ -393,7 +387,7 @@ namespace LeagueSharp.SDK.Core.Extensions
             }
 
             var @base = unit as Obj_AI_Base;
-            var unitPosition = @base != null ? @base.ServerPosition : unit.Position;
+            var unitPosition = @base?.ServerPosition ?? unit.Position;
 
             return @from.IsValid()
                        ? @from.DistanceSquared(unitPosition) < range * range

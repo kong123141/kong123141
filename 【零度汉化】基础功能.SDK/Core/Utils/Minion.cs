@@ -1,34 +1,30 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Minion.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="Minion.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   The minion utils, contains a set of functions to quickly operate around minions.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core.Utils
 {
     using System.Collections.Generic;
     using System.Linq;
 
-    using LeagueSharp.SDK.Core.Enumerations;
-    using LeagueSharp.SDK.Core.Extensions;
-    using LeagueSharp.SDK.Core.Extensions.SharpDX;
-    using LeagueSharp.SDK.Core.Math;
-    using LeagueSharp.SDK.Core.Math.Prediction;
+    using Enumerations;
+    using Extensions;
+    using Extensions.SharpDX;
+    using Math;
+    using Math.Prediction;
 
     using SharpDX;
 
@@ -92,7 +88,7 @@ namespace LeagueSharp.SDK.Core.Utils
             float range, 
             int useMecMax = 9)
         {
-            var result = new Vector2();
+            var result = default(Vector2);
             var minionCount = 0;
             var startPos = ObjectManager.Player.ServerPosition.ToVector2();
 
@@ -158,7 +154,7 @@ namespace LeagueSharp.SDK.Core.Utils
         /// </returns>
         public static FarmLocation GetBestLineFarmLocation(List<Vector2> minions, float width, float range)
         {
-            var result = new Vector2();
+            var result = default(Vector2);
             var minionCount = 0;
             var startPos = ObjectManager.Player.ServerPosition.ToVector2();
 
@@ -181,7 +177,7 @@ namespace LeagueSharp.SDK.Core.Utils
             {
                 if (pos.DistanceSquared(startPos) <= range * range)
                 {
-                    var endPos = startPos + range * (pos - startPos).Normalized();
+                    var endPos = startPos + (range * (pos - startPos).Normalized());
 
                     var count = minions.Count(pos2 => pos2.DistanceSquared(startPos, endPos, true) <= width * width);
 
@@ -238,7 +234,7 @@ namespace LeagueSharp.SDK.Core.Utils
             float range, 
             bool collision, 
             SkillshotType stype, 
-            Vector3 rangeCheckFrom = new Vector3())
+            Vector3 rangeCheckFrom = default(Vector3))
         {
             from = from.ToVector2().IsValid() ? from : ObjectManager.Player.ServerPosition;
 
@@ -308,7 +304,7 @@ namespace LeagueSharp.SDK.Core.Utils
     }
 
     /// <summary>
-    ///     TODO The farm location.
+    ///     The farm location.
     /// </summary>
     public struct FarmLocation
     {

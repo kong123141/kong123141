@@ -1,36 +1,30 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MenuKeyBind.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="MenuKeyBind.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   Menu KeyBind.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core.UI.IMenu.Values
 {
     using System;
     using System.Runtime.Serialization;
     using System.Security.Permissions;
     using System.Windows.Forms;
-
-    using LeagueSharp.SDK.Core.Enumerations;
-    using LeagueSharp.SDK.Core.UI.IMenu.Skins;
-    using LeagueSharp.SDK.Core.Utils;
-
-    using MenuItem = LeagueSharp.SDK.Core.UI.IMenu.MenuItem;
+    using Core.Utils;
+    using Enumerations;
+    using Skins;
+    using MenuItem = MenuItem;
 
     /// <summary>
     ///     Menu KeyBind.
@@ -83,7 +77,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Values
             this.Key = key;
             this.Type = type;
             this.original = key;
-            Game.OnWndProc += Game_OnWndProc;
+            Game.OnWndProc += this.Game_OnWndProc;
         }
 
         private void Game_OnWndProc(WndEventArgs args)
@@ -100,6 +94,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Values
         {
             this.Key = (Keys)info.GetValue("key", typeof(Keys));
             this.original = (Keys)info.GetValue("original", typeof(Keys));
+            this.Active = (bool)info.GetValue("active", typeof(bool));
         }
 
         #endregion
@@ -159,13 +154,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Values
         /// <summary>
         ///     KeyBind Item Width.
         /// </summary>
-        public override int Width
-        {
-            get
-            {
-                return this.Handler.Width();
-            }
-        }
+        public override int Width => this.Handler.Width();
 
         #endregion
 
@@ -190,6 +179,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Values
             {
                 this.Key = keybind.Key;
             }
+            this.Active = keybind.active;
         }
 
         /// <summary>
@@ -198,6 +188,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Values
         public override void RestoreDefault()
         {
             this.Key = this.original;
+            this.Active = false;
         }
 
         /// <summary>
@@ -208,7 +199,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Values
         /// </param>
         public override void WndProc(WindowsKeys args)
         {
-            //do nothing, we use the fast OnWndProc for keybinds
+            // do nothing, we use the fast OnWndProc for keybinds
         }
 
         #endregion
@@ -230,11 +221,12 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Values
         {
             if (info == null)
             {
-                throw new ArgumentNullException("info");
+                throw new ArgumentNullException(nameof(info));
             }
 
             info.AddValue("key", this.Key, typeof(Keys));
             info.AddValue("original", this.original, typeof(Keys));
+            info.AddValue("active", this.active, typeof(bool));
         }
 
         #endregion
@@ -270,6 +262,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Values
         {
             info.AddValue("key", this.Key, typeof(Keys));
             info.AddValue("original", this.original, typeof(Keys));
+            info.AddValue("active", this.active, typeof(bool));
         }
 
         #endregion

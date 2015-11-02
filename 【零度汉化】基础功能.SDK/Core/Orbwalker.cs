@@ -1,24 +1,20 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Orbwalker.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
-//   
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//   
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//   
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+﻿// <copyright file="Orbwalker.cs" company="LeagueSharp">
+//    Copyright (c) 2015 LeagueSharp.
+// 
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+// 
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+// 
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
-// <summary>
-//   The <c>orbwalker</c> system.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+
 namespace LeagueSharp.SDK.Core
 {
     using System;
@@ -26,19 +22,17 @@ namespace LeagueSharp.SDK.Core
     using System.Linq;
     using System.Reflection;
     using System.Windows.Forms;
-
-    using LeagueSharp.SDK.Core.Enumerations;
-    using LeagueSharp.SDK.Core.Extensions;
-    using LeagueSharp.SDK.Core.Extensions.SharpDX;
-    using LeagueSharp.SDK.Core.Math.Prediction;
-    using LeagueSharp.SDK.Core.UI.IMenu.Values;
-    using LeagueSharp.SDK.Core.Utils;
-    using LeagueSharp.SDK.Core.Wrappers;
-
+    using Enumerations;
+    using Extensions;
+    using Extensions.SharpDX;
+    using Math.Prediction;
     using SharpDX;
-
+    using UI.IMenu.Values;
+    using Utils;
+    using Wrappers;
+    using Wrappers.Damages;
     using Color = System.Drawing.Color;
-    using Menu = LeagueSharp.SDK.Core.UI.IMenu.Menu;
+    using Menu = UI.IMenu.Menu;
 
     /// <summary>
     ///     The <c>orbwalker</c> system.
@@ -56,7 +50,14 @@ namespace LeagueSharp.SDK.Core
         /// <summary>
         ///     The <c>orbwalker</c> menu.
         /// </summary>
-        private static readonly Menu Menu = new Menu("orbwalker", "走砍设置");
+        private static readonly Menu Menu = new Menu("orbwalker", "Orbwalker");
+
+        private static readonly string[] SpecialMinions =
+            {
+                "zyrathornplant", "zyragraspingplant", "heimertyellow",
+                "heimertblue", "malzaharvoidling", "yorickdecayedghoul",
+                "yorickravenousghoul", "yorickspectralghoul", "shacobox"
+            };
 
         /// <summary>
         ///     Value indicating whether the <see cref="Orbwalker" /> is enabled.
@@ -101,13 +102,9 @@ namespace LeagueSharp.SDK.Core
         ///     Gets a value indicating whether can attack.
         /// </summary>
         public static bool CanAttack
-        {
-            get
-            {
-                return Variables.TickCount + Game.Ping / 2 + 25
-                       >= LastAutoAttackTick + GameObjects.Player.AttackDelay * 1000 && Attack;
-            }
-        }
+            =>
+                Variables.TickCount + (Game.Ping / 2) + 25
+                >= LastAutoAttackTick + (GameObjects.Player.AttackDelay * 1000) && Attack;
 
         /// <summary>
         ///     Gets a value indicating whether can move.
@@ -127,8 +124,8 @@ namespace LeagueSharp.SDK.Core
                 }
 
                 return !GameObjects.Player.CanCancelAutoAttack()
-                       || (Variables.TickCount + Game.Ping / 2
-                           >= LastAutoAttackTick + GameObjects.Player.AttackCastDelay * 1000
+                       || (Variables.TickCount + (Game.Ping / 2)
+                           >= LastAutoAttackTick + (GameObjects.Player.AttackCastDelay * 1000)
                            + Menu["advanced"]["miscExtraWindup"].GetValue<MenuSlider>().Value);
             }
         }
@@ -244,7 +241,7 @@ namespace LeagueSharp.SDK.Core
                         InvokeAction(
                             new OrbwalkerActionArgs
                                 {
-                                    Position = minion.Position, Target = minion, Process = true, 
+                                    Position = minion.Position, Target = minion, Process = true,
                                     Type = OrbwalkerType.NonKillableMinion
                                 });
                     }
@@ -295,6 +292,17 @@ namespace LeagueSharp.SDK.Core
                         <= GameObjects.Player.GetAutoAttackDamage(m, true));
                 if (!shouldWait)
                 {
+                    // H-28G, Sumon Voidling, Jack In The Box, (Clyde, Inky, Blinky), Plant
+                    foreach (var specialMinion in
+                        GameObjects.EnemyMinions.Where(
+                            m =>
+                            m.IsValidTarget(m.GetRealAutoAttackRange())
+                            && SpecialMinions.Any(s => s.Equals(m.CharData.BaseSkinName))))
+                    {
+                        return specialMinion;
+                    }
+
+                    // Jungle mob.
                     var mob =
                         (GameObjects.JungleLegendary.FirstOrDefault(j => j.IsValidTarget(j.GetRealAutoAttackRange()))
                          ?? GameObjects.JungleSmall.FirstOrDefault(
@@ -308,11 +316,21 @@ namespace LeagueSharp.SDK.Core
                         return mob;
                     }
 
+                    // Sentinel
+                    foreach (var sentinel in
+                        GameObjects.EnemyMinions.Where(
+                            m =>
+                            m.IsValidTarget(m.GetRealAutoAttackRange()) && m.CharData.BaseSkinName == "kalistaspawn"))
+                    {
+                        return sentinel;
+                    }
+
+                    // Last Minion
                     if (LastMinion.IsValidTarget(LastMinion.GetRealAutoAttackRange()))
                     {
                         var predHealth = Health.GetPrediction(
-                            LastMinion, 
-                            (int)((GameObjects.Player.AttackDelay * 1000) * 2f), 
+                            LastMinion,
+                            (int)((GameObjects.Player.AttackDelay * 1000) * 2f),
                             100);
                         if (predHealth >= 2 * GameObjects.Player.GetAutoAttackDamage(LastMinion, true)
                             || System.Math.Abs(predHealth - LastMinion.Health) < float.Epsilon)
@@ -321,6 +339,7 @@ namespace LeagueSharp.SDK.Core
                         }
                     }
 
+                    // Minion
                     var minion = (from m in
                                       GameObjects.EnemyMinions.Where(m => m.IsValidTarget(m.GetRealAutoAttackRange()))
                                   let predictedHealth =
@@ -334,7 +353,11 @@ namespace LeagueSharp.SDK.Core
                         return LastMinion = minion;
                     }
 
-                    // TODO: Add special minions (zyra plants, donger turrets, etc).
+                    // Elise Spiderlings
+                    return
+                        GameObjects.EnemyMinions.FirstOrDefault(
+                            m =>
+                            m.IsValidTarget(m.GetRealAutoAttackRange()) && m.CharData.BaseSkinName == "elisespiderling");
                 }
             }
 
@@ -371,7 +394,7 @@ namespace LeagueSharp.SDK.Core
                     var randomDistance = new Random(Variables.TickCount).Next(0, 50);
                     position = menuItem.Value - randomDistance <= GameObjects.Player.BoundingRadius
                                    ? GameObjects.Player.Position.Extend(
-                                       position, 
+                                       position,
                                        GameObjects.Player.BoundingRadius + randomDistance)
                                    : GameObjects.Player.Position.Extend(position, menuItem.Value - randomDistance);
                 }
@@ -383,15 +406,13 @@ namespace LeagueSharp.SDK.Core
                     var radius = GameObjects.Player.Distance(Game.CursorPos) < 360
                                      ? 0F
                                      : GameObjects.Player.BoundingRadius / 2f;
-                    var x = (float)(position.X + radius * System.Math.Cos(angle));
-                    var y = (float)(position.Y + radius * System.Math.Sin(angle));
+                    var x = (float)(position.X + (radius * System.Math.Cos(angle)));
+                    var y = (float)(position.Y + (radius * System.Math.Sin(angle)));
                     position = new Vector3(x, y, NavMesh.GetHeightForPosition(x, y));
                 }
 
                 var eventArgs = new OrbwalkerActionArgs
-                                    {
-                                       Position = position, Process = true, Type = OrbwalkerType.Movement 
-                                    };
+                                    { Position = position, Process = true, Type = OrbwalkerType.Movement };
                 InvokeAction(eventArgs);
 
                 if (eventArgs.Process)
@@ -419,7 +440,7 @@ namespace LeagueSharp.SDK.Core
                 {
                     var eventArgs = new OrbwalkerActionArgs
                                         {
-                                            Target = gTarget, Position = gTarget.Position, Process = true, 
+                                            Target = gTarget, Position = gTarget.Position, Process = true,
                                             Type = OrbwalkerType.BeforeAttack
                                         };
                     InvokeAction(eventArgs);
@@ -476,19 +497,19 @@ namespace LeagueSharp.SDK.Core
             advanced.Add(new MenuSeparator("separatorMovement", "移动"));
             advanced.Add(
                 new MenuSlider(
-                    "movementDelay", 
-                    "移动延时", 
-                    new Random(Variables.TickCount).Next(30, 101), 
-                    0, 
-                    2500));
+                    "movementDelay",
+                    "移动延时",
+                    new Random(Variables.TickCount).Next(80, 121),
+                    0,
+                    500));
             advanced.Add(new MenuBool("movementScramble", "随机移动位置", true));
             advanced.Add(new MenuSlider("movementExtraHold", "待命范围", 25, 0, 250));
             advanced.Add(
                 new MenuSlider(
                     "movementMaximumDistance",
-					"最大移动距离", 
-                    new Random().Next(500, 1201), 
-                    350, 
+                    "最大移动距离",
+                    new Random().Next(500, 1201),
+                    350,
                     1200));
             advanced.Add(new MenuSeparator("separatorMisc", "其它设置"));
             advanced.Add(new MenuSlider("miscExtraWindup", "额外延时", 80, 0, 200));
@@ -503,9 +524,9 @@ namespace LeagueSharp.SDK.Core
                             {
                                 Menu.RestoreDefault();
                                 Menu["advanced"]["movementMaximumDistance"].GetValue<MenuSlider>().Value = new Random().Next(
-                                    500, 
+                                    500,
                                     1201);
-                                Menu["advanced"]["movementDelay"].GetValue<MenuSlider>().Value = new Random().Next(30, 101);
+                                Menu["advanced"]["movementDelay"].GetValue<MenuSlider>().Value = new Random().Next(80, 121);
                             }
                     });
             Menu.Add(advanced);
@@ -570,10 +591,7 @@ namespace LeagueSharp.SDK.Core
         /// </param>
         protected static void InvokeAction(OrbwalkerActionArgs e)
         {
-            if (OnAction != null)
-            {
-                OnAction(MethodBase.GetCurrentMethod().DeclaringType, e);
-            }
+            OnAction?.Invoke(MethodBase.GetCurrentMethod().DeclaringType, e);
         }
 
         /// <summary>
@@ -617,8 +635,8 @@ namespace LeagueSharp.SDK.Core
                 if (GameObjects.Player.Position.IsValid())
                 {
                     Drawing.DrawCircle(
-                        GameObjects.Player.Position, 
-                        GameObjects.Player.GetRealAutoAttackRange(), 
+                        GameObjects.Player.Position,
+                        GameObjects.Player.GetRealAutoAttackRange(),
                         Color.Blue);
                 }
             }
@@ -637,8 +655,8 @@ namespace LeagueSharp.SDK.Core
                         value = value > 255 ? 255 : value < 0 ? 0 : value;
 
                         Drawing.DrawCircle(
-                            minion.Position, 
-                            minion.BoundingRadius * 2f, 
+                            minion.Position,
+                            minion.BoundingRadius * 2f,
                             Color.FromArgb(255, 0, 255, (byte)(255 - value)));
                     }
                 }
@@ -678,7 +696,7 @@ namespace LeagueSharp.SDK.Core
 
                 if (target != null && target.IsValid && AutoAttack.IsAutoAttack(spellName))
                 {
-                    LastAutoAttackTick = Variables.TickCount - Game.Ping / 2;
+                    LastAutoAttackTick = Variables.TickCount - (Game.Ping / 2);
                     MissileLaunched = false;
 
                     if (!target.Compare(LastTarget))
@@ -688,11 +706,11 @@ namespace LeagueSharp.SDK.Core
                         LastTarget = target;
                     }
 
-                    var time = Variables.TickCount + sender.AttackCastDelay * 1000 + 40;
+                    var time = Variables.TickCount + (sender.AttackCastDelay * 1000) + 40;
                     if (!AfterAttackTime.ContainsKey(time))
                     {
                         AfterAttackTime.Add(
-                            time, 
+                            time,
                             new OrbwalkerActionArgs { Target = target, Type = OrbwalkerType.AfterAttack });
                     }
 
