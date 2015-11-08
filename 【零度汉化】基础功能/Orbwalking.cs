@@ -115,7 +115,7 @@ namespace LeagueSharp.Common
             "dariusnoxiantacticsonh", "fioraflurry", "garenq",
             "hecarimrapidslash", "jaxempowertwo", "jaycehypercharge", "leonashieldofdaybreak", "luciane", "lucianq",
             "monkeykingdoubleattack", "mordekaisermaceofspades", "nasusq", "nautiluspiercinggaze", "netherblade",
-            "parley", "poppydevastatingblow", "powerfist", "renektonpreexecute", "rengarq", "shyvanadoubleattack",
+            "gangplankqwrapper", "poppydevastatingblow", "powerfist", "renektonpreexecute", "rengarq", "shyvanadoubleattack",
             "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble", "vie", "volibearq",
             "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave"
         };
@@ -177,6 +177,11 @@ namespace LeagueSharp.Common
         /// <c>true</c> if the orbwalker will move.
         /// </summary>
         public static bool Move = true;
+
+        /// <summary>
+        /// The tick the most recent attack command was sent.
+        /// </summary>
+        public static int LastAttackCommandT;
 
         /// <summary>
         /// The tick the most recent move command was sent.
@@ -565,6 +570,11 @@ namespace LeagueSharp.Common
             bool useFixedDistance = true,
             bool randomizeMinDistance = true)
         {
+            if (Utils.GameTimeTickCount - LastAttackCommandT < (70 + Math.Min(60, Game.Ping)))
+            {
+                return;
+            }
+
             try
             {
                 if (target.IsValidTarget() && CanAttack())
@@ -576,23 +586,15 @@ namespace LeagueSharp.Common
                     {
                         if (!NoCancelChamps.Contains(_championName))
                         {
-                            LastAATick = Utils.GameTimeTickCount + Game.Ping + 100 - (int)(ObjectManager.Player.AttackCastDelay * 1000f);
                             _missileLaunched = false;
-
-                            var d = GetRealAutoAttackRange(target) - 65;
-                            if (Player.Distance(target, true) > d * d && !Player.IsMelee)
-                            {
-                                LastAATick = Utils.GameTimeTickCount + Game.Ping + 400 - (int)(ObjectManager.Player.AttackCastDelay * 1000f);
-                            }
                         }
 
-                        if (!Player.IssueOrder(GameObjectOrder.AttackUnit, target))
+                        if(Player.IssueOrder(GameObjectOrder.AttackUnit, target))
                         {
-                            ResetAutoAttackTimer();
+                            LastAttackCommandT = Utils.GameTimeTickCount;
+                            _lastTarget = target;
                         }
-
-                        LastMoveCommandT = 0;
-                        _lastTarget = target;
+                        
                         return;
                     }
                 }
@@ -636,7 +638,7 @@ namespace LeagueSharp.Common
         /// <param name="args">The <see cref="GameObjectProcessSpellCastEventArgs"/> instance containing the event data.</param>
         private static void Obj_AI_Base_OnDoCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if(sender.IsMe && IsAutoAttack(args.SData.Name))
+            if(sender.IsMe)
             {
                 if(Game.Ping <= 30) //First world problems kappa
                 {
@@ -655,8 +657,16 @@ namespace LeagueSharp.Common
         /// <param name="args">The <see cref="GameObjectProcessSpellCastEventArgs"/> instance containing the event data.</param>
         private static void Obj_AI_Base_OnDoCast_Delayed(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            FireAfterAttack(sender, args.Target as AttackableUnit);
-            _missileLaunched = true;
+            if (IsAutoAttackReset(args.SData.Name))
+            {
+                ResetAutoAttackTimer();
+            }
+
+            if(IsAutoAttack(args.SData.Name))
+            {
+                FireAfterAttack(sender, args.Target as AttackableUnit);
+                _missileLaunched = true;
+            }
         }
 
         /// <summary>
@@ -670,9 +680,9 @@ namespace LeagueSharp.Common
             {
                 var spellName = Spell.SData.Name;
 
-                if (IsAutoAttackReset(spellName) && unit.IsMe)
+                if (unit.IsMe && IsAutoAttackReset(spellName) && Spell.SData.SpellCastTime == 0)
                 {
-                    Utility.DelayAction.Add(250, ResetAutoAttackTimer);
+                    ResetAutoAttackTimer();
                 }
 
                 if (!IsAutoAttack(spellName))
@@ -685,6 +695,7 @@ namespace LeagueSharp.Common
                 {
                     LastAATick = Utils.GameTimeTickCount - Game.Ping / 2;
                     _missileLaunched = false;
+                    LastMoveCommandT = 0;
 
                     if (Spell.Target is Obj_AI_Base)
                     {
@@ -822,7 +833,6 @@ namespace LeagueSharp.Common
 
                 /* Missile check */
                 _config.AddItem(new MenuItem("MissileCheck", "Use Missile Check").SetShared().SetValue(true));
-                _config.AddItem(new MenuItem("AutoSetWindUpTime", "\u81EA\u52A8\u8BBE\u7F6E\u540E\u6447\u0028\u82B1\u8FB9\u0053\u0074\u0079\u006C\u0065\u0029").SetShared().SetValue(false));
 
                 /* Delay sliders */
                 _config.AddItem(
@@ -1023,7 +1033,7 @@ namespace LeagueSharp.Common
                                 1000 * (int) Math.Max(0, Player.Distance(minion) - Player.BoundingRadius) / (int)GetMyProjectileSpeed();
                         var predHealth = HealthPrediction.GetHealthPrediction(minion, t, FarmDelay);
 
-                        if (minion.Team != GameObjectTeam.Neutral && (_config.Item("AttackPetsnTraps").GetValue<bool>() && minion.CharData.BaseSkinName != "jarvanivstandard" || MinionManager.IsMinion(minion, _config.Item("AttackWards").GetValue<bool>()) ))
+                        if (minion.Team != GameObjectTeam.Neutral && (_config.Item("AttackPetsnTraps").GetValue<bool>() && minion.BaseSkinName != "jarvanivstandard" || MinionManager.IsMinion(minion, _config.Item("AttackWards").GetValue<bool>()) ))
                         {
                             if (predHealth <= 0)
                             {
@@ -1162,48 +1172,12 @@ namespace LeagueSharp.Common
                     Orbwalk(
                         target, (_orbwalkingPoint.To2D().IsValid()) ? _orbwalkingPoint : Game.CursorPos,
                         _config.Item("ExtraWindup").GetValue<Slider>().Value,
-                        _config.Item("HoldPosRadius").GetValue<Slider>().Value);
-
-                    if (_config.Item("AutoSetWindUpTime").GetValue<bool>())
-                    {
-                        AutoSetExByHuabian();
-                    }
+                        Math.Max(_config.Item("HoldPosRadius").GetValue<Slider>().Value, 30));
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-            }
-
-            private static int extraWindup;
-
-            private void AutoSetExByHuabian()
-            {
-                if (!_config.Item("AutoSetWindUpTime").GetValue<bool>())
-                {
-                    extraWindup = _config.Item("ExtraWindup").GetValue<Slider>().Value;
-                    return;
-                }
-                var additional = 0;
-                if (Game.Ping >= 100)
-                    additional = Game.Ping / 100 * 5;
-                else if (Game.Ping > 40 && Game.Ping < 100)
-                    additional = Game.Ping / 100 * 10;
-                else if (Game.Ping <= 40)
-                    additional = +15;
-
-                var windUp = Game.Ping - 20 + additional;
-
-                if (windUp < 40 && 20 < windUp)
-                    windUp = 36;
-                else if (windUp < 20 && 10 < windUp)
-                    windUp = 14;
-                else if (windUp < 10)
-                    windUp = 5;
-
-                _config.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
-
-                extraWindup = windUp;
             }
 
             /// <summary>
