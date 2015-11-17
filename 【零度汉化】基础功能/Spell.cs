@@ -75,11 +75,6 @@ namespace LeagueSharp.Common
             /// The spell has a low hit chance
             /// </summary>
             LowHitChance,
-
-            /// <summary>
-            /// The spell was casted too quickly after the previous cast.
-            /// </summary>
-            PreventFlood,
         }
 
         /// <summary>
@@ -330,20 +325,6 @@ namespace LeagueSharp.Common
             set { _rangeCheckFrom = value; }
         }
 
-        /// <summary>
-        /// Initializes this instance.
-        /// </summary>
-        internal static void Initialize()
-        {
-            CustomEvents.Game.OnGameLoad += eventArgs =>
-            {
-                var menu = new Menu("CastFunction", "CastFunction");
-                var slider = new MenuItem("LimitCastingAttempts", "Limit Casting Attempts").SetValue(true)
-                    .SetTooltip("Prevent Cast Flooding");
-                menu.AddItem(slider);
-                CommonMenu.Config.AddSubMenu(menu);
-            };
-        }
 
         /// <summary>
         /// Sets spell the be a targetted spell.
@@ -573,7 +554,7 @@ namespace LeagueSharp.Common
             bool exactHitChance = false,
             int minTargets = -1)
         {
-            if (unit == null)
+            if (unit == null || MenuGUI.IsShopOpen || MenuGUI.IsChatOpen)
             {
                 return CastStates.NotCasted;
             }
@@ -596,12 +577,6 @@ namespace LeagueSharp.Common
                 if (RangeCheckFrom.Distance(unit.ServerPosition, true) > RangeSqr)
                 {
                     return CastStates.OutOfRange;
-                }
-
-                //Prevent flood
-                if (CommonMenu.Config.Item("LimitCastingAttempts").GetValue<bool>() && Utils.TickCount - LastCastAttemptT < (70 + Math.Min(60, Game.Ping)))
-                {
-                    return CastStates.PreventFlood;
                 }
 
                 LastCastAttemptT = Utils.TickCount;
@@ -652,12 +627,6 @@ namespace LeagueSharp.Common
                 return CastStates.LowHitChance;
             }
 
-            //Prevent flood
-            if (CommonMenu.Config.Item("LimitCastingAttempts").GetValue<bool>() && Utils.TickCount - LastCastAttemptT < (70 + Math.Min(60, Game.Ping)))
-            {
-                return CastStates.PreventFlood;
-            }
-
             LastCastAttemptT = Utils.TickCount;
 
             if (IsChargedSpell)
@@ -695,7 +664,12 @@ namespace LeagueSharp.Common
         /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
         public bool CastOnUnit(Obj_AI_Base unit, bool packetCast = false)
         {
-            if (!Slot.IsReady() || From.Distance(unit.ServerPosition, true) > RangeSqr || (CommonMenu.Config.Item("LimitCastingAttempts").GetValue<bool>() && Utils.TickCount - LastCastAttemptT < (70 + Math.Min(60, Game.Ping))))
+            if (!Slot.IsReady() || From.Distance(unit.ServerPosition, true) > RangeSqr)
+            {
+                return false;
+            }
+
+            if (MenuGUI.IsShopOpen || MenuGUI.IsChatOpen)
             {
                 return false;
             }
@@ -753,6 +727,10 @@ namespace LeagueSharp.Common
         /// <returns><c>true</c> if the spell was sucessfully casted, <c>false</c> otherwise.</returns>
         public bool Cast(Vector3 fromPosition, Vector3 toPosition)
         {
+            if (MenuGUI.IsShopOpen || MenuGUI.IsChatOpen)
+            {
+                return false;
+            }
             return Slot.IsReady() && ObjectManager.Player.Spellbook.CastSpell(Slot, fromPosition, toPosition);
         }
 
@@ -764,6 +742,10 @@ namespace LeagueSharp.Common
         /// <returns><c>true</c> if the spell was casted successfully, <c>false</c> otherwise.</returns>
         public bool Cast(Vector2 position, bool packetCast = false)
         {
+            if (MenuGUI.IsShopOpen || MenuGUI.IsChatOpen)
+            {
+                return false;
+            }
             return Cast(position.To3D(), packetCast);
         }
 
@@ -776,12 +758,6 @@ namespace LeagueSharp.Common
         public bool Cast(Vector3 position, bool packetCast = false)
         {
             if (!Slot.IsReady())
-            {
-                return false;
-            }
-
-            //Prevent flood
-            if (CommonMenu.Config.Item("LimitCastingAttempts").GetValue<bool>() && Utils.TickCount - LastCastAttemptT < (70 + Math.Min(60, Game.Ping)))
             {
                 return false;
             }
@@ -1109,6 +1085,11 @@ namespace LeagueSharp.Common
         /// <returns>CastStates.</returns>
         public CastStates CastOnBestTarget(float extraRange = 0, bool packetCast = false, bool aoe = false)
         {
+            if (MenuGUI.IsShopOpen || MenuGUI.IsChatOpen)
+            {
+                return CastStates.NotCasted;
+            }
+
             var target = GetTarget(extraRange);
             return target != null ? Cast(target, packetCast, aoe) : CastStates.NotCasted;
         }

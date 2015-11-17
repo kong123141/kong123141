@@ -30,20 +30,11 @@ using SharpDX;
 
 namespace LeagueSharp.Common
 {
-    using System;
-
     /// <summary>
     /// Provides methods regarding items.
     /// </summary>
     public static class Items
     {
-        /// <summary>
-        /// Gets or sets the last cast attempt tick.
-        /// </summary>
-        /// <value>
-        /// The last cast attempt tick.
-        /// </value>
-        public static int LastCastAttemptT { get; set; }
 
         /// <summary>
         /// Returns true if the hero has the item.
@@ -109,13 +100,6 @@ namespace LeagueSharp.Common
         /// <returns></returns>
         public static bool UseItem(string name, Obj_AI_Base target = null)
         {
-            if (CommonMenu.Config.Item("LimitCastingAttempts").GetValue<bool>() && Utils.TickCount - LastCastAttemptT < (70 + Math.Min(60, Game.Ping)))
-            {
-                return false;
-            }
-
-            LastCastAttemptT = Utils.TickCount;
-
             foreach (var slot in ObjectManager.Player.InventoryItems.Where(slot => slot.Name == name))
             {
                 if (target != null)
@@ -139,13 +123,6 @@ namespace LeagueSharp.Common
         /// <returns></returns>
         public static bool UseItem(int id, Obj_AI_Base target = null)
         {
-            if (CommonMenu.Config.Item("LimitCastingAttempts").GetValue<bool>() && Utils.TickCount - LastCastAttemptT < (70 + Math.Min(60, Game.Ping)))
-            {
-                return false;
-            }
-
-            LastCastAttemptT = Utils.TickCount;
-
             foreach (var slot in ObjectManager.Player.InventoryItems.Where(slot => slot.Id == (ItemId)id))
             {
                 if (target != null)
@@ -180,13 +157,6 @@ namespace LeagueSharp.Common
         /// <returns></returns>
         public static bool UseItem(int id, Vector3 position)
         {
-            if (CommonMenu.Config.Item("LimitCastingAttempts").GetValue<bool>() && Utils.TickCount - LastCastAttemptT < (70 + Math.Min(60, Game.Ping)))
-            {
-                return false;
-            }
-
-            LastCastAttemptT = Utils.TickCount;
-
             if (position != Vector3.Zero)
             {
                 foreach (var slot in ObjectManager.Player.InventoryItems.Where(slot => slot.Id == (ItemId)id))
@@ -204,7 +174,7 @@ namespace LeagueSharp.Common
         /// <returns></returns>
         public static InventorySlot GetWardSlot()
         {
-            var wardIds = new[] { 3340, 3350, 3361, 3154, 2045, 2049, 2050, 2044 };
+            var wardIds = new[] { 2043, 2045, 2049, 2050, 2301, 2302, 2303, 3340, 3361, 3362, 3711, 3364 };
             return (from wardId in wardIds
                     where CanUseItem(wardId)
                     select ObjectManager.Player.InventoryItems.FirstOrDefault(slot => slot.Id == (ItemId)wardId))

@@ -59,7 +59,6 @@ namespace LeagueSharp.Common
             Flowers.Initilalize();
             //Hacks.Initialize();
             FakeClicks.Initialize();
-            Spell.Initialize();
 
             Config.AddToMainMenu();
         }
