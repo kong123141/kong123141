@@ -86,7 +86,7 @@ namespace LeagueSharp.Common
             Hexgun,
 
             /// <summary>
-            /// The DFG
+            /// The Dfg
             /// </summary>
             Dfg,
 
@@ -1032,8 +1032,8 @@ namespace LeagueSharp.Common
                                 Slot = SpellSlot.Q, DamageType = DamageType.Physical,
                                 Damage =
                                     (source, target, level) =>
-                                    new double[] { 20, 60, 100, 140, 180 }[level]
-                                    + 1.3 * (source.BaseAttackDamage + source.FlatPhysicalDamageMod)
+                                    new double[] { 30, 70, 110, 150, 190 }[level]
+                                    + new double[] { 1.3, 1.4, 1.5, 1.6, 1.7 }[level] * (source.TotalAttackDamage)
                             },
                         //W
                         new DamageSpell
@@ -1050,7 +1050,7 @@ namespace LeagueSharp.Common
                                 Slot = SpellSlot.E, DamageType = DamageType.Magical,
                                 Damage =
                                     (source, target, level) =>
-                                    new double[] { 80, 130, 180, 230, 280 }[level]
+                                    new double[] { 70, 110, 150, 190, 230 }[level]
                                     + 0.8 * source.AbilityPower()
                             },
                         //R
@@ -2564,9 +2564,10 @@ namespace LeagueSharp.Common
                                 Slot = SpellSlot.R, DamageType = DamageType.Magical,
                                 Damage =
                                     (source, target, level) =>
-                                    new double[] { 80, 120, 160 }[level] * 2
-                                    + 0.5 * source.FlatPhysicalDamageMod
-                                    + 0.3 * source.AbilityPower()
+                                    (new double[] { 70, 110, 150 }[level]
+                                    + 0.65 * source.FlatPhysicalDamageMod
+                                    + 0.25 * source.AbilityPower()) * 
+                                    (target.HealthPercent < 25 ? 3 : (target.HealthPercent < 50 ? 2 : 1))
                             },
                     });
 
@@ -4612,7 +4613,7 @@ namespace LeagueSharp.Common
                                 Slot = SpellSlot.W, DamageType = DamageType.Magical,
                                 Damage =
                                     (source, target, level) =>
-                                    new double[] { 80, 105, 130, 155, 180 }[level]
+                                    new double[] { 60, 110, 160, 210, 260 }[level]
                                     + 0.5 * source.AbilityPower()
                             },
                         //E - base damage
@@ -4865,7 +4866,7 @@ namespace LeagueSharp.Common
                                 Slot = SpellSlot.R, DamageType = DamageType.Magical,
                                 Damage =
                                     (source, target, level) =>
-                                    new double[] { 150, 250, 350 }[level]
+                                    new double[] { 100, 175, 250 }[level]
                                     + 1 * source.AbilityPower()
                             },
                     });
@@ -4888,10 +4889,9 @@ namespace LeagueSharp.Common
                             {
                                 Slot = SpellSlot.W, DamageType = DamageType.True,
                                 Damage =
-                                    (source, target, level) =>
-                                    new double[] { 20, 30, 40, 50, 60 }[level]
-                                    + (new double[] { 4, 5, 6, 7, 8 }[level] / 100) * target.MaxHealth
+                                    (source, target, level) => Math.Max(new double[] { 40, 60, 80, 100, 120 }[level], (new double[] { 6, 7.5, 9, 10.5, 12 }[level] / 100) * target.MaxHealth)
                             },
+            
                         //E
                         new DamageSpell
                             {
@@ -5553,8 +5553,6 @@ namespace LeagueSharp.Common
                     return source.CalcDamage(target, DamageType.Magical, target.MaxHealth * 0.2);
                 case DamageItems.Botrk:
                     return source.CalcDamage(target, DamageType.Physical, target.MaxHealth * 0.1);
-                case DamageItems.Dfg:
-                    return source.CalcDamage(target, DamageType.Magical, target.MaxHealth * 0.15);
                 case DamageItems.FrostQueenClaim:
                     return source.CalcDamage(target, DamageType.Magical, 50 + 5 * source.Level);
                 case DamageItems.Hexgun:
@@ -5645,7 +5643,7 @@ namespace LeagueSharp.Common
                 // BotRK
                 if (Items.HasItem(3153, hero))
                 {
-                    var d = 0.08 * target.Health;
+                    var d = 0.06 * target.Health;
                     if (target is Obj_AI_Minion)
                     {
                         d = Math.Min(d, 60);
