@@ -456,6 +456,34 @@ namespace LeagueSharp.Common
                                   (source.BaseAttackDamage + source.FlatPhysicalDamageMod)) - 10f,
             };
             AttackPassives.Add(p);
+            
+            p = new PassiveDamage
+            {
+                ChampionName = "TwistedFate", IsActive = (source, target) => (source.HasBuff("redcardpreattack")),
+                GetDamage =
+                            (source, target) =>
+                            (float)source.GetSpellDamage(target, SpellSlot.W, 2)
+                            - (float)
+                              source.CalcDamage(
+                                  target,
+                                  DamageType.Physical,
+                                  (source.BaseAttackDamage + source.FlatPhysicalDamageMod)) - 10f,
+            };
+            AttackPassives.Add(p);
+            
+            p = new PassiveDamage
+            {
+                ChampionName = "TwistedFate", IsActive = (source, target) => (source.HasBuff("goldcardpreattack")),
+                GetDamage =
+                            (source, target) =>
+                            (float)source.GetSpellDamage(target, SpellSlot.W, 3)
+                            - (float)
+                              source.CalcDamage(
+                                  target,
+                                  DamageType.Physical,
+                                  (source.BaseAttackDamage + source.FlatPhysicalDamageMod)) - 10f,
+            };
+            AttackPassives.Add(p);
 
             p = new PassiveDamage
             {
@@ -1034,15 +1062,6 @@ namespace LeagueSharp.Common
                                     (source, target, level) =>
                                     new double[] { 30, 70, 110, 150, 190 }[level]
                                     + new double[] { 1.3, 1.4, 1.5, 1.6, 1.7 }[level] * (source.TotalAttackDamage)
-                            },
-                        //W
-                        new DamageSpell
-                            {
-                                Slot = SpellSlot.W, DamageType = DamageType.Magical,
-                                Damage =
-                                    (source, target, level) =>
-                                    new double[] { 80, 130, 180, 230, 280 }[level]
-                                    + 0.6 * source.AbilityPower()
                             },
                         //E
                         new DamageSpell
