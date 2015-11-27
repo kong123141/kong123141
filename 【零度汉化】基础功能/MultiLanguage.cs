@@ -47,22 +47,9 @@ namespace LeagueSharp.Common
         /// </summary>
         static MultiLanguage()
         {
-            switch (CommonMenu.Config.Item("Language").GetValue<StringList>().SelectedIndex)
-			{
-				case 0:
-					LoadLanguage(Config.SelectedLanguage);
-					break;
-				case 1:
-					LoadLanguage("Chinese");
-					break;
-				case 2:
-					LoadLanguage("English");
-					break;
-				default:
-					LoadLanguage("Chinese");
-					break;
-			}
+            LoadLanguage(Config.SelectedLanguage);
         }
+
         /// <summary>
         /// Translates the text into the loaded language.
         /// </summary>
