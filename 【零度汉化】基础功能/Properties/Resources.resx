@@ -13211,6 +13211,23 @@
 	"min danger level windwall": "\u6700\u5c0f\u7684\u5371\u9669\u7b49\u7ea7\u98ce\u5899",
 	"min danger level dash": "\u6700\u5c11\u5371\u9669\u7b49\u7ea7\u8eb2\u907f",
 	"min enemies for autoult": "\u6700\u5c11\u654c\u4eba\u6570\u4f7f\u7528\u5927\u62db",
+	"spell settings": "\u6280\u80fd\u8bbe\u7f6e",
+	"predict settings": "\u9884\u6d4b\u8bbe\u7f6e",
+	"smart cast": "\u667a\u80fd\u6295\u63b7",
+	"turret settings": "\u9632\u5fa1\u5854\u8bbe\u7f6e",
+	"don't auto q2": "\u4e0d\u81ea\u52a8\u0051\u0032",
+	"don't q2 if enemies > allies": "\u4e0d\u8981\u0051\u0032\u0020\u5982\u679c\u654c\u4eba\u003e\u961f\u53cb",
+	"auto q jungle": "\u81ea\u52a8\u0051\u91ce\u602a",
+	"now": "\u73b0\u5728",
+	"support mode range": "\u8f85\u52a9\u6a21\u5f0f\u8303\u56f4",
+	"smart cast q": "\u667a\u80fd\u629b\u0051",
+	"smart cast w": "\u667a\u80fd\u6295\u63b7\u0057",
+	"smart cast e": "\u667a\u80fd\u6295\u63b7\u0045",
+	"q/e ally turret’s target": "\u0051\u0020\u002f\u0020\u0045\u961f\u53cb\u0020\u9632\u5fa1\u5854\u7684\u76ee\u6807",
+	"q/e target into ally turret": "\u0051\u0020\u002f\u0020\u0045\u76ee\u6807\u4e3a\u961f\u53cb\u9632\u5fa1\u5854",
+	"don't q2 in enemy turret": "\u5728\u654c\u4eba\u9632\u5fa1\u5854\u4e0d\u8981\u0051\u0032",
+	"2 -  3 level": "\u0032\u0020\u002d\u0020\u0033\u7ea7",
+	"4 - 18 level": "\u0034\u0020\u002d\u0020\u0031\u0038\u7ea7",
 	"w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
