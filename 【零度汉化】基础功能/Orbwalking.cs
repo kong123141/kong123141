@@ -25,6 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using SharpDX;
 using Color = System.Drawing.Color;
 
@@ -117,7 +118,7 @@ namespace LeagueSharp.Common
             "monkeykingdoubleattack", "mordekaisermaceofspades", "nasusq", "nautiluspiercinggaze", "netherblade",
             "gangplankqwrapper", "poppydevastatingblow", "powerfist", "renektonpreexecute", "rengarq", "shyvanadoubleattack",
             "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble", "vie", "volibearq",
-            "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "masochism"
+            "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "masochism", "illaoiw"
         };
 
 
@@ -441,7 +442,7 @@ namespace LeagueSharp.Common
                 return false;
             }
 
-            return Utils.GameTimeTickCount + Game.Ping / 2 + 25 >= LastAATick + Player.AttackDelay * 1000 && Attack;
+            return Utils.GameTimeTickCount + Game.Ping / 2 + 25 >= LastAATick + Orbwalker.AttackSpeedDelay * 1000 && Attack;
         }
 
         /// <summary>
@@ -862,7 +863,6 @@ namespace LeagueSharp.Common
                 _config.AddItem(new MenuItem("MissileCheck", "Use Missile Check").SetShared().SetValue(true));
 
                 /* Delay sliders */
-                _config.AddItem(new MenuItem("AutoSetWindUpTime", "\u81EA\u52A8\u8BBE\u7F6E\u540E\u6447\u0028\u82B1\u8FB9\u0053\u0074\u0079\u006C\u0065\u0029").SetShared().SetValue(false));
                 _config.AddItem(
                     new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 0, 200)));
                 _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(30, 0, 200)));
@@ -881,12 +881,64 @@ namespace LeagueSharp.Common
 
                 _config.AddItem(
                     new MenuItem("StillCombo", "Combo without moving").SetShared().SetValue(new KeyBind('N', KeyBindType.Press)));
+                _config.Item("StillCombo").ValueChanged +=
+                    (sender, args) => { Move = !args.GetNewValue<KeyBind>().Active; };
+
+                var menuAttackSpeed = new Menu("Attack Speed Limiter", "AttackSpeedLimiter");
+                {
+                    menuAttackSpeed.AddItem(
+                        new MenuItem("AttackSpeedLimiter.Enabled", "Enabled").SetShared().SetValue(false))
+                        .Permashow(true, "Orbwalker | Attack Speed Limiter", SharpDX.Color.Aqua);
+                    menuAttackSpeed.AddItem(
+                        new MenuItem("AttackSpeedLimiter.MaxAttackSpeed", "Limit Attack Speed [Recommend: 2150]:")
+                            .SetShared().SetValue(new Slider(2150, 650, 3500)));
+                    menuAttackSpeed.AddItem(
+                        new MenuItem("AttackSpeedLimiter.LimitWhen", "Limit:").SetShared()
+                            .SetValue(new StringList(new[] { "If I'm moving / kite mode", "Everytime" }, 0)));
+                    _config.AddSubMenu(menuAttackSpeed);
+                }
 
                 Player = ObjectManager.Player;
                 Game.OnUpdate += GameOnOnGameUpdate;
                 Drawing.OnDraw += DrawingOnOnDraw;
                 Instances.Add(this);
             }
+
+            /// <summary>
+            /// Returning Attack Speed Delay
+            /// </summary>
+            public static float AttackSpeedDelay
+            {
+                get
+                {
+                    if (!_config.Item("AttackSpeedLimiter.Enabled").GetValue<bool>())
+                    {
+                        return ObjectManager.Player.AttackDelay;
+                    }
+
+                    var speed = (float)_config.Item("AttackSpeedLimiter.MaxAttackSpeed").GetValue<Slider>().Value;
+
+                    switch (_config.Item("AttackSpeedLimiter.LimitWhen").GetValue<StringList>().SelectedIndex)
+                    {
+                        case 0:
+                            {
+                                return ObjectManager.Player.Path.Count() != 0
+                                    ? ObjectManager.Player.AttackDelay > 1000 / speed
+                                        ? ObjectManager.Player.AttackDelay
+                                        : 1000 / speed
+                                    : ObjectManager.Player.AttackDelay;
+                            }
+                        case 1:
+                            {
+                                return ObjectManager.Player.AttackDelay > 1000 / speed
+                                    ? ObjectManager.Player.AttackDelay
+                                    : 1000 / speed;
+                            }
+                    }
+                    return ObjectManager.Player.AttackDelay;
+                }
+            }
+
 
             /// <summary>
             /// Determines if a target is in auto attack range.
@@ -1029,7 +1081,7 @@ namespace LeagueSharp.Common
                                 minion.IsValidTarget() && minion.Team != GameObjectTeam.Neutral &&
                                 InAutoAttackRange(minion) && MinionManager.IsMinion(minion, false) &&
                                 HealthPrediction.LaneClearHealthPrediction(
-                                    minion, (int)((Player.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay) <=
+                                    minion, (int)((AttackSpeedDelay * 1000) * LaneClearWaitTimeMod), FarmDelay) <=
                                 Player.GetAutoAttackDamage(minion));
             }
 
@@ -1097,7 +1149,7 @@ namespace LeagueSharp.Common
                 }
 
                 //Forced target
-                if (ActiveMode == OrbwalkingMode.Combo && _forcedTarget.IsValidTarget() && InAutoAttackRange(_forcedTarget))
+                if (_forcedTarget.IsValidTarget() && InAutoAttackRange(_forcedTarget))
                 {
                     return _forcedTarget;
                 }
@@ -1165,7 +1217,7 @@ namespace LeagueSharp.Common
                         if (_prevMinion.IsValidTarget() && InAutoAttackRange(_prevMinion))
                         {
                             var predHealth = HealthPrediction.LaneClearHealthPrediction(
-                                _prevMinion, (int)((Player.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay);
+                                _prevMinion, (int)((AttackSpeedDelay * 1000) * LaneClearWaitTimeMod), FarmDelay);
                             if (predHealth >= 2 * Player.GetAutoAttackDamage(_prevMinion) ||
                                 Math.Abs(predHealth - _prevMinion.Health) < float.Epsilon)
                             {
@@ -1181,7 +1233,7 @@ namespace LeagueSharp.Common
                                           minion.CharData.BaseSkinName != "gangplankbarrel")
                                   let predHealth =
                                       HealthPrediction.LaneClearHealthPrediction(
-                                          minion, (int)((Player.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay)
+                                          minion, (int)((AttackSpeedDelay * 1000) * LaneClearWaitTimeMod), FarmDelay)
                                   where
                                       predHealth >= 2 * Player.GetAutoAttackDamage(minion) ||
                                       Math.Abs(predHealth - minion.Health) < float.Epsilon
@@ -1210,9 +1262,6 @@ namespace LeagueSharp.Common
                         return;
                     }
 
-                    //Block movement if StillCombo is used
-                    Move = !_config.Item("StillCombo").GetValue<KeyBind>().Active;
-
                     //Prevent canceling important spells
                     if (Player.IsCastingInterruptableSpell(true))
                     {
@@ -1224,53 +1273,11 @@ namespace LeagueSharp.Common
                         target, (_orbwalkingPoint.To2D().IsValid()) ? _orbwalkingPoint : Game.CursorPos,
                         _config.Item("ExtraWindup").GetValue<Slider>().Value,
                         Math.Max(_config.Item("HoldPosRadius").GetValue<Slider>().Value, 30));
-
-                    if (_config.Item("AutoSetWindUpTime").GetValue<bool>())
-                    {
-                        AutoSetExByHuabian();
-                    }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-            }
-
-            /// <summary>
-            /// ExtraWindupTime C'
-            /// </summary>
-            private static int extraWindup;
-
-            /// <summary>
-            /// Auto Set ExtraWindUp Time 
-            /// </summary>
-            private void AutoSetExByHuabian()
-            {
-                if (!_config.Item("AutoSetWindUpTime").GetValue<bool>())
-                {
-                    extraWindup = _config.Item("ExtraWindup").GetValue<Slider>().Value;
-                    return;
-                }
-                var additional = 0;
-                if (Game.Ping >= 100)
-                    additional = Game.Ping / 100 * 5;
-                else if (Game.Ping > 40 && Game.Ping < 100)
-                    additional = Game.Ping / 100 * 10;
-                else if (Game.Ping <= 40)
-                    additional = +15;
-
-                var windUp = Game.Ping - 20 + additional;
-
-                if (windUp < 40 && 20 < windUp)
-                    windUp = 36;
-                else if (windUp < 20 && 10 < windUp)
-                    windUp = 14;
-                else if (windUp < 10)
-                    windUp = 5;
-
-                _config.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
-
-                extraWindup = windUp;
             }
 
             /// <summary>

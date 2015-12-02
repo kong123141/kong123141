@@ -5781,7 +5781,7 @@ namespace LeagueSharp.Common
             Meditation = 98,
             Merciless = 97,
             Bandit = 114,
-            DangerousGAme = 115,
+            DangerousGame = 115,
             Precision = 129,
             Intelligence = 130,
             StormraidersSurge = 145,
@@ -6118,7 +6118,7 @@ namespace LeagueSharp.Common
 
                 //Damage Reduction Masteries
 
-                //DAMAGE REDUCTION 4 %, doubling to 8 % when near at least one allied champion
+                //DAMAGE REDUCTION 2 %, increasing to 8 % when near at least one allied champion
                 //IN THIS TOGETHER 8 % of the damage that the nearest allied champion would take is dealt to you instead.This can't bring you below 15% health.
                 Mastery BondofStones = targetHero.GetMastery(Resolve.BondofStones);
                 if (BondofStones != null && BondofStones.IsActive())
@@ -6130,7 +6130,7 @@ namespace LeagueSharp.Common
                     }
                     else
                     {
-                        amount *= 0.96d;
+                        amount *= 0.98d;
                     }
                 }
                 
@@ -6324,11 +6324,11 @@ namespace LeagueSharp.Common
                 //Thunderlord's Decree: RIDE THE LIGHTNING Your 3rd ability or basic attack on an enemy champion shocks them, dealing 10 - 180(+0.2 bonus attack damage)(+0.1 ability power) magic damage in an area around them
                 if (false) // Need a good way to check if it is 3rd attack (Use OnProcessSpell/SpellBook.OnCast if have to)
                 {
-                    //Mastery Thunder = hero.GetMastery(Cunning.ThunderlordsDecree);
-                    //if (Thunder != null && Thunder.IsActive())
-                    //{
-                    //    // amount += 10 * hero.Level + (0.2 * hero.FlatPhysicalDamageMod) + (0.1 * hero.AbilityPower());
-                    //}
+                    Mastery Thunder = hero.GetMastery(Cunning.ThunderlordsDecree);
+                    if (Thunder != null && Thunder.IsActive())
+                    {
+                        // amount += 10 * hero.Level + (0.2 * hero.FlatPhysicalDamageMod) + (0.1 * hero.AbilityPower());
+                    }
                 }
             }
 
