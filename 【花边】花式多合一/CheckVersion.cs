@@ -48,6 +48,11 @@ namespace 花边_花式多合一
                                 {
                                     Game.PrintChat("<font color=\"#FF0000\">鑺辫竟-鑺卞紡澶氬悎涓€</font> - 宸茬粡鏇存柊,璇蜂笅杞芥柊鐗堟湰!");
                                 }
+                                else
+                                {
+                                    Game.PrintChat("<font color=\"#FF0000\">This is OutDate!</font> - Please Use New Version!");
+
+                                }
                             }
                         }
                     }
