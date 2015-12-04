@@ -180,7 +180,7 @@ namespace LeagueSharp.Common
                 "Alistar", "Amumu", "Bard", "Blitzcrank", "Braum", "Cho'Gath", "Dr. Mundo", "Garen", "Gnar",
                 "Hecarim", "Janna", "Jarvan IV", "Leona", "Lulu", "Malphite", "Nami", "Nasus", "Nautilus", "Nunu",
                 "Olaf", "Rammus", "Renekton", "Sejuani", "Shen", "Shyvana", "Singed", "Sion", "Skarner", "Sona",
-                "Soraka", "Taric", "TahmKench", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra"
+                 "Taric", "TahmKench", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra"
             };
 
             string[] p2 =
@@ -206,6 +206,11 @@ namespace LeagueSharp.Common
                 "Xerath", "Zed", "Ziggs"
             };
 
+            string[] fuckbitch =
+            {
+                "Soraka"
+            };
+
             if (p1.Contains(championName))
             {
                 return 1;
@@ -217,6 +222,31 @@ namespace LeagueSharp.Common
             if (p3.Contains(championName))
             {
                 return 3;
+            }
+            if(fuckbitch.Contains(championName))
+            {
+                if(_configMenu.Item("FuckingBitch").GetValue<bool>())
+                {
+                    if(ObjectManager.Player.Level >= _configMenu.Item("Fuckingbitchifplayerlevels").GetValue<Slider>().Value)
+                    {
+                        return (_configMenu.Item("SetBitchLevels").GetValue<Slider>().Value);
+                    }
+                    else
+                    {
+                        if(_configMenu.Item("Fuckingbitchdanger").GetValue<bool>())
+                        {
+                            return 5;
+                        }
+                        else
+                        {
+                            return 4;
+                        }
+                    }
+                }
+                else
+                {
+                    return 1;
+                }
             }
             return p4.Contains(championName) ? 4 : 1;
         }
@@ -237,6 +267,10 @@ namespace LeagueSharp.Common
                     new MenuItem("SelTColor", "Focus selected target color").SetShared().SetValue(new Circle(true, Color.Red)));
                 focusMenu.AddItem(
                     new MenuItem("ForceFocusSelected", "Only attack selected target").SetShared().SetValue(false));
+                focusMenu.AddItem(new MenuItem("Fuckingbitch", "If have Soraka Auto Set Levels").SetShared().SetValue(false));
+                focusMenu.AddItem(new MenuItem("Fuckingbitchdanger", "More Danger with ADC").SetShared().SetValue(false));
+                focusMenu.AddItem(new MenuItem("Fuckingbitchifplayerlevels", "If Player Levels >= Set Levels").SetShared().SetValue(new Slider(9, 1, 19)));
+                focusMenu.AddItem(new MenuItem("SetBitchLevels", "The Soraka Danger Levels").SetShared().SetValue(new Slider(1, 1, 5)));
                 focusMenu.AddItem(new MenuItem("sep", ""));
                 focusMenu.AddItem(
                     new MenuItem("ForceFocusSelectedKeys", "Enable only attack selected Keys").SetShared().SetValue(false));
