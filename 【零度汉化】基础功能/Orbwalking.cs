@@ -873,7 +873,7 @@ namespace LeagueSharp.Common
                 _config.AddItem(new MenuItem("MissileCheck", "Use Missile Check").SetShared().SetValue(true));
 
                 /* Delay sliders */
-                _config.AddItem(new MenuItem("AutoSetWindUpTime", "Auto Set WindUp Times").SetShared().SetValue(new KeyBind('S', KeyBindType.Press)));
+                _config.AddItem(new MenuItem("AutoSetWindUpTime", "\u81EA\u52A8\u8BBE\u7F6E\u540E\u6447\u0028\u9ED8\u8BA4\u6309\u952E\u0053\u0029").SetShared().SetValue(new KeyBind('S', KeyBindType.Press)));
                 _config.AddItem(
                     new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 0, 200)));
                 _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(30, 0, 200)));
