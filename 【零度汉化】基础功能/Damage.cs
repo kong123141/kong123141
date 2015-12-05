@@ -273,9 +273,23 @@ namespace LeagueSharp.Common
             p = new PassiveDamage
             {
                 ChampionName = "Ekko",
-                IsActive = (source, target) => (target.GetBuffCount("EkkoStacks") == 3),
+                IsActive = (source, target) => (target.GetBuffCount("EkkoStacks") == 2),
                 GetDamage = (source, target) =>
                  (float)source.CalcDamage(target, DamageType.Magical, 10 + (source.Level * 10) + (source.AbilityPower() * 0.8)),
+            };
+            AttackPassives.Add(p);
+            
+            p = new PassiveDamage
+            {
+                ChampionName = "Ekko",
+                IsActive = (source, target) => (target.HealthPercent < 30),
+                GetDamage = (source, target) =>
+                {
+                    float dmg = (float)source.CalcDamage(target, LeagueSharp.Common.Damage.DamageType.Magical, (target.MaxHealth - target.Health) * (5 + Math.Floor(source.AbilityPower() / 100) * 2.2f) / 100);
+                    if (!(target is Obj_AI_Hero) && dmg > 150f)
+                        dmg = 150f;
+                    return dmg;
+                }
             };
             AttackPassives.Add(p);
 
@@ -327,25 +341,6 @@ namespace LeagueSharp.Common
                                  0.1d * (source.BaseAttackDamage + source.FlatPhysicalDamageMod))),
             };
             AttackPassives.Add(p);
-
-            #endregion
-
-            #region Kalista
-
-            p = new PassiveDamage
-            {
-                ChampionName = "Kalista",
-                IsActive = (source, target) => true,
-                GetDamage =
-                                (source, target) =>
-                                ((float)
-                                 -source.CalcDamage(
-                                     target,
-                                     DamageType.Physical,
-                                     0.1d * (source.BaseAttackDamage + source.FlatPhysicalDamageMod))),
-            };
-            AttackPassives.Add(p);
-            
 
             #endregion
 
@@ -418,7 +413,27 @@ namespace LeagueSharp.Common
             AttackPassives.Add(p);
 
             #endregion
+            
+            #region Rengar
 
+            p = new PassiveDamage
+            {
+                ChampionName = "Rengar",
+                IsActive = (source, target) => source.HasBuff("rengarqbase"),
+                GetDamage = (source, target) => (float)source.CalcDamage(target, LeagueSharp.Common.Damage.DamageType.Physical, new int[] { 30, 60, 90, 120, 150 }[source.GetSpell(SpellSlot.Q).Level - 1] + (source.BaseAttackDamage + source.FlatPhysicalDamageMod) * new int[] { 0, 5, 10, 15, 20 }[source.GetSpell(SpellSlot.Q).Level - 1] / 100f)
+            };
+            AttackPassives.Add(p);
+
+			
+			p = new PassiveDamage
+            {
+                ChampionName = "Rengar",
+                IsActive = (source, target) => source.HasBuff("rengarqemp"),
+                GetDamage = (source, target) => (float)source.CalcDamage(target, LeagueSharp.Common.Damage.DamageType.Physical, new int[] { 30, 45, 60, 75, 90, 105, 120, 135, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240 }[source.Level - 1] + (source.BaseAttackDamage + source.FlatPhysicalDamageMod) * 0.5f)
+            };
+            AttackPassives.Add(p);
+            #endregion
+ 
             #region Riven
 
             p = new PassiveDamage
@@ -5629,13 +5644,14 @@ namespace LeagueSharp.Common
             bool includePassive = false)
         {
             double result = source.TotalAttackDamage;
-
+	        var k = source.CharData.BaseSkinName == "Kalista" ? 0.9d : 1d;
+	    
             if (!includePassive)
             {
-                return CalcPhysicalDamage(source, target, result);
+                return CalcPhysicalDamage(source, target, result * k);
             }
 
-            var k = 1d;
+            
             var reduction = 0d;
 
             var hero = source as Obj_AI_Hero;
@@ -5731,17 +5747,17 @@ namespace LeagueSharp.Common
 
         internal static Mastery GetMastery(this Obj_AI_Hero hero, Ferocity ferocity)
         {
-            return FindMastery(hero, MasteryPage.Offense, (int)ferocity);
+            return FindMastery(hero, MasteryPage.Ferocity, (int)ferocity);
         }
 
         internal static Mastery GetMastery(this Obj_AI_Hero hero, Cunning cunning)
         {
-            return FindMastery(hero, MasteryPage.Defense, (int)cunning);
+            return FindMastery(hero, MasteryPage.Cunning, (int)cunning);
         }
 
         internal static Mastery GetMastery(this Obj_AI_Hero hero, Resolve resolve)
         {
-            return FindMastery(hero, MasteryPage.Utility, (int)resolve);
+            return FindMastery(hero, MasteryPage.Resolve, (int)resolve);
         }
 
         internal static bool IsActive(this Mastery mastery)
@@ -6306,7 +6322,7 @@ namespace LeagueSharp.Common
 
                 //Opressor: KICK 'EM WHEN THEY'RE DOWN You deal 2.5% increased damage to targets with impaired movement (slows, stuns, taunts, etc)
                 Mastery Opressor = hero.GetMastery(Ferocity.Oppresor);
-                if (Opressor != null && Opressor.IsActive() && targetHero.IsMoveImpaired())
+                if (targetHero != null && Opressor != null && Opressor.IsActive() && targetHero.IsMoveImpaired())
                 {
                     amount *= 1.025;
                 }
@@ -6317,18 +6333,18 @@ namespace LeagueSharp.Common
                     Mastery Merciless = hero.GetMastery(Cunning.Merciless);
                     if (Merciless != null && Merciless.IsActive() && targetHero.HealthPercent < 40)
                     {
-                        amount *= 1 + ((new double[] { 1, 2, 3, 4, 5 }[Merciless.Points]) / 100);
+                        amount *= 1 + Merciless.Points / 100f;
                     }
                 }
 
                 //Thunderlord's Decree: RIDE THE LIGHTNING Your 3rd ability or basic attack on an enemy champion shocks them, dealing 10 - 180(+0.2 bonus attack damage)(+0.1 ability power) magic damage in an area around them
                 if (false) // Need a good way to check if it is 3rd attack (Use OnProcessSpell/SpellBook.OnCast if have to)
                 {
-                    //Mastery Thunder = hero.GetMastery(Cunning.ThunderlordsDecree);
-                    //if (Thunder != null && Thunder.IsActive())
-                    //{
-                    //    // amount += 10 * hero.Level + (0.2 * hero.FlatPhysicalDamageMod) + (0.1 * hero.AbilityPower());
-                    //}
+                    Mastery Thunder = hero.GetMastery(Cunning.ThunderlordsDecree);
+                    if (Thunder != null && Thunder.IsActive())
+                    {
+                        // amount += 10 * hero.Level + (0.2 * hero.FlatPhysicalDamageMod) + (0.1 * hero.AbilityPower());
+                    }
                 }
             }
 
@@ -6368,7 +6384,7 @@ namespace LeagueSharp.Common
                 Mastery Fervor = hero.GetMastery(Ferocity.FervorofBattle);
                 if (Fervor != null && Fervor.IsActive())
                 {
-                    value += (new double[] { 1.6, 3.2, 4.8, 6.4, 8 }[hero.Level]) * hero.GetBuffCount("MasteryOnHitDamageStacker");
+                    value += (0.9 + hero.Level * 0.42) * hero.GetBuffCount("MasteryOnHitDamageStacker");
                 }
             }
 
