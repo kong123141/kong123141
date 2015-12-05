@@ -267,10 +267,10 @@ namespace LeagueSharp.Common
                     new MenuItem("SelTColor", "Focus selected target color").SetShared().SetValue(new Circle(true, Color.Red)));
                 focusMenu.AddItem(
                     new MenuItem("ForceFocusSelected", "Only attack selected target").SetShared().SetValue(false));
-                focusMenu.AddItem(new MenuItem("Fuckingbitch", "If have Soraka Auto Set Levels").SetShared().SetValue(false));
-                focusMenu.AddItem(new MenuItem("Fuckingbitchdanger", "More Danger with ADC").SetShared().SetValue(false));
-                focusMenu.AddItem(new MenuItem("Fuckingbitchifplayerlevels", "If Player Levels >= Set Levels").SetShared().SetValue(new Slider(9, 1, 19)));
-                focusMenu.AddItem(new MenuItem("SetBitchLevels", "The Soraka Danger Levels").SetShared().SetValue(new Slider(1, 1, 5)));
+                focusMenu.AddItem(new MenuItem("Fuckingbitch", "\u5047\u5982\u5BF9\u9762\u6709\u7D22\u62C9\u5361\u81EA\u52A8\u8BBE\u7F6E").SetShared().SetValue(false));
+                focusMenu.AddItem(new MenuItem("Fuckingbitchdanger", "\u5BF9\u7EBF\u65F6\u4F18\u5148\u6253\u7D22\u62C9\u5361\u518D\u6253\u0041\u0044").SetShared().SetValue(false));
+                focusMenu.AddItem(new MenuItem("Fuckingbitchifplayerlevels", "\u5F53\u81EA\u5DF1\u7684\u7B49\u7EA7\u003E\u003D\u6062\u590D\u6B63\u5E38\u8BBE\u7F6E").SetShared().SetValue(new Slider(9, 1, 19)));
+                focusMenu.AddItem(new MenuItem("SetBitchLevels", "\u6B63\u5E38\u7D22\u62C9\u5361\u7684\u5371\u9669\u7A0B\u5EA6\u0028\u0035\u6700\u9AD8\u0029").SetShared().SetValue(new Slider(1, 1, 5)));
                 focusMenu.AddItem(new MenuItem("sep", ""));
                 focusMenu.AddItem(
                     new MenuItem("ForceFocusSelectedKeys", "Enable only attack selected Keys").SetShared().SetValue(false));
