@@ -52,7 +52,8 @@ namespace LeagueSharp.Common
             Closest,
             NearMouse,
             LessAttack,
-            LessCast
+            LessCast,
+            MostStack
         }
 
         #endregion
@@ -180,7 +181,7 @@ namespace LeagueSharp.Common
                 "Alistar", "Amumu", "Bard", "Blitzcrank", "Braum", "Cho'Gath", "Dr. Mundo", "Garen", "Gnar",
                 "Hecarim", "Janna", "Jarvan IV", "Leona", "Lulu", "Malphite", "Nami", "Nasus", "Nautilus", "Nunu",
                 "Olaf", "Rammus", "Renekton", "Sejuani", "Shen", "Shyvana", "Singed", "Sion", "Skarner", "Sona",
-                 "Taric", "TahmKench", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra"
+                "Soraka", "Taric", "TahmKench", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra"
             };
 
             string[] p2 =
@@ -206,11 +207,6 @@ namespace LeagueSharp.Common
                 "Xerath", "Zed", "Ziggs"
             };
 
-            string[] fuckbitch =
-            {
-                "Soraka"
-            };
-
             if (p1.Contains(championName))
             {
                 return 1;
@@ -222,31 +218,6 @@ namespace LeagueSharp.Common
             if (p3.Contains(championName))
             {
                 return 3;
-            }
-            if(fuckbitch.Contains(championName))
-            {
-                if(_configMenu.Item("FuckingBitch").GetValue<bool>())
-                {
-                    if(ObjectManager.Player.Level >= _configMenu.Item("Fuckingbitchifplayerlevels").GetValue<Slider>().Value)
-                    {
-                        return (_configMenu.Item("SetBitchLevels").GetValue<Slider>().Value);
-                    }
-                    else
-                    {
-                        if(_configMenu.Item("Fuckingbitchdanger").GetValue<bool>())
-                        {
-                            return 5;
-                        }
-                        else
-                        {
-                            return 4;
-                        }
-                    }
-                }
-                else
-                {
-                    return 1;
-                }
             }
             return p4.Contains(championName) ? 4 : 1;
         }
@@ -267,10 +238,6 @@ namespace LeagueSharp.Common
                     new MenuItem("SelTColor", "Focus selected target color").SetShared().SetValue(new Circle(true, Color.Red)));
                 focusMenu.AddItem(
                     new MenuItem("ForceFocusSelected", "Only attack selected target").SetShared().SetValue(false));
-                focusMenu.AddItem(new MenuItem("Fuckingbitch", "\u5047\u5982\u5BF9\u9762\u6709\u7D22\u62C9\u5361\u81EA\u52A8\u8BBE\u7F6E").SetShared().SetValue(false));
-                focusMenu.AddItem(new MenuItem("Fuckingbitchdanger", "\u5BF9\u7EBF\u65F6\u4F18\u5148\u6253\u7D22\u62C9\u5361\u518D\u6253\u0041\u0044").SetShared().SetValue(false));
-                focusMenu.AddItem(new MenuItem("Fuckingbitchifplayerlevels", "\u5F53\u81EA\u5DF1\u7684\u7B49\u7EA7\u003E\u003D\u6062\u590D\u6B63\u5E38\u8BBE\u7F6E").SetShared().SetValue(new Slider(9, 1, 19)));
-                focusMenu.AddItem(new MenuItem("SetBitchLevels", "\u6B63\u5E38\u7D22\u62C9\u5361\u7684\u5371\u9669\u7A0B\u5EA6\u0028\u0035\u6700\u9AD8\u0029").SetShared().SetValue(new Slider(1, 1, 5)));
                 focusMenu.AddItem(new MenuItem("sep", ""));
                 focusMenu.AddItem(
                     new MenuItem("ForceFocusSelectedKeys", "Enable only attack selected Keys").SetShared().SetValue(false));
@@ -306,6 +273,8 @@ namespace LeagueSharp.Common
                 config.AddItem(
                     new MenuItem("TargetingMode", "Target Mode").SetShared()
                         .SetValue(new StringList(Enum.GetNames(typeof (TargetingMode)))));
+                config.AddItem(
+                    new MenuItem("stack.count", "Stack Count").SetValue(new Slider(2, 1, 20))).SetTooltip("Only for Stack Mode");
 
                 CommonMenu.Config.AddSubMenu(config);
 
@@ -446,6 +415,18 @@ namespace LeagueSharp.Common
                    !IsInvulnerable(target, damageType, ignoreShieldSpells);
         }
 
+        private static string[] StackNames =
+            {
+                "KalistaExpungeMarker",
+                "vaynesilvereddebuff",
+                "twitchdeadlyvenom",
+                "EkkoStacks",
+                "dariushemo",
+                "gnarwproc",
+                "TahmKenchPDebuffCounter",
+                "varuswdebuff",
+            };
+
         public static Obj_AI_Hero GetTarget(Obj_AI_Base champion,
             float range,
             DamageType type,
@@ -504,7 +485,7 @@ namespace LeagueSharp.Common
 
                     case TargetingMode.MostAP:
                         return targets.MaxOrDefault(hero => hero.BaseAbilityDamage + hero.FlatMagicDamageMod);
-
+						
                     case TargetingMode.Closest:
                         return
                             targets.MinOrDefault(
@@ -534,6 +515,12 @@ namespace LeagueSharp.Common
                                 hero =>
                                     champion.CalcDamage(hero, Damage.DamageType.Magical, 100) / (1 + hero.Health) *
                                     GetPriority(hero));
+                    
+                    case TargetingMode.MostStack:
+                        return targets.MaxOrDefault(hero =>
+                            hero.Buffs.Where(x => StackNames.Contains(x.Name.ToLower()) &&
+                                x.Count >= _configMenu.Item("stack.count").GetValue<Slider>().Value)
+                                .Sum(buff => buff.Count));
                 }
             }
             catch (Exception e)
