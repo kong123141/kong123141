@@ -25,7 +25,8 @@
             fl.AddItem(new MenuItem("SaySomething1", "By huabian"));
             CommonMenu.Config.AddSubMenu(fl);
 
-            fl.Item("Disable Drawing").ValueChanged += Flowers_ValueChanged;
+            fl.Item("Disable Drawing").ValueChanged += DisableDrawing;
+            fl.Item("disable say").ValueChanged += DisableSay;
 
             if (fl.Item("SaySomething").GetValue<bool>())
             {
@@ -42,49 +43,16 @@
                 });
             }
 
-            Game.OnUpdate += Game_OnUpdate;
         }
 
-        private static void Flowers_ValueChanged(object sender, OnValueChangeEventArgs e)
+        private static void DisableSay(object sender, OnValueChangeEventArgs e)
         {
-            if (fl.Item("Disable Drawing").GetValue<KeyBind>().Active)
-            {
-                LeagueSharp.Hacks.DisableDrawings = true;
-            }
-            else
-            {
-                LeagueSharp.Hacks.DisableDrawings = false;
-            }
+            Lost.DisableSay = e.GetNewValue<bool>();
         }
 
-        private static void Game_OnUpdate(EventArgs args)
+        private static void DisableDrawing(object sender, OnValueChangeEventArgs e)
         {
-            /*if (fl.Item("zoom hack").IsActive())
-            {
-                Lost.ZoomHack = true;
-            }
-            else
-            {
-                Lost.ZoomHack = false;
-            }*/
-
-            if (fl.Item("disable say").GetValue<KeyBind>().Active)
-            {
-                Lost.DisableSay = true;
-            }
-            else
-            {
-                Lost.DisableSay = false;
-            }
-
-            /*if (fl.Item("Tower Ranges").GetValue<KeyBind>().Active)
-            {
-                Lost.TowerRanges = true;
-            }
-            else
-            {
-                Lost.TowerRanges = false;
-            }*/
+            Lost.DisableDrawings = e.GetNewValue<KeyBind>().Active;
         }
     }
 }
