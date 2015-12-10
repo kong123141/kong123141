@@ -5707,16 +5707,6 @@ namespace LeagueSharp.Common
 
                     result += d;
                 }
-
-                //SAVAGERY: BONUS DAMAGE TO MINIONS AND MONSTERS 1/2/3/4/5 on single target spells and basic attacks
-                if (target is Obj_AI_Minion)
-                {
-                    var savagery = hero.GetMastery(Cunning.Savagery);
-                    if(savagery != null)
-                    {
-                        result += savagery.Points;
-                    }
-                }
             }
 
             var targetHero = target as Obj_AI_Hero;
@@ -5736,7 +5726,7 @@ namespace LeagueSharp.Common
                 }
             }
 
-            return CalcPhysicalDamage(source, target, (result - reduction) * k);
+            return CalcPhysicalDamage(source, target, (result - reduction) * k + PassiveFlatMod(source, target));
         }
 
         internal static Mastery FindMastery(this Obj_AI_Hero @hero, MasteryPage page, int id)
@@ -6021,7 +6011,7 @@ namespace LeagueSharp.Common
                 source,
                 target,
                 PassivePercentMod(source, target, value) * amount,
-                DamageType.Magical) + PassiveFlatMod(source, target);
+                DamageType.Magical);
 
             return damage;
         }
@@ -6037,12 +6027,14 @@ namespace LeagueSharp.Common
         {
             double armorPenetrationPercent = source.PercentArmorPenetrationMod;
             double armorPenetrationFlat = source.FlatArmorPenetrationMod;
+            double bonusArmorPenetrationMod = source.PercentBonusArmorPenetrationMod;
 
             // Minions return wrong percent values.
             if (source is Obj_AI_Minion)
             {
                 armorPenetrationFlat = 0d;
                 armorPenetrationPercent = 1d;
+                bonusArmorPenetrationMod = 1d;
             }
 
             // Turrets too.
@@ -6050,7 +6042,10 @@ namespace LeagueSharp.Common
             {
                 armorPenetrationFlat = 0d;
                 armorPenetrationPercent = 1d;
+                bonusArmorPenetrationMod = 1d;
             }
+
+            
 
             if (source is Obj_AI_Turret)
             {
@@ -6068,26 +6063,28 @@ namespace LeagueSharp.Common
 
             // Penetration can't reduce armor below 0.
             var armor = target.Armor;
+            var bonusArmor = target.Armor - target.CharData.Armor;
+
 
             double value;
             if (armor < 0)
             {
                 value = 2 - 100 / (100 - armor);
             }
-            else if ((armor * armorPenetrationPercent) - armorPenetrationFlat < 0)
+            else if ((armor * armorPenetrationPercent) - (bonusArmor * (1 - bonusArmorPenetrationMod)) - armorPenetrationFlat < 0)
             {
                 value = 1;
             }
             else
             {
-                value = 100 / (100 + (armor * armorPenetrationPercent) - armorPenetrationFlat);
+                value = 100 / (100 + (armor * armorPenetrationPercent) - (bonusArmor * (1 - bonusArmorPenetrationMod)) - armorPenetrationFlat);
             }
 
             var damage = DamageReductionMod(
                 source,
                 target,
                 PassivePercentMod(source, target, value) * amount,
-                DamageType.Physical) + PassiveFlatMod(source, target);
+                DamageType.Physical);
 
             // Take into account the percent passives, flat passives and damage reduction.
             return damage;
