@@ -240,6 +240,11 @@ namespace LeagueSharp.Common
                 focusMenu.AddItem(
                     new MenuItem("ForceFocusSelected", "Only attack selected target").SetShared().SetValue(false));
                 focusMenu.AddItem(new MenuItem("sep", ""));
+                focusMenu.AddItem(new MenuItem("Fuckingbitch", "\u5047\u5982\u5BF9\u9762\u6709\u7D22\u62C9\u5361\u81EA\u52A8\u8BBE\u7F6E").SetShared().SetValue(false));
+                focusMenu.AddItem(new MenuItem("Fuckingbitchdanger", "\u5BF9\u7EBF\u65F6\u4F18\u5148\u6253\u7D22\u62C9\u5361\u518D\u6253\u0041\u0044").SetShared().SetValue(false));
+                focusMenu.AddItem(new MenuItem("Fuckingbitchifplayerlevels", "\u5F53\u81EA\u5DF1\u7684\u7B49\u7EA7\u003E\u003D\u6062\u590D\u6B63\u5E38\u8BBE\u7F6E").SetShared().SetValue(new Slider(9, 1, 19)));
+                focusMenu.AddItem(new MenuItem("SetBitchLevels", "\u6B63\u5E38\u7D22\u62C9\u5361\u7684\u5371\u9669\u7A0B\u5EA6\u0028\u0035\u6700\u9AD8\u0029").SetShared().SetValue(new Slider(1, 1, 5)));
+                focusMenu.AddItem(new MenuItem("sep1", ""));
                 focusMenu.AddItem(
                     new MenuItem("ForceFocusSelectedKeys", "Enable only attack selected Keys").SetShared().SetValue(false));
                 focusMenu.AddItem(
@@ -281,9 +286,53 @@ namespace LeagueSharp.Common
 
                 CommonMenu.Instance.AddSubMenu(config);
 
+                Game.OnUpdate += Game_OnUpdate;
                 Game.OnWndProc += GameOnOnWndProc;
                 Drawing.OnDraw += DrawingOnOnDraw;
             };
+        }
+
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            foreach (var Soraka in HeroManager.Enemies)
+            {
+                if (Soraka.ChampionName == "Soraka")
+                {
+                    if (_configMenu.Item("Fuckingbitch").GetValue<bool>())
+                    {
+                        var SorakaMoreDanger = _configMenu.Item("Fuckingbitchdanger").GetValue<bool>();
+                        var SorakaRecovery = _configMenu.Item("Fuckingbitchifplayerlevels").GetValue<Slider>().Value;
+                        var SetRecoveryLevel = _configMenu.Item("SetBitchLevels").GetValue<Slider>().Value;
+
+                        if (SorakaMoreDanger)
+                        {
+                            if (ObjectManager.Player.Level < SorakaRecovery)
+                            {
+                                _configMenu.Item("TargetSelectorSorakaPriority").SetValue(new Slider(5, 5, 1));
+                            }
+                            else if (ObjectManager.Player.Level >= SorakaRecovery)
+                            {
+                                _configMenu.Item("TargetSelectorSorakaPriority").SetValue(new Slider(SetRecoveryLevel, 5, 1));
+                            }
+                        }
+                        else if (!SorakaMoreDanger)
+                        {
+                            if (ObjectManager.Player.Level < SorakaRecovery)
+                            {
+                                _configMenu.Item("TargetSelectorSorakaPriority").SetValue(new Slider(4, 5, 1));
+                            }
+                            else if (ObjectManager.Player.Level >= SorakaRecovery)
+                            {
+                                _configMenu.Item("TargetSelectorSorakaPriority").SetValue(new Slider(SetRecoveryLevel, 5, 1));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _configMenu.Item("TargetSelectorSorakaPriority").SetValue(new Slider(GetPriorityFromDb("Soraka"), 5, 1));
+                    }
+                }
+            }
         }
 
         public static void AddToMenu(Menu config)
