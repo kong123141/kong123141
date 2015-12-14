@@ -279,7 +279,7 @@ namespace LeagueSharp.Common
                         .SetValue(new StringList(Enum.GetNames(typeof (TargetingMode)))));
 
 
-                CommonMenu.Config.AddSubMenu(config);
+                CommonMenu.Instance.AddSubMenu(config);
 
                 Game.OnWndProc += GameOnOnWndProc;
                 Drawing.OnDraw += DrawingOnOnDraw;
@@ -322,13 +322,6 @@ namespace LeagueSharp.Common
             // Kayle's Intervention (R)
             if (target.HasBuff("JudicatorIntervention"))
             {
-                return true;
-            }
-
-            // Poppy's Diplomatic Immunity (R)
-            if (target.HasBuff("DiplomaticImmunity") && !ObjectManager.Player.HasBuff("poppyulttargetmark"))
-            {
-                //TODO: Get the actual target mark buff name
                 return true;
             }
 

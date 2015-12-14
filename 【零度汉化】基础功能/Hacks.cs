@@ -1,4 +1,6 @@
-﻿namespace LeagueSharp.Common
+﻿using System;
+
+namespace LeagueSharp.Common
 {
     /// <summary>
     /// Adds hacks to the menu.
@@ -50,8 +52,7 @@
                     {
                         LeagueSharp.Hacks.TowerRanges = args.GetNewValue<bool>();
                     };
-
-                CommonMenu.Config.AddSubMenu(menu);
+                CommonMenu.Instance.AddSubMenu(menu);
             };
         }
     }

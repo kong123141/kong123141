@@ -1,7 +1,6 @@
 ﻿namespace LeagueSharp.Common
 {
     using System;
-    using System.Threading;
     using Lost = LeagueSharp.Hacks;
 
     class Flowers
@@ -10,7 +9,7 @@
         public static float gameTime1 = 0;
         public static readonly Menu fl = new Menu("Flowers Utility", "Flowers Utility");
 
-        internal static void Initilalize()
+        internal static void Initialize()
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
@@ -23,7 +22,7 @@
             //fl.AddItem(new MenuItem("Tower Ranges", "Show enemy tower range").SetValue(false));
             fl.AddItem(new MenuItem("SaySomething", "Stop script loading information").SetValue(false));
             fl.AddItem(new MenuItem("SaySomething1", "By huabian"));
-            CommonMenu.Config.AddSubMenu(fl);
+            CommonMenu.Instance.AddSubMenu(fl);
 
             fl.Item("Disable Drawing").ValueChanged += DisableDrawing;
             fl.Item("disable say").ValueChanged += DisableSay;
