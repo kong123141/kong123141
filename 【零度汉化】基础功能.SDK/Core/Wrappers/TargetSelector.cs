@@ -365,15 +365,15 @@ namespace LeagueSharp.SDK.Core.Wrappers
                             menu.Add(new MenuSlider("ts" + enemy.ChampionName, enemy.ChampionName, priority, 0, 5));
                         }
 
-                        menu.Add(new MenuSeparator("separatorOther", "其它设置"));
+                        menu.Add(new MenuSeparator("separatorOther", "其他设置"));
                     }
 
-                    menu.Add(new MenuBool("focusTarget", "集火选中的目标", true));
-                    menu.Add(new MenuBool("drawTarget", "标示目标", true));
-                    menu.Add(new MenuColor("drawTargetColor", "标示颜色", Color.Red));
-                    menu.Add(new MenuSeparator("separatorMode", "选择目标模式"));
+                    menu.Add(new MenuBool("focusTarget", "集中攻击选择的目标", true));
+                    menu.Add(new MenuBool("drawTarget", "显示目标", true));
+                    menu.Add(new MenuColor("drawTargetColor", "显示目标颜色", Color.Red));
+                    menu.Add(new MenuSeparator("separatorMode", "模式选择"));
                     menu.Add(
-                        new MenuList<TargetSelectorMode>("mode", "模式")
+                        new MenuList<TargetSelectorMode>("mode", "Mode")
                             { SelectedValue = TargetSelectorMode.AutoPriority });
 
                     rootMenu.Add(menu);

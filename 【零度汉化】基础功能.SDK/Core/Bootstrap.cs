@@ -66,7 +66,7 @@ namespace LeagueSharp.SDK.Core
             Logging.Write()(LogLevel.Info, "[SDK Bootstrap] GameObjects Initialized.");
 
             // Create L# menu
-            Variables.LeagueSharpMenu = new Menu("LeagueSharp", "LeagueSharp", true).Attach();
+            Variables.LeagueSharpMenu = new Menu("LeagueSharp", "【零度汉化】基础功能.SDK", true).Attach();
             MenuCustomizer.Initialize(Variables.LeagueSharpMenu);
             Logging.Write()(LogLevel.Info, "[SDK Bootstrap] LeagueSharp Menu Created.");
 

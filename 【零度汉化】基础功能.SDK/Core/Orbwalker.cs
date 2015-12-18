@@ -487,23 +487,23 @@ namespace LeagueSharp.SDK.Core
         /// </param>
         internal static void Initialize(Menu menu)
         {
-            var drawing = new Menu("drawings", "显示设置");
-            drawing.Add(new MenuBool("drawAARange", "显示平A范围", true));
-            drawing.Add(new MenuBool("drawKillableMinion", "补刀提示"));
-            drawing.Add(new MenuBool("drawKillableMinionFade", "补刀提示动画"));
+            var drawing = new Menu("drawings", "范围显示");
+            drawing.Add(new MenuBool("drawAARange", "显示AA范围", true));
+            drawing.Add(new MenuBool("drawKillableMinion", "显示可击杀的小兵"));
+            drawing.Add(new MenuBool("drawKillableMinionFade", "启动可击杀小兵淡出淡入效果"));
             Menu.Add(drawing);
 
-            var advanced = new Menu("advanced", "高级设置");
-            advanced.Add(new MenuSeparator("separatorMovement", "移动"));
+            var advanced = new Menu("advanced", "延迟设置");
+            advanced.Add(new MenuSeparator("separatorMovement", "移动延迟"));
             advanced.Add(
                 new MenuSlider(
                     "movementDelay",
-                    "移动延时",
+                    "移动延迟",
                     new Random(Variables.TickCount).Next(80, 121),
                     0,
                     500));
             advanced.Add(new MenuBool("movementScramble", "随机移动位置", true));
-            advanced.Add(new MenuSlider("movementExtraHold", "待命范围", 25, 0, 250));
+            advanced.Add(new MenuSlider("movementExtraHold", "额外控制区域", 25, 0, 250));
             advanced.Add(
                 new MenuSlider(
                     "movementMaximumDistance",
@@ -511,14 +511,14 @@ namespace LeagueSharp.SDK.Core
                     new Random().Next(500, 1201),
                     350,
                     1200));
-            advanced.Add(new MenuSeparator("separatorMisc", "其它设置"));
-            advanced.Add(new MenuSlider("miscExtraWindup", "额外延时", 80, 0, 200));
-            advanced.Add(new MenuSlider("miscFarmDelay", "补刀延时", 0, 0, 200));
-            advanced.Add(new MenuBool("miscPriorizeFarm", "优先补刀，其次消耗", true));
-            advanced.Add(new MenuBool("miscMissile", "碰撞检测", true));
-            advanced.Add(new MenuSeparator("separatorOther", "其它"));
+            advanced.Add(new MenuSeparator("separatorMisc", "杂项设置:↓"));
+            advanced.Add(new MenuSlider("miscExtraWindup", "额外走砍后摇", 80, 0, 200));
+            advanced.Add(new MenuSlider("miscFarmDelay", "打钱延迟(建议10以下)", 0, 0, 200));
+            advanced.Add(new MenuBool("miscPriorizeFarm", "骚扰时优先补刀", true));
+            advanced.Add(new MenuBool("miscMissile", "使用碰撞检测", true));
+            advanced.Add(new MenuSeparator("separatorOther", "其他"));
             advanced.Add(
-                new MenuButton("resetAll", "设置", "重置所有设置")
+                new MenuButton("resetAll", "设置", "恢复默认设置")
                     {
                         Action = () =>
                             {
@@ -530,12 +530,12 @@ namespace LeagueSharp.SDK.Core
                             }
                     });
             Menu.Add(advanced);
-            Menu.Add(new MenuSeparator("separatorKeys", "键位设置"));
-            Menu.Add(new MenuBool("enableOption", "启用走砍", true));
-            Menu.Add(new MenuKeyBind("lasthitKey", "补刀", Keys.X, KeyBindType.Press));
-            Menu.Add(new MenuKeyBind("laneclearKey", "清线", Keys.V, KeyBindType.Press));
-            Menu.Add(new MenuKeyBind("hybridKey", "消耗", Keys.C, KeyBindType.Press));
-            Menu.Add(new MenuKeyBind("orbwalkKey", "走砍", Keys.Space, KeyBindType.Press));
+            Menu.Add(new MenuSeparator("separatorKeys", "按键设置"));
+            Menu.Add(new MenuBool("enableOption", "启动SDK走砍", true));
+            Menu.Add(new MenuKeyBind("lasthitKey", "补刀按键", Keys.X, KeyBindType.Press));
+            Menu.Add(new MenuKeyBind("laneclearKey", "清线按键", Keys.V, KeyBindType.Press));
+            Menu.Add(new MenuKeyBind("hybridKey", "骚扰按键", Keys.C, KeyBindType.Press));
+            Menu.Add(new MenuKeyBind("orbwalkKey", "走砍按键", Keys.Space, KeyBindType.Press));
 
             Menu.MenuValueChanged += (sender, args) =>
                 {
