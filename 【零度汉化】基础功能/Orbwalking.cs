@@ -116,7 +116,7 @@ namespace LeagueSharp.Common
             "dariusnoxiantacticsonh", "fioraflurry", "garenq","gravesmove",
             "hecarimrapidslash", "jaxempowertwo", "jaycehypercharge", "leonashieldofdaybreak", "luciane",
             "monkeykingdoubleattack", "mordekaisermaceofspades", "nasusq", "nautiluspiercinggaze", "netherblade",
-            "gangplankqwrapper", "poppydevastatingblow", "powerfist", "renektonpreexecute", "rengarq", "shyvanadoubleattack",
+            "gangplankqwrapper", "poppypassiveattack", "powerfist", "renektonpreexecute", "rengarq", "shyvanadoubleattack",
             "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble", "vie", "volibearq",
             "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "masochism", "illaoiw"
         };
@@ -139,7 +139,7 @@ namespace LeagueSharp.Common
             "yorickdecayedghoulbasicattack", "yorickravenousghoulbasicattack",
             "yorickspectralghoulbasicattack", "malzaharvoidlingbasicattack",
             "malzaharvoidlingbasicattack2", "malzaharvoidlingbasicattack3",
-            "kindredwolfbasicattack", "kindredbasicattackoverridelightbombfinal"
+            "kindredwolfbasicattack"
         };
 
 
@@ -149,7 +149,7 @@ namespace LeagueSharp.Common
         private static readonly string[] Attacks =
         {
             "caitlynheadshotmissile", "frostarrow", "garenslash2",
-            "kennenmegaproc", "lucianpassiveattack", "masteryidoublestrike", "quinnwenhanced", "renektonexecute",
+            "kennenmegaproc", "masteryidoublestrike", "quinnwenhanced", "renektonexecute",
             "renektonsuperexecute", "rengarnewpassivebuffdash", "trundleq", "xenzhaothrust", "xenzhaothrust2",
             "xenzhaothrust3", "viktorqbuff"
         };
@@ -874,7 +874,6 @@ namespace LeagueSharp.Common
                 _config.AddItem(new MenuItem("MissileCheck", "Use Missile Check").SetShared().SetValue(true));
 
                 /* Delay sliders */
-                _config.AddItem(new MenuItem("AutoSetWindUpTime", "\u81EA\u52A8\u8BBE\u7F6E\u540E\u6447\u0028\u9ED8\u8BA4\u6309\u952E\u0053\u0029").SetShared().SetValue(new KeyBind('S', KeyBindType.Press)));
                 _config.AddItem(
                     new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 0, 200)));
                 _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(30, 0, 200)));
@@ -1384,54 +1383,11 @@ namespace LeagueSharp.Common
                         target, (_orbwalkingPoint.To2D().IsValid()) ? _orbwalkingPoint : Game.CursorPos,
                         _config.Item("ExtraWindup").GetValue<Slider>().Value,
                         Math.Max(_config.Item("HoldPosRadius").GetValue<Slider>().Value, 30));
-
-                    if (_config.Item("AutoSetWindUpTime").GetValue<KeyBind>().Active)
-                    {
-                        AutoSetExByHuabian();
-                    }
-
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-            }
-
-            /// <summary>
-            /// ExtraWindupTime C'
-            /// </summary>
-            private static int extraWindup;
-
-            /// <summary>
-            /// Auto Set ExtraWindUp Time 
-            /// </summary>
-            private void AutoSetExByHuabian()
-            {
-                if (!_config.Item("AutoSetWindUpTime").GetValue<KeyBind>().Active)
-                {
-                    extraWindup = _config.Item("ExtraWindup").GetValue<Slider>().Value;
-                    return;
-                }
-                var additional = 0;
-                if (Game.Ping >= 100)
-                    additional = Game.Ping / 100 * 5;
-                else if (Game.Ping > 40 && Game.Ping < 100)
-                    additional = Game.Ping / 100 * 10;
-                else if (Game.Ping <= 40)
-                    additional = +15;
-
-                var windUp = Game.Ping - 20 + additional;
-
-                if (windUp < 40 && 20 < windUp)
-                    windUp = 36;
-                else if (windUp < 20 && 10 < windUp)
-                    windUp = 14;
-                else if (windUp < 10)
-                    windUp = 5;
-
-                _config.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
-
-                extraWindup = windUp;
             }
 
             /// <summary>
