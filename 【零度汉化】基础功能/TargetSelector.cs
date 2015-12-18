@@ -74,12 +74,10 @@ namespace LeagueSharp.Common
                 UsingCustom = value;
                 if (value)
                 {
-                    Game.OnWndProc -= GameOnOnWndProc;
                     Drawing.OnDraw -= DrawingOnOnDraw;
                 }
                 else
                 {
-                    Game.OnWndProc += GameOnOnWndProc;
                     Drawing.OnDraw += DrawingOnOnDraw;
                 }
             }
@@ -284,11 +282,14 @@ namespace LeagueSharp.Common
                         .SetValue(new StringList(Enum.GetNames(typeof (TargetingMode)))));
 
 
-                CommonMenu.Instance.AddSubMenu(config);
-
                 Game.OnUpdate += Game_OnUpdate;
+                CommonMenu.Instance.AddSubMenu(config);
                 Game.OnWndProc += GameOnOnWndProc;
-                Drawing.OnDraw += DrawingOnOnDraw;
+
+                if (!CustomTS)
+                {
+                    Drawing.OnDraw += DrawingOnOnDraw;
+                }
             };
         }
 
@@ -333,8 +334,8 @@ namespace LeagueSharp.Common
                     }
                 }
             }
-        }
 
+        }
         public static void AddToMenu(Menu config)
         {
             config.AddItem(new MenuItem("Alert", "----Use TS in Common Menu----"));
@@ -462,13 +463,13 @@ namespace LeagueSharp.Common
 
         private static string[] StackNames =
             {
-                "KalistaExpungeMarker",
+                "kalistaexpungemarker",
                 "vaynesilvereddebuff",
                 "twitchdeadlyvenom",
-                "EkkoStacks",
+                "ekkostacks",
                 "dariushemo",
                 "gnarwproc",
-                "TahmKenchPDebuffCounter",
+                "tahmkenchpdebuffcounter",
                 "varuswdebuff",
             };
 
