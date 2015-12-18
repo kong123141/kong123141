@@ -25,6 +25,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LeagueSharp.Common.Data;
+using Ferocity = LeagueSharp.Common.Data.MasteryData.Ferocity;
+using Cunning = LeagueSharp.Common.Data.MasteryData.Cunning;
+using Resolve = LeagueSharp.Common.Data.MasteryData.Resolve;
+
 
 #endregion
 
@@ -3688,37 +3693,61 @@ namespace LeagueSharp.Common
                 "Poppy",
                 new List<DamageSpell>
                     {
-                        //Q
+                        //Q - single hit
                         new DamageSpell
                             {
-                                Slot = SpellSlot.Q, DamageType = DamageType.Magical,
+                                Slot = SpellSlot.Q, DamageType = DamageType.Physical,
                                 Damage =
                                     (source, target, level) =>
-                                    Math.Min(
-                                        new double[] { 75, 150, 225, 300, 375 }[level],
-                                        new double[] { 20, 40, 60, 80, 100 }[level]
-                                        + 0.08 * target.MaxHealth
-                                        + 1 * (source.BaseAttackDamage + source.FlatPhysicalDamageMod)
-                                        + 0.6 * source.AbilityPower())
+                                    new double[] {40, 70, 100, 130, 160}[level]
+                                    + 0.65 * source.FlatPhysicalDamageMod
+                                    + 0.06 * target.MaxHealth
+                            },
+                        //Q - both hits
+                        new DamageSpell
+                            {
+                                Slot = SpellSlot.Q, Stage = 1, DamageType = DamageType.Physical,
+                                Damage =
+                                    (source, target, level) =>
+                                    (new double[] {80, 140, 200, 260, 320}[level]
+                                    + 1.3 * source.FlatPhysicalDamageMod
+                                    + 0.12 * target.MaxHealth)
+                            },
+                        //W
+                        new DamageSpell
+                            {
+                                Slot = SpellSlot.W, DamageType = DamageType.Magical,
+                                Damage =
+                                    (source, target, level) =>
+                                    new double[] { 70, 110, 150, 190, 230 }[level]
+                                    + 0.7 * source.AbilityPower()
                             },
                         //E - without colliding
                         new DamageSpell
                             {
-                                Slot = SpellSlot.E, DamageType = DamageType.Magical,
+                                Slot = SpellSlot.E, DamageType = DamageType.Physical,
                                 Damage =
                                     (source, target, level) =>
-                                    new double[] { 50, 75, 100, 125, 150 }[level]
-                                    + 0.4 * source.AbilityPower()
+                                    new double[] { 50, 70, 90, 110, 130 }[level]
+                                    + 0.5 * source.FlatPhysicalDamageMod
                             },
                         //E - with colliding
                         new DamageSpell
                             {
-                                Slot = SpellSlot.E, Stage = 1, DamageType = DamageType.Magical,
+                                Slot = SpellSlot.E, Stage = 1, DamageType = DamageType.Physical,
                                 Damage =
                                     (source, target, level) =>
-                                    new double[] { 50, 75, 100, 125, 150 }[level]
-                                    + new double[] { 75, 125, 175, 225, 275 }[level]
-                                    + 0.8 * source.AbilityPower()
+                                    (new double[] { 100, 140, 180, 220, 260 }[level]
+                                    + 1 * source.FlatPhysicalDamageMod)
+                            },
+                        //R
+                        new DamageSpell
+                            {
+                                Slot = SpellSlot.R, DamageType = DamageType.Physical,
+                                Damage =
+                                    (source, target, level) =>
+                                    (new double[] { 200, 300, 400 }[level]
+                                    + 0.9 * source.FlatPhysicalDamageMod)
                             },
                     });
 
@@ -5737,88 +5766,6 @@ namespace LeagueSharp.Common
             return CalcPhysicalDamage(source, target, (result - reduction) * k + PassiveFlatMod(source, target));
         }
 
-        internal static Mastery FindMastery(this Obj_AI_Hero @hero, MasteryPage page, int id)
-        {
-            var mastery = @hero.Masteries.FirstOrDefault(m => m.Page == page && m.Id == id);
-            return mastery;
-        }
-
-        internal static Mastery GetMastery(this Obj_AI_Hero hero, Ferocity ferocity)
-        {
-            return FindMastery(hero, MasteryPage.Ferocity, (int)ferocity);
-        }
-
-        internal static Mastery GetMastery(this Obj_AI_Hero hero, Cunning cunning)
-        {
-            return FindMastery(hero, MasteryPage.Cunning, (int)cunning);
-        }
-
-        internal static Mastery GetMastery(this Obj_AI_Hero hero, Resolve resolve)
-        {
-            return FindMastery(hero, MasteryPage.Resolve, (int)resolve);
-        }
-
-        internal static bool IsActive(this Mastery mastery)
-        {
-            return mastery.Points >= 1;
-        }
-
-        internal static bool IsMoveImpaired(this Obj_AI_Hero hero)
-        {
-            return hero.HasBuffOfType(BuffType.Fear) || hero.HasBuffOfType(BuffType.Slow) || hero.HasBuffOfType(BuffType.Snare) || hero.HasBuffOfType(BuffType.Stun) ||
-                   hero.HasBuffOfType(BuffType.Taunt);
-        }
-
-        internal enum Ferocity
-        {
-            Fury = 65,
-            Sorcery = 68,
-            DoubleEdgedSword = 81,
-            Vampirism = 97,
-            NaturalTalent = 100,
-            Feast = 82,
-            BountyHunter = 113,
-            Oppresor = 114,
-            BatteringBlows = 129,
-            PiercingThoughts = 132,
-            WarlordsBloodlust = 145,
-            FervorofBattle = 146,
-            DeathFireTouch = 137
-        }
-
-        internal enum Cunning
-        {
-            Wanderer = 65,
-            Savagery = 66,
-            RunicAffinity = 81,
-            SecretStash = 82,
-            Meditation = 98,
-            Merciless = 97,
-            Bandit = 114,
-            DangerousGame = 115,
-            Precision = 129,
-            Intelligence = 130,
-            StormraidersSurge = 145,
-            ThunderlordsDecree = 146,
-            WindspeakerBlessing = 147
-        }
-        
-        internal enum Resolve
-        {
-            Recovery = 65,
-            Unyielding = 66,
-            Explorer = 81,
-            ToughSkin = 82,
-            RunicArmor = 97,
-            VeteransScar = 98,
-            Insight = 113,
-            Swiftness = 129,
-            LegendaryGuardian = 130,
-            GraspoftheUndying = 145,
-            StrengthoftheAges = 146,
-            BondofStones = 147
-        }
-
         /// <summary>
         ///     Calculates the combo damage of the given spell combo on the given target.
         /// </summary>
@@ -6245,13 +6192,6 @@ namespace LeagueSharp.Common
                                   target.Spellbook.GetSpell(SpellSlot.W).Level - 1] / (source is Obj_AI_Turret ? 2 : 1);
                 }
 
-                // Valiant Fighter
-                // + Poppy reduces all damage that exceeds 10% of her current health by 50%.
-                if (target.HasBuff("PoppyValiantFighter") && !(source is Obj_AI_Turret) && amount / target.Health > 0.1d)
-                {
-                    amount *= 0.5d;
-                }
-
                 // Shadow Dash
                 // + Shen reduces all physical damage by 50% from taunted enemies.
                 if (target.HasBuff("Shen Shadow Dash") && source.HasBuff("Taunt") && damageType == DamageType.Physical)
@@ -6345,11 +6285,11 @@ namespace LeagueSharp.Common
                 //Thunderlord's Decree: RIDE THE LIGHTNING Your 3rd ability or basic attack on an enemy champion shocks them, dealing 10 - 180(+0.2 bonus attack damage)(+0.1 ability power) magic damage in an area around them
                 if (false) // Need a good way to check if it is 3rd attack (Use OnProcessSpell/SpellBook.OnCast if have to)
                 {
-                    //Mastery Thunder = hero.GetMastery(Cunning.ThunderlordsDecree);
-                    //if (Thunder != null && Thunder.IsActive())
-                    //{
-                    //    // amount += 10 * hero.Level + (0.2 * hero.FlatPhysicalDamageMod) + (0.1 * hero.AbilityPower());
-                    //}
+                    Mastery Thunder = hero.GetMastery(Cunning.ThunderlordsDecree);
+                    if (Thunder != null && Thunder.IsActive())
+                    {
+                        // amount += 10 * hero.Level + (0.2 * hero.FlatPhysicalDamageMod) + (0.1 * hero.AbilityPower());
+                    }
                 }
             }
 
