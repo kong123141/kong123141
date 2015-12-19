@@ -13500,6 +13500,18 @@
 	"cast w on dragon": "\u653eW\u5230\u5c0f\u9f99",
 	"cast w on baron": "\u653eW\u5230\u5927\u9f99",
 	"#shooter reworked: ok": "\u3010\u96f6\u5ea6\u6c49\u5316\u3011\u795e\u5c04\u624b-\u65b0\u7248",
+	"zhonya's on dangerous spell": "\u4e2d\u4e9a\u7684\u5371\u9669\u6280\u80fd",
+	"use zhonya on low hp (beta)": "\u4f4e\u8840\u91cf\u4f7f\u7528\u4e2d\u4e9a\uff08\u6d4b\u8bd5\u7248\uff09",
+	"hp percent": "\u8840\u91cf\u0025",
+	"barrier activated": "\u5c4f\u969c\u6fc0\u6d3b",
+	"barrier percentage": "\u5c4f\u969c\u767e\u5206\u6bd4",
+	"barrier on damage dealt %": "\u5c4f\u969c\u4f24\u5bb3\u5904\u7406\u0025",
+	"heal on damage dealt %": "\u6cbb\u7597\u4f24\u5bb3\u0025",
+	"mobs": "\u5c0f\u602a",
+	"mikaels ally settings": "\u5e72\u9505\u961f\u53cb\u8bbe\u7f6e",
+	"cleanse on dangerous spell": "\u51c0\u5316\u5371\u9669\u6280\u80fd",
+	"draw jungle timers": "\u663e\u793a\u91ce\u533a\u8ba1\u65f6\u5668",
+	"place pink ward on unit stealth": "\u7528\u771f\u773c\u002f\u626b\u63cf\u68c0\u6d4b\u9690\u8eab",
 	"w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
