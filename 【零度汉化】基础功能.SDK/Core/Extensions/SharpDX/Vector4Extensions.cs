@@ -38,7 +38,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Angle between two vectors in float-units</returns>
         public static float AngleBetween(this Vector4 vector4, Vector4 toVector4)
         {
-            return AngleBetween(vector4, toVector4.ToVector3());
+            return vector4.ToVector2().AngleBetween(toVector4);
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Angle between two vectors in float-units</returns>
         public static float AngleBetween(this Vector4 vector4, Vector2 toVector2)
         {
-            return AngleBetween(vector4, toVector2.ToVector3());
+            return vector4.ToVector2().AngleBetween(toVector2);
         }
 
         /// <summary>
@@ -60,18 +60,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Angle between two vectors in float-units</returns>
         public static float AngleBetween(this Vector4 vector4, Vector3 toVector3)
         {
-            var theta = vector4.Polar() - toVector3.Polar();
-            if (theta < 0)
-            {
-                theta = theta + 360;
-            }
-
-            if (theta > 180)
-            {
-                theta = 360 - theta;
-            }
-
-            return theta;
+            return vector4.ToVector2().AngleBetween(toVector3);
         }
 
         /// <summary>
@@ -82,20 +71,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Closest Vector4</returns>
         public static Vector4 Closest(this Vector4 vector4, IEnumerable<Vector4> array)
         {
-            var result = Vector4.Zero;
-            var distance = float.MaxValue;
-
-            foreach (var vector in array)
-            {
-                var temporaryDistance = vector4.Distance(vector);
-                if (distance < temporaryDistance)
-                {
-                    distance = temporaryDistance;
-                    result = vector;
-                }
-            }
-
-            return result;
+            return vector4.ToVector2().Closest(array);
         }
 
         /// <summary>
@@ -106,20 +82,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Closest Vector3</returns>
         public static Vector3 Closest(this Vector4 vector4, IEnumerable<Vector3> array)
         {
-            var result = Vector3.Zero;
-            var distance = float.MaxValue;
-
-            foreach (var vector in array)
-            {
-                var temporaryDistance = vector4.Distance(vector);
-                if (distance < temporaryDistance)
-                {
-                    distance = temporaryDistance;
-                    result = vector;
-                }
-            }
-
-            return result;
+            return vector4.ToVector2().Closest(array);
         }
 
         /// <summary>
@@ -130,20 +93,31 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Closest Vector2</returns>
         public static Vector2 Closest(this Vector4 vector4, IEnumerable<Vector2> array)
         {
-            var result = Vector2.Zero;
-            var distance = float.MaxValue;
+            return vector4.ToVector2().Closest(array);
+        }
 
-            foreach (var vector in array)
-            {
-                var temporaryDistance = vector4.Distance(vector);
-                if (distance < temporaryDistance)
-                {
-                    distance = temporaryDistance;
-                    result = vector;
-                }
-            }
+        /// <summary>
+        ///     Counts the ally heroes in range.
+        /// </summary>
+        /// <param name="vector4">The vector4.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="originalUnit">The original unit.</param>
+        /// <returns></returns>
+        public static int CountAllyHeroesInRange(this Vector4 vector4, float range, Obj_AI_Base originalUnit = null)
+        {
+            return vector4.ToVector3().CountAllyHeroesInRange(range, originalUnit);
+        }
 
-            return result;
+        /// <summary>
+        ///     Counts the enemy heroes in range.
+        /// </summary>
+        /// <param name="vector4">The vector4.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="originalUnit">The original unit.</param>
+        /// <returns></returns>
+        public static int CountEnemyHeroesInRange(this Vector4 vector4, float range, Obj_AI_Base originalUnit = null)
+        {
+            return vector4.ToVector3().CountEnemyHeroesInRange(range, originalUnit);
         }
 
         /// <summary>
@@ -252,10 +226,12 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         ///     Returns if the Vector4 is on the screen.
         /// </summary>
         /// <param name="vector4">Extended SharpDX Vector4</param>
+        /// ///
+        /// <param name="radius">Radius</param>
         /// <returns>Is Vector4 on screen</returns>
-        public static bool IsOnScreen(this Vector4 vector4)
+        public static bool IsOnScreen(this Vector4 vector4, float radius = 0f)
         {
-            return vector4.ToVector3().IsOnScreen();
+            return vector4.ToVector3().IsOnScreen(radius);
         }
 
         /// <summary>
@@ -266,7 +242,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>The <see cref="bool" />.</returns>
         public static bool IsOrthogonal(this Vector4 vector4, Vector4 toVector4)
         {
-            return IsOrthogonal(vector4, toVector4.ToVector3());
+            return vector4.ToVector2().IsOrthogonal(toVector4);
         }
 
         /// <summary>
@@ -277,7 +253,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>The <see cref="bool" />.</returns>
         public static bool IsOrthogonal(this Vector4 vector4, Vector2 toVector2)
         {
-            return IsOrthogonal(vector4, toVector2.ToVector3());
+            return vector4.ToVector2().IsOrthogonal(toVector2);
         }
 
         /// <summary>
@@ -294,18 +270,27 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// </returns>
         public static bool IsOrthogonal(this Vector4 vector4, Vector3 toVector3)
         {
-            return Math.Abs((vector4.X * toVector3.X) + (vector4.Y * toVector3.Y)) < float.Epsilon;
+            return vector4.ToVector2().IsOrthogonal(toVector3);
         }
 
         /// <summary>
-        ///     Returns whether the given position is under a turret
+        ///     Returns whether the given position is under a ally turret
         /// </summary>
         /// <param name="position">Extended SharpDX Vector4</param>
-        /// <param name="enemyTurretsOnly">Include Enemy Turret Only</param>
         /// <returns>Is Position under a turret</returns>
-        public static bool IsUnderTurret(this Vector4 position, bool enemyTurretsOnly)
+        public static bool IsUnderAllyTurret(this Vector4 position)
         {
-            return position.ToVector3().IsUnderTurret(enemyTurretsOnly);
+            return position.ToVector2().IsUnderAllyTurret();
+        }
+
+        /// <summary>
+        ///     Returns whether the given position is under a enemy turret
+        /// </summary>
+        /// <param name="position">Extended SharpDX Vector4</param>
+        /// <returns>Is Position under a turret</returns>
+        public static bool IsUnderEnemyTurret(this Vector4 position)
+        {
+            return position.ToVector2().IsUnderEnemyTurret();
         }
 
         /// <summary>
@@ -393,23 +378,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Polar for Vector Angle (Degrees)</returns>
         public static float Polar(this Vector4 vector4)
         {
-            if (Math.Abs(vector4.X - 0) <= (float)1e-9)
-            {
-                return (vector4.Y > 0) ? 90 : (vector4.Y < 0) ? 270 : 0;
-            }
-
-            var theta = (float)(Math.Atan(vector4.Y / vector4.X) * (180 / Math.PI));
-            if (vector4.X < 0)
-            {
-                theta += 180;
-            }
-
-            if (theta < 0)
-            {
-                theta += 360;
-            }
-
-            return theta;
+            return vector4.ToVector2().Polar();
         }
 
         /// <summary>
@@ -424,9 +393,9 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
             var sin = Math.Sin(angle);
 
             return new Vector4(
-                (float)((vector4.X * cos) - (vector4.Y * sin)), 
-                (float)((vector4.Y * cos) + (vector4.X * sin)), 
-                vector4.Z, 
+                (float)((vector4.X * cos) - (vector4.Y * sin)),
+                (float)((vector4.Y * cos) + (vector4.X * sin)),
+                vector4.Z,
                 vector4.W);
         }
 

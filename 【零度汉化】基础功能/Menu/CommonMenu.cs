@@ -10,7 +10,7 @@
         /// <summary>
         ///     The menu instance.
         /// </summary>
-        internal static Menu Instance = new Menu("LeagueSharp.Common", "LeagueSharp.Common", true);
+        internal static Menu Instance = new Menu("\u3010\u96F6\u5EA6\u6C49\u5316\u3011\u57FA\u7840\u529F\u80FD", "LeagueSharp.Common", true);
 
         #endregion
 

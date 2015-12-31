@@ -38,18 +38,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>Angle between two vectors in float-units</returns>
         public static float AngleBetween(this Vector2 vector2, Vector2 toVector2)
         {
-            return AngleBetween(vector2, toVector2.ToVector3());
-        }
-
-        /// <summary>
-        ///     Returns the angle between two vectors.
-        /// </summary>
-        /// <param name="vector2">Extended SharpDX Vector2</param>
-        /// <param name="toVector3">SharpDX Vector3</param>
-        /// <returns>Angle between two vectors in float-units</returns>
-        public static float AngleBetween(this Vector2 vector2, Vector3 toVector3)
-        {
-            var theta = vector2.Polar() - toVector3.Polar();
+            var theta = vector2.Polar() - toVector2.Polar();
             if (theta < 0)
             {
                 theta = theta + 360;
@@ -67,11 +56,22 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         ///     Returns the angle between two vectors.
         /// </summary>
         /// <param name="vector2">Extended SharpDX Vector2</param>
+        /// <param name="toVector3">SharpDX Vector3</param>
+        /// <returns>Angle between two vectors in float-units</returns>
+        public static float AngleBetween(this Vector2 vector2, Vector3 toVector3)
+        {
+            return AngleBetween(vector2, toVector3.ToVector2());
+        }
+
+        /// <summary>
+        ///     Returns the angle between two vectors.
+        /// </summary>
+        /// <param name="vector2">Extended SharpDX Vector2</param>
         /// <param name="toVector4">SharpDX Vector4</param>
         /// <returns>Angle between two vectors in float-units</returns>
         public static float AngleBetween(this Vector2 vector2, Vector4 toVector4)
         {
-            return AngleBetween(vector2, toVector4.ToVector3());
+            return AngleBetween(vector2, toVector4.ToVector2());
         }
 
         /// <summary>
@@ -174,6 +174,30 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
             }
 
             return result;
+        }
+
+        /// <summary>
+        ///     Counts the ally heroes in range.
+        /// </summary>
+        /// <param name="vector2">The vector2.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="originalUnit">The original unit.</param>
+        /// <returns></returns>
+        public static int CountAllyHeroesInRange(this Vector2 vector2, float range, Obj_AI_Base originalUnit = null)
+        {
+            return vector2.ToVector3().CountAllyHeroesInRange(range, originalUnit);
+        }
+
+        /// <summary>
+        ///     Counts the enemy heroes in range.
+        /// </summary>
+        /// <param name="vector2">The vector2.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="originalUnit">The original unit.</param>
+        /// <returns></returns>
+        public static int CountEnemyHeroesInRange(this Vector2 vector2, float range, Obj_AI_Base originalUnit = null)
+        {
+            return vector2.ToVector3().CountEnemyHeroesInRange(range, originalUnit);
         }
 
         /// <summary>
@@ -424,10 +448,12 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         ///     Returns if the Vector2 is on the screen.
         /// </summary>
         /// <param name="vector2">Extended SharpDX Vector2</param>
+        /// ///
+        /// <param name="radius">Radius</param>
         /// <returns>Is Vector2 on screen</returns>
-        public static bool IsOnScreen(this Vector2 vector2)
+        public static bool IsOnScreen(this Vector2 vector2, float radius = 0f)
         {
-            return vector2.ToVector3().IsOnScreen();
+            return vector2.ToVector3().IsOnScreen(radius);
         }
 
         /// <summary>
@@ -438,7 +464,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>The <see cref="bool" />.</returns>
         public static bool IsOrthogonal(this Vector2 vector2, Vector2 toVector2)
         {
-            return IsOrthogonal(vector2, toVector2.ToVector3());
+            return Math.Abs((vector2.X * toVector2.X) + (vector2.Y * toVector2.Y)) < float.Epsilon;
         }
 
         /// <summary>
@@ -449,7 +475,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>The <see cref="bool" />.</returns>
         public static bool IsOrthogonal(this Vector2 vector2, Vector3 toVector3)
         {
-            return Math.Abs((vector2.X * toVector3.X) + (vector2.Y * toVector3.Y)) < float.Epsilon;
+            return IsOrthogonal(vector2, toVector3.ToVector2());
         }
 
         /// <summary>
@@ -460,7 +486,27 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>The <see cref="bool" />.</returns>
         public static bool IsOrthogonal(this Vector2 vector2, Vector4 toVector4)
         {
-            return IsOrthogonal(vector2, toVector4.ToVector3());
+            return IsOrthogonal(vector2, toVector4.ToVector2());
+        }
+
+        /// <summary>
+        ///     Returns whether the given position is under a ally turret
+        /// </summary>
+        /// <param name="position">Extended SharpDX Vector2</param>
+        /// <returns>Is Position under a turret</returns>
+        public static bool IsUnderAllyTurret(this Vector2 position)
+        {
+            return GameObjects.AllyTurrets.Any(turret => !turret.IsDead && turret.Distance(position) < 950);
+        }
+
+        /// <summary>
+        ///     Returns whether the given position is under a enemy turret
+        /// </summary>
+        /// <param name="position">Extended SharpDX Vector2</param>
+        /// <returns>Is Position under a turret</returns>
+        public static bool IsUnderEnemyTurret(this Vector2 position)
+        {
+            return GameObjects.EnemyTurrets.Any(turret => !turret.IsDead && turret.Distance(position) < 950);
         }
 
         /// <summary>
@@ -487,17 +533,6 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         public static bool IsUnderRectangle(this Vector2 point, float x, float y, float width, float height)
         {
             return point.X > x && point.X < x + width && point.Y > y && point.Y < y + height;
-        }
-
-        /// <summary>
-        ///     Returns whether the given position is under a turret
-        /// </summary>
-        /// <param name="position">Extended SharpDX Vector2</param>
-        /// <param name="enemyTurretsOnly">Include Enemy Turret Only</param>
-        /// <returns>Is Position under a turret</returns>
-        public static bool IsUnderTurret(this Vector2 position, bool enemyTurretsOnly)
-        {
-            return position.ToVector3().IsUnderTurret(enemyTurretsOnly);
         }
 
         /// <summary>
@@ -659,7 +694,7 @@ namespace LeagueSharp.SDK.Core.Extensions.SharpDX
         /// <returns>The <see cref="Vector3" /></returns>
         public static Vector3 ToVector3(this Vector2 vector2, float z = 0f)
         {
-            return new Vector3(vector2, z);
+            return new Vector3(vector2, z.Equals(0f) ? GameObjects.Player.ServerPosition.Z : z);
         }
 
         /// <summary>

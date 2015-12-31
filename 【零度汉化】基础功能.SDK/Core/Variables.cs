@@ -19,7 +19,9 @@ namespace LeagueSharp.SDK.Core
 {
     using System;
 
-    using UI.IMenu;
+    using LeagueSharp.SDK.Core.UI.IMenu;
+    using LeagueSharp.SDK.Core.Wrappers.Orbwalking;
+    using LeagueSharp.SDK.Core.Wrappers.TargetSelector;
 
     /// <summary>
     ///     Class that contains helpful variables.
@@ -29,18 +31,34 @@ namespace LeagueSharp.SDK.Core
         #region Static Fields
 
         /// <summary>
-        ///     The kit version.
-        /// </summary>
-        public static readonly Version KitVersion = typeof(Bootstrap).Assembly.GetName().Version;
-
-        /// <summary>
         ///     The league version.
         /// </summary>
         public static readonly Version GameVersion = new Version(Game.Version);
 
+        /// <summary>
+        ///     The kit version.
+        /// </summary>
+        public static readonly Version KitVersion = typeof(Bootstrap).Assembly.GetName().Version;
+
         #endregion
 
         #region Public Properties
+
+        /// <summary>
+        ///     Gets or sets the Orbwalker instance.
+        /// </summary>
+        /// <value>
+        ///     The orbwalker.
+        /// </value>
+        public static Orbwalker Orbwalker { get; internal set; }
+
+        /// <summary>
+        ///     Gets the TargetSelector instance.
+        /// </summary>
+        /// <value>
+        ///     The targetselector.
+        /// </value>
+        public static TargetSelector TargetSelector { get; internal set; }
 
         /// <summary>
         ///     Gets the Safe TickCount.

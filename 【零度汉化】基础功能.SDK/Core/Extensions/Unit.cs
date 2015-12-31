@@ -19,10 +19,11 @@ namespace LeagueSharp.SDK.Core.Extensions
 {
     using System;
     using System.Linq;
-    using Enumerations;
+
     using global::SharpDX;
-    using SharpDX;
-    using Wrappers;
+
+    using LeagueSharp.SDK.Core.Enumerations;
+    using LeagueSharp.SDK.Core.Extensions.SharpDX;
 
     /// <summary>
     ///     Provides helpful extensions to Units.
@@ -30,6 +31,28 @@ namespace LeagueSharp.SDK.Core.Extensions
     public static class Unit
     {
         #region Public Methods and Operators
+
+        /// <summary>
+        ///     Counts the ally heroes in range.
+        /// </summary>
+        /// <param name="unit">The unit.</param>
+        /// <param name="range">The range.</param>
+        /// <returns></returns>
+        public static int CountAllyHeroesInRange(this Obj_AI_Base unit, float range)
+        {
+            return unit.ServerPosition.CountAllyHeroesInRange(range, unit);
+        }
+
+        /// <summary>
+        ///     Counts the enemy heroes in range.
+        /// </summary>
+        /// <param name="unit">The unit.</param>
+        /// <param name="range">The range.</param>
+        /// <returns></returns>
+        public static int CountEnemyHeroesInRange(this Obj_AI_Base unit, float range)
+        {
+            return unit.ServerPosition.CountEnemyHeroesInRange(range, unit);
+        }
 
         /// <summary>
         ///     Gets the distance between two GameObjects
@@ -230,20 +253,26 @@ namespace LeagueSharp.SDK.Core.Extensions
         /// <returns>
         ///     The <see cref="TurretType" />.
         /// </returns>
-        public static TurretType GetTurretType(this Obj_AI_Base turret)
+        public static TurretType GetTurretType(this Obj_AI_Turret turret)
         {
             switch (turret.CharData.BaseSkinName)
             {
                 case "SRUAP_Turret_Order1":
                 case "SRUAP_Turret_Chaos1":
+                case "ha_ap_orderturret":
+                case "HA_AP_OrderTurret2":
+                case "HA_AP_OrderTurret3":
+                case "HA_AP_ChaosTurret":
+                case "HA_AP_ChaosTurret2":
+                case "HA_AP_ChaosTurret3":
                     return TurretType.TierOne;
 
                 case "SRUAP_Turret_Order2":
                 case "SRUAP_Turret_Chaos2":
                     return TurretType.TierTwo;
 
-                case "SRUAP_Turret_Order3_Test":
-                case "SRUAP_Turret_Chaos3_Test":
+                case "SRUAP_Turret_Order3":
+                case "SRUAP_Turret_Chaos3":
                     return TurretType.TierThree;
 
                 case "SRUAP_Turret_Order4":
@@ -263,8 +292,7 @@ namespace LeagueSharp.SDK.Core.Extensions
         public static bool InFountain(this Obj_AI_Hero hero)
         {
             float fountainRange = 562500; // 750 * 750
-            var map = Map.GetMap();
-            if (map != null && map.Type == MapType.SummonersRift)
+            if (Game.MapId == GameMapId.SummonersRift)
             {
                 fountainRange = 1102500; // 1050 * 1050
             }
@@ -317,24 +345,23 @@ namespace LeagueSharp.SDK.Core.Extensions
         }
 
         /// <summary>
-        ///     Returns whether the specific unit is under an enemy turret.
+        ///     Returns whether the specific unit is under a ally turret.
         /// </summary>
         /// <param name="unit"><see cref="Obj_AI_Base" /> unit</param>
         /// <returns>Is Unit under an Enemy Turret</returns>
-        public static bool IsUnderTurret(this Obj_AI_Base unit)
+        public static bool IsUnderAllyTurret(this Obj_AI_Base unit)
         {
-            return unit.Position.IsUnderTurret(true);
+            return unit.ServerPosition.IsUnderAllyTurret();
         }
 
         /// <summary>
-        ///     Returns whether the specific unit is under a turret.
+        ///     Returns whether the specific unit is under a enemy turret.
         /// </summary>
         /// <param name="unit"><see cref="Obj_AI_Base" /> unit</param>
-        /// <param name="enemyTurretsOnly">Include Enemy Turrets Only</param>
-        /// <returns>Is Unit under a Turret</returns>
-        public static bool IsUnderTurret(this Obj_AI_Base unit, bool enemyTurretsOnly)
+        /// <returns>Is Unit under an Enemy Turret</returns>
+        public static bool IsUnderEnemyTurret(this Obj_AI_Base unit)
         {
-            return unit.Position.IsUnderTurret(enemyTurretsOnly);
+            return unit.ServerPosition.IsUnderEnemyTurret();
         }
 
         /// <summary>
@@ -370,9 +397,9 @@ namespace LeagueSharp.SDK.Core.Extensions
         ///     The <see cref="bool" />.
         /// </returns>
         public static bool IsValidTarget(
-            this AttackableUnit unit, 
-            float range = float.MaxValue, 
-            bool checkTeam = true, 
+            this AttackableUnit unit,
+            float range = float.MaxValue,
+            bool checkTeam = true,
             Vector3 from = default(Vector3))
         {
             if (unit == null || !unit.IsValid || unit.IsDead || !unit.IsVisible || !unit.IsTargetable
