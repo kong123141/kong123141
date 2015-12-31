@@ -24,13 +24,14 @@ namespace LSF小脚本 {
 			string str = "L#璧勬簮缃戝皬宸ュ叿杞藉叆";
 			Game.PrintChat(str);
 
-			Config = new Menu("LSF","【零度汉化】LSF小脚本",true);
+			Config = new Menu("LSF","LSF小脚本",true);
 			
 			new Features.打野计时();
 			new Features.显示时间();
 			new Features.屏蔽显示();
 			//new Features.塔防范围();
 			new Features.检测外挂();
+			new Features.自带功能();
 			Config.Attach();
 			
 			var startNotifi = new Notification("L#资源网小工具", "Http://lsharp.xyz\n我们将持续更新相关内容\n打野计时 载入");

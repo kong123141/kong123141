@@ -18,6 +18,7 @@ using LeagueSharp.SDK.Core.Extensions.SharpDX;
 using LSF小脚本.Interface;
 
 namespace LSF小脚本.Features {
+
 	class 检测外挂 {
 		private readonly Dictionary<int, List<IDetector>> _detectors = new Dictionary<int, List<IDetector>>();
 		private Menu Config;
@@ -27,7 +28,7 @@ namespace LSF小脚本.Features {
 		public 检测外挂() {
 			Config = new Menu("检测外挂", "检测外挂");
 			Config.Add(new MenuBool("启用", "启用", true));
-			var detectionType = new MenuList<string>("detection", "检测级别",new string[] { "优先","一般","不检测"});
+			var detectionType = new MenuList<string>("detection", "检测",new string[] { "Preferred", "Safe", "AntiHumanizer" });
 			detectionType.ValueChanged += (sender, args) =>
 			{
 				foreach (var detector in _detectors)
@@ -36,40 +37,68 @@ namespace LSF小脚本.Features {
 				}
 			};
 			Config.Add(detectionType);
+
+			Config.Add(new MenuSeparator("1", "提示:"));
+			Config.Add(new MenuSeparator("2", "一旦关闭右上角的提示，就只"));
+			Config.Add(new MenuSeparator("3", "有重新载入脚本才会再次显示"));
 			Program.Config.Add(Config);
 
 			Obj_AI_Hero.OnNewPath += Obj_AI_Hero_OnNewPath;
 			Game.OnUpdate += Game_OnUpdate;
 
-			
 			notification.IsOpen = true;
 			
         }
+
+		
 
 		private void Game_OnUpdate(EventArgs args) {
 			
 			string content = "";
 
-            foreach (var detector in _detectors)
+			foreach (var detector in _detectors)
 			{
 				var maxValue = detector.Value.Max(item => item.GetScriptDetections());
 				var hero = GameObjects.AllyHeroes.First(h => h.NetworkId == detector.Key);
 
-				if ( maxValue > 0)
+				//if (hero.IsMe) continue;
+
+				if (maxValue > 0)
 				{
 					if (!Notificed)
 					{
 						Notificed = true;
-						Notifications.Add(notification);
+                        Notifications.Add(notification);
 					}
-					string info = hero.Name + ": " + detector.Value.First(itemId => itemId.GetScriptDetections() == maxValue).GetName() + ";";
+					string info = (hero.IsAlly ? "我方" : "敌方")
+						+" "
+						+ Utf2Ansi(hero.Name)
+						+ "("+ hero.ChampionName+")"
+						+ ": " + detector.Value.First(itemId => itemId.GetScriptDetections() == maxValue).GetName() 
+						+ "["+ maxValue+"]"
+						+ ";";
 					content += info + Environment.NewLine;
+
+					notification.Body = content;
+					notification.OnUpdate();
+
+					
 				}
-               
-            }
-			
-            notification.Body = content;
-			notification.OnUpdate();
+			}
+
+        }
+
+		public static string Ansi2Utf(string s) {
+			var b = Encoding.Convert(Encoding.Default, Encoding.Unicode, Encoding.Default.GetBytes(s));
+			b = Encoding.Convert(Encoding.Unicode, Encoding.UTF8, b);
+			return Encoding.Default.GetString(b);
+
+		}
+
+		public static string Utf2Ansi(string s) {
+			var b = Encoding.Convert(Encoding.UTF8, Encoding.Unicode, Encoding.Default.GetBytes(s));
+			b = Encoding.Convert(Encoding.Unicode, Encoding.Default, b);
+			return Encoding.Default.GetString(b);
 		}
 
 		private void Obj_AI_Hero_OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args) {
