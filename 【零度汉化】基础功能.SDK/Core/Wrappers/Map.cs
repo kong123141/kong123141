@@ -15,75 +15,29 @@
 //    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
 
-namespace LeagueSharp.SDK.Core.Wrappers
+namespace LeagueSharp.SDK
 {
     using System.Collections.Generic;
 
-    using Enumerations;
+    using LeagueSharp.SDK.Core.Utils;
 
     using SharpDX;
 
     /// <summary>
     ///     Utility for the Maps in League of Legends.
     /// </summary>
+    [ResourceImport]
     public class Map
     {
         #region Static Fields
 
+        [ResourceImport("Data.Map.json")]
+        private static Dictionary<int, Map> MapById = new Dictionary<int, Map>();
+
         /// <summary>
         ///     Map by ID list.
         /// </summary>
-        private static readonly IDictionary<int, Map> MapById = new Dictionary<int, Map>
-                                                                    {
-                                                                        {
-                                                                            8,
-                                                                            new Map
-                                                                                {
-                                                                                    Name = "The Crystal Scar",
-                                                                                    ShortName = "crystalScar",
-                                                                                    MapId = GameMapId.CrystalScar,
-                                                                                    Grid =
-                                                                                        new Vector2(13894f / 2, 13218f / 2),
-                                                                                    StartingLevel = 3
-                                                                                }
-                                                                        },
-                                                                        {
-                                                                            10,
-                                                                            new Map
-                                                                                {
-                                                                                    Name = "The Twisted Treeline",
-                                                                                    ShortName = "twistedTreeline",
-                                                                                    MapId = GameMapId.TwistedTreeline,
-                                                                                    Grid =
-                                                                                        new Vector2(15436f / 2, 14474f / 2),
-                                                                                    StartingLevel = 1
-                                                                                }
-                                                                        },
-                                                                        {
-                                                                            11,
-                                                                            new Map
-                                                                                {
-                                                                                    Name = "Summoner's Rift",
-                                                                                    ShortName = "summonerRift",
-                                                                                    MapId = GameMapId.SummonersRift,
-                                                                                    Grid =
-                                                                                        new Vector2(13982f / 2, 14446f / 2),
-                                                                                    StartingLevel = 1
-                                                                                }
-                                                                        },
-                                                                        {
-                                                                            12,
-                                                                            new Map
-                                                                                {
-                                                                                    Name = "Howling Abyss",
-                                                                                    ShortName = "howlingAbyss",
-                                                                                    MapId = GameMapId.HowlingAbyss,
-                                                                                    Grid =
-                                                                                        new Vector2(13120f / 2, 12618f / 2),
-                                                                                    StartingLevel = 3
-                                                                                }
-                                                                        }
-                                                                    };
+        public static IReadOnlyDictionary<int, Map> Maps => MapById;
 
         #endregion
 
@@ -92,36 +46,38 @@ namespace LeagueSharp.SDK.Core.Wrappers
         /// <summary>
         ///     Gets the Grid of the Map
         /// </summary>
-        public Vector2 Grid { get; private set; }
-
-        /// <summary>
-        ///     Gets the name of the map
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        ///     Gets the short name of the map.
-        /// </summary>
-        public string ShortName { get; private set; }
-
-        /// <summary>
-        ///     Gets the level the players start at
-        /// </summary>
-        public int StartingLevel { get; private set; }
+        public Vector2 Grid { get; set; }
 
         /// <summary>
         ///     Gets the MapType
         /// </summary>
-        public GameMapId MapId { get; private set; }
+        public GameMapId MapId { get; set; }
+
+        /// <summary>
+        ///     Gets the name of the map
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        ///     Gets the short name of the map.
+        /// </summary>
+        public string ShortName { get; set; }
+
+        /// <summary>
+        ///     Gets the level the players start at
+        /// </summary>
+        public int StartingLevel { get; set; }
 
         #endregion
 
         #region Public Methods and Operators
 
         /// <summary>
-        ///     Returns the current map.
+        ///     Gets the current game map.
         /// </summary>
-        /// <returns>The current map</returns>
+        /// <returns>
+        ///     The current map information.
+        /// </returns>
         public static Map GetMap()
         {
             if (MapById.ContainsKey((int)Game.MapId))
@@ -131,8 +87,7 @@ namespace LeagueSharp.SDK.Core.Wrappers
 
             return new Map
                        {
-                           Name = "Unknown", ShortName = "unknown", MapId = (GameMapId) 0, Grid = new Vector2(0, 0),
-                           StartingLevel = 1
+                           Name = "Unknown", ShortName = "unknown", MapId = 0, Grid = new Vector2(0, 0), StartingLevel = 1
                        };
         }
 

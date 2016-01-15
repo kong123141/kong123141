@@ -15,21 +15,16 @@
 //    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
 
-namespace LeagueSharp.SDK.Core
+namespace LeagueSharp.SDK
 {
     using System.Globalization;
     using System.Security.Permissions;
     using System.Threading;
 
-    using LeagueSharp.SDK.Core.Enumerations;
-    using LeagueSharp.SDK.Core.Events;
     using LeagueSharp.SDK.Core.UI.IMenu;
     using LeagueSharp.SDK.Core.UI.IMenu.Customizer;
-    using LeagueSharp.SDK.Core.UI.INotifications;
     using LeagueSharp.SDK.Core.Utils;
     using LeagueSharp.SDK.Core.Wrappers.Damages;
-    using LeagueSharp.SDK.Core.Wrappers.Orbwalking;
-    using LeagueSharp.SDK.Core.Wrappers.TargetSelector;
 
     /// <summary>
     ///     Bootstrap is an initialization pointer for the AppDomainManager to initialize the library correctly once loaded in
@@ -72,12 +67,16 @@ namespace LeagueSharp.SDK.Core
             // Initial notification.
             Logging.Write()(LogLevel.Info, "[-- SDK Bootstrap Loading --]");
 
+            // Load Resource Content.
+            ResourceLoader.Initialize();
+            Logging.Write()(LogLevel.Info, "[SDK Bootstrap] Resources Initialized.");
+
             // Load GameObjects.
             GameObjects.Initialize();
             Logging.Write()(LogLevel.Info, "[SDK Bootstrap] GameObjects Initialized.");
 
             // Create L# menu
-            Variables.LeagueSharpMenu = new Menu("LeagueSharp", "【零度汉化】SDK基础功能", true).Attach();
+            Variables.LeagueSharpMenu = new Menu("LeagueSharp", "SDK For 花边", true).Attach();
             MenuCustomizer.Initialize(Variables.LeagueSharpMenu);
             Logging.Write()(LogLevel.Info, "[SDK Bootstrap] LeagueSharp Menu Created.");
 
@@ -96,10 +95,6 @@ namespace LeagueSharp.SDK.Core
             // Load Damages.
             Damage.Initialize(Variables.GameVersion);
             Logging.Write()(LogLevel.Info, "[SDK Bootstrap] Damage Library Initialized.");
-
-            // Load Gapcloser.
-            Gapcloser.Initialize();
-            Logging.Write()(LogLevel.Info, "[SDK Bootstrap] Gapcloser Library Initialized.");
 
             // Final notification.
             Logging.Write()(LogLevel.Info, "[-- SDK Bootstrap Loading --]");

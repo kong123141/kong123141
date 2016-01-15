@@ -15,7 +15,7 @@
 //    along with this program.  If not, see http://www.gnu.org/licenses/
 // </copyright>
 
-namespace LeagueSharp.SDK.Core.Enumerations
+namespace LeagueSharp.SDK
 {
     /// <summary>
     ///     Cast States
@@ -60,6 +60,11 @@ namespace LeagueSharp.SDK.Core.Enumerations
         /// <summary>
         ///     Spell Invalid Target
         /// </summary>
-        InvalidTarget
+        InvalidTarget,
+
+        /// <summary>
+        ///     Spell Low Mana
+        /// </summary>
+        LowMana
     }
 }

@@ -39,7 +39,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Customizer
         #region Constructors and Destructors
 
         private MenuCustomizer(Menu parentMenu)
-            : base("menucustomizer", "Menu", false, string.Empty)
+            : base("menucustomizer", "菜单设置", false, string.Empty)
         {
             parentMenu.Add(this);
             this.BuildCustomizer();
@@ -105,19 +105,19 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Customizer
         private void AddContainer(Menu menu)
         {
             this.ContainerHeight =
-                menu.Add(new MenuSlider("containerheight", "Item Height", MenuSettings.ContainerHeight, 15, 50));
+                menu.Add(new MenuSlider("containerheight", "项目高度", MenuSettings.ContainerHeight, 15, 50));
             this.FontHeight =
-                menu.Add(new MenuSlider("fontheight", "Font Size", MenuSettings.Font.Description.Height, 10, 30));
+                menu.Add(new MenuSlider("fontheight", "字体大小", MenuSettings.Font.Description.Height, 10, 30));
             this.BackgroundColor =
-                menu.Add(new MenuColor("backgroundcolor", "Background Color", MenuSettings.RootContainerColor));
+                menu.Add(new MenuColor("backgroundcolor", "背景颜色", MenuSettings.RootContainerColor));
         }
 
         private void AddPosition(Menu menu)
         {
             this.PositionX =
-                menu.Add(new MenuSlider("x", "Position (X)", (int)MenuSettings.Position.X, 0, Drawing.Width));
+                menu.Add(new MenuSlider("x", "横坐标", (int)MenuSettings.Position.X, 0, Drawing.Width));
             this.PositionY =
-                menu.Add(new MenuSlider("y", "Position (Y)", (int)MenuSettings.Position.Y, 0, Drawing.Height));
+                menu.Add(new MenuSlider("y", "纵坐标", (int)MenuSettings.Position.Y, 0, Drawing.Height));
         }
 
         private void ApplyChanges()
