@@ -13,7 +13,7 @@
     {
         #region Static Fields
 
-        public static readonly Color ActiveBackgroundColor = Color.FromArgb(0, 37, 53); // 准备修改这个
+        public static readonly Color ActiveBackgroundColor = Color.FromArgb(0, 37, 53);
 
         /// <summary>
         ///     The menu starting position.
@@ -46,7 +46,7 @@
         {
             get
             {
-                return Color.FromArgb(Menu.Root.Item("BackgroundAlpha").GetValue<Slider>().Value, Menu.Root.Item("BackgroundColor").GetValue<Color>());
+                return Color.FromArgb(Menu.Root.Item("BackgroundAlpha").GetValue<Slider>().Value, Color.Black);
             }
         }
 
