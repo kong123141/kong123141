@@ -23,8 +23,7 @@
         {
             TargetSelector.Initialize();
             Prediction.Initialize();
-            Flowers.Initialize();
-            //Hacks.Initialize();
+            Hacks.Initialize();
             FakeClicks.Initialize();
 
             Instance.AddToMainMenu();
