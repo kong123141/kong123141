@@ -1,168 +1,205 @@
 {
   "Caitlyn": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "FiddleSticks": [
     {
-      "DangerLevel": 1,
+      "DangerLevel": "Medium",
       "MovementInterrupts": true,
-      "Slot": 1
+      "Name": null,
+      "Slot": "W"
     },
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Galio": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Janna": [
     {
+      "DangerLevel": "Low",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Karthus": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Katarina": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Lucian": [
     {
-      "DangerLevel": 2,
-      "Slot": 3
+      "DangerLevel": "High",
+      "MovementInterrupts": false,
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Malzahar": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "MasterYi": [
     {
+      "DangerLevel": "Low",
       "MovementInterrupts": true,
-      "Slot": 1
+      "Name": null,
+      "Slot": "W"
     }
   ],
   "MissFortune": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Nunu": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Pantheon": [
     {
+      "DangerLevel": "Low",
       "MovementInterrupts": true,
-      "Slot": 2
+      "Name": null,
+      "Slot": "E"
     },
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Quinn": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "RekSai": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Sion": [
     {
+      "DangerLevel": "Low",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Shen": [
     {
+      "DangerLevel": "Low",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "TahmKench": [
     {
-      "DangerLevel": 1,
+      "DangerLevel": "Medium",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "TwistedFate": [
     {
-      "DangerLevel": 1,
+      "DangerLevel": "Medium",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Urgot": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Velkoz": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Warwick": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Xerath": [
     {
-      "DangerLevel": 2,
+      "DangerLevel": "High",
       "MovementInterrupts": true,
-      "Slot": 3
+      "Name": null,
+      "Slot": "R"
     }
   ],
   "Varus": [
-    {}
+    {
+      "DangerLevel": "Low",
+      "MovementInterrupts": false,
+      "Name": null,
+      "Slot": "Q"
+    }
   ],
   "Zilean": [
     {
+      "DangerLevel": "Low",
       "MovementInterrupts": true,
+      "Name": null,
       "Slot": 52
     }
   ]

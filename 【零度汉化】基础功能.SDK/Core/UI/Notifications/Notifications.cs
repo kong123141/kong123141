@@ -128,13 +128,13 @@ namespace LeagueSharp.SDK
                 {
                     Menu = new Menu("notifications", "通知设置");
 
-                    Menu.Add(new MenuSeparator("editor", "标记设置"));
-                    Menu.Add(new MenuBool("edit", "编辑位置"));
+                    Menu.Add(new MenuSeparator("editor", "Edit Options"));
+                    Menu.Add(new MenuBool("edit", "Edit Position"));
                     Menu.Add(new MenuSeparator("animation", "Animation Options"));
                     Menu.Add(new MenuBool("animations", "Enable Animations") { Value = true });
                     Menu.Add(new MenuBool("flash", "Enable Flash-Animations") { Value = false });
-                    Menu.Add(new MenuSeparator("other", "其他设置"));
-                    Menu.Add(new MenuBool("autoOpen", "启动通知"));
+                    Menu.Add(new MenuSeparator("other", "Other Options"));
+                    Menu.Add(new MenuBool("autoOpen", "Open Notifications"));
                     Menu.Add(new MenuBool("sticky", "Allow Notification Sticky"));
 
                     menu.Add(Menu);

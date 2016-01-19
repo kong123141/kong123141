@@ -39,7 +39,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Customizer
         #region Constructors and Destructors
 
         private MenuCustomizer(Menu parentMenu)
-            : base("menucustomizer", "菜单设置", false, string.Empty)
+            : base("menucustomizer", "Menu", false, string.Empty)
         {
             parentMenu.Add(this);
             this.BuildCustomizer();
@@ -144,12 +144,12 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Customizer
 
         private void BuildCustomizer()
         {
-            var customizeMenu = this.Add(new Menu("customize", "Customize"));
+            var customizeMenu = this.Add(new Menu("customize", "定制设置"));
             this.AddPosition(customizeMenu);
             this.AddContainer(customizeMenu);
-            customizeMenu.Add(new MenuButton("apply", "Apply Changes", "Apply") { Action = this.ApplyChanges });
+            customizeMenu.Add(new MenuButton("apply", "启动 变动", "Apply") { Action = this.ApplyChanges });
             customizeMenu.Add(
-                new MenuButton("reset", "Reset Customization", "Reset")
+                new MenuButton("reset", "复原定制", "Reset")
                     {
                         Action = () =>
                             {
@@ -161,7 +161,7 @@ namespace LeagueSharp.SDK.Core.UI.IMenu.Customizer
 
         private void BuildOptions()
         {
-            this.LockPosition = this.Add(new MenuBool("lock", "Lock Position"));
+            this.LockPosition = this.Add(new MenuBool("lock", "锁定位置"));
         }
 
         #endregion
