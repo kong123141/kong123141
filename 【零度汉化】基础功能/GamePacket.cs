@@ -522,12 +522,12 @@ namespace LeagueSharp.Common
             PacketProtocolFlags flags = PacketProtocolFlags.Reliable)
         {
             return; //Blocked for now 4.21
-            if (!Block)
-            {
-                Game.SendPacket(
-                    Ms.ToArray(), Channel == PacketChannel.C2S ? channel : Channel,
-                    Flags == PacketProtocolFlags.Reliable ? flags : Flags);
-            }
+            //if (!Block)
+            //{
+            //    Game.SendPacket(
+            //        Ms.ToArray(), Channel == PacketChannel.C2S ? channel : Channel,
+            //        Flags == PacketProtocolFlags.Reliable ? flags : Flags);
+            //}
         }
 
         /// <summary>
@@ -537,10 +537,10 @@ namespace LeagueSharp.Common
         public void Process(PacketChannel channel = PacketChannel.S2C)
         {
             return; //Blocked for now 4.21
-            if (!Block)
-            {
-                Game.ProcessPacket(Ms.ToArray(), channel);
-            }
+            //if (!Block)
+            //{
+            //    Game.ProcessPacket(Ms.ToArray(), channel);
+            //}
         }
 
         /// <summary>
