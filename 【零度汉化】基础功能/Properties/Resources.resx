@@ -13579,6 +13579,13 @@
 	"show ": "\u663e\u793a",
 	"show hidden objects, wards": "\u663e\u793a\u9690\u85cf\u7684\u7269\u4f53\uff0c\u773c\u536b",
 	"mini-map hack": "\u8ff7\u4f60\u5730\u56fe\u7834\u89e3",
+	"mana % usage": "\u84dd\u91cf\u0025\u4f7f\u7528",
+	"spit minions?": "\u5410\u5c0f\u5175\uff1f",
+	"interupt with q": "\u4e2d\u65ad\u4e0e\u0051",
+	"interupt with w": "\u4e2d\u65ad\u4e0e\u0057",
+	"toggle auto shield": "\u5207\u6362\u81ea\u52a8\u76fe",
+	"auto shield at hp %": "\u81ea\u52a8\u76fe\u5728\u8840\u91cf\u0025",
+	"draw max w movement range": "\u663e\u793a\u6700\u5927\u0057\u79fb\u52a8\u8303\u56f4",
 	"w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
