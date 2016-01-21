@@ -17,15 +17,20 @@
         private static void Game_OnGameLoad(EventArgs args)
         {
             fl.AddItem(new MenuItem("Disable Drawing", "Screen display [I]").SetValue(new KeyBind('I', KeyBindType.Toggle, Lost.DisableDrawings)));
-            //fl.AddItem(new MenuItem("zoom hack", "Infinite horizon [danger]").SetValue(false)); 
             fl.AddItem(new MenuItem("disable say", "Ban said the script").SetValue(true));
-            //fl.AddItem(new MenuItem("Tower Ranges", "Show enemy tower range").SetValue(false));
             fl.AddItem(new MenuItem("SaySomething", "Stop script loading information").SetValue(false));
             fl.AddItem(new MenuItem("SaySomething1", "By huabian"));
             CommonMenu.Instance.AddSubMenu(fl);
 
-            fl.Item("Disable Drawing").ValueChanged += DisableDrawing;
-            fl.Item("disable say").ValueChanged += DisableSay;
+            fl.Item("Disable Drawing").ValueChanged += (s, e) => 
+            {
+                Lost.DisableDrawings = e.GetNewValue<KeyBind>().Active;
+            };
+
+            fl.Item("disable say").ValueChanged += (s, e) => 
+            {
+                Lost.DisableSay = e.GetNewValue<bool>();
+            };
 
             if (fl.Item("SaySomething").GetValue<bool>())
             {
@@ -42,16 +47,6 @@
                 });
             }
 
-        }
-
-        private static void DisableSay(object sender, OnValueChangeEventArgs e)
-        {
-            Lost.DisableSay = e.GetNewValue<bool>();
-        }
-
-        private static void DisableDrawing(object sender, OnValueChangeEventArgs e)
-        {
-            Lost.DisableDrawings = e.GetNewValue<KeyBind>().Active;
         }
     }
 }

@@ -60,6 +60,6 @@ using System.Runtime.InteropServices;
 // übernehmen, indem Sie "*" eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.0.491")]
-[assembly: AssemblyFileVersion("1.0.0.491")]
+[assembly: AssemblyVersion("1.0.0.492")]
+[assembly: AssemblyFileVersion("1.0.0.492")]
 [assembly: NeutralResourcesLanguage("en")]
