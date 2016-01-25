@@ -13586,13 +13586,21 @@
 	"toggle auto shield": "\u5207\u6362\u81ea\u52a8\u76fe",
 	"auto shield at hp %": "\u81ea\u52a8\u76fe\u5728\u8840\u91cf\u0025",
 	"draw max w movement range": "\u663e\u793a\u6700\u5927\u0057\u79fb\u52a8\u8303\u56f4",
-		"press key": "\u6309\u952e\u6a21\u5f0f",
+	"press key": "\u6309\u952e\u6a21\u5f0f",
     "presskey 1": "\u6309\u952e 1",
     "presskey 2": "\u6309\u952e 2",
     "presskey 3": "\u6309\u952e 3",
     "presskey 4": "\u6309\u952e 4",
-	    "--------- fakeclicks": "--------- \u865a\u5047\u70b9\u51fb",
+	"--------- fakeclicks": "--------- \u865a\u5047\u70b9\u51fb",
     "--------- explore utility": "--------- \u5f00\u53d1\u529f\u80fd",
+	"block dash in x enemies ": "\u5728\u0058\u654c\u4eba\u683c\u6321",
+	"block dash in wall": "\u5899\u683c\u6321",
+	"block dash under turret": "\u5728\u9632\u5fa1\u5854\u683c\u6321",
+	"gapcloser mode": "\u7a81\u8fdb\u6a21\u5f0f",
+	"enemy info grid": "\u654c\u4eba\u4fe1\u606f\u7f51\u683c",
+	"show flash and r cd": "\u95ea\u73b0\u548c\u0052\u7684\u0043\u0044\u663e\u793a",
+	"show recall": "\u663e\u793a\u56de\u57ce",
+	"auto buy blue trinket after lvl 9": "\u0039\u7ea7\u540e\u81ea\u52a8\u4e70\u84dd\u8272\u5fbd\u7ae0",
 	"w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
