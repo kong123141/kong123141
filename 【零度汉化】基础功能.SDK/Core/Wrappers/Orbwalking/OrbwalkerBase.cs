@@ -150,15 +150,15 @@ namespace LeagueSharp.SDK
         ///     Gets or sets value indicating the amount of executed auto attacks.
         /// </summary>
         public int TotalAutoAttacks { get; protected set; }
+        
+        /// <summary>
+        ///     Gets or sets value indication in which mode Orbwalk should run.
+        /// </summary>
+        public TK ActiveMode { get; set; }
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        ///     Gets or sets a value indicating whether movement.
-        /// </summary>
-        protected TK ActiveMode { get; set; }
 
         /// <summary>
         ///     Gets or sets a value indicating whether movement.
@@ -248,11 +248,6 @@ namespace LeagueSharp.SDK
         /// </returns>
         public virtual bool CanMove(float extraWindup, bool disableMissileCheck)
         {
-            if (!this.MovementState)
-            {
-                return false;
-            }
-
             if (this.MissileLaunched && !disableMissileCheck)
             {
                 return true;
@@ -362,7 +357,7 @@ namespace LeagueSharp.SDK
                 }
             }
 
-            if (this.CanMove())
+            if (this.CanMove() && this.MovementState)
             {
                 this.Move(position.HasValue && position.Value.IsValid() ? position.Value : Game.CursorPos);
             }

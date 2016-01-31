@@ -54,6 +54,16 @@ namespace LeagueSharp.SDK.Core.Utils
         #region Public Properties
 
         /// <summary>
+        ///     Gets the current Cursor Game position as a Screen Vector2.
+        /// </summary>
+        public static Vector2 GameScreenPosition => Drawing.WorldToScreen(Game.CursorPos);
+
+        /// <summary>
+        ///     Returns if the cursor is over a HUD item.
+        /// </summary>
+        public static bool IsOverHUD => Position != GameScreenPosition;
+
+        /// <summary>
         ///     Gets the current Cursor position in a Vector2.
         /// </summary>
         public static Vector2 Position => new Vector2(posX, posY);

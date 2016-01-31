@@ -22,7 +22,8 @@ namespace LeagueSharp.SDK
     using System.Linq;
 
     using LeagueSharp.SDK.Core.Utils;
-
+    using LeagueSharp.SDK.Core.Wrappers.Damages;
+    
     using SharpDX;
 
     /// <summary>
@@ -61,12 +62,11 @@ namespace LeagueSharp.SDK
         ///     The Width
         /// </summary>
         private float width;
-
-
+        
         /// <summary>
         ///     The Minimum Mana Percentage
         /// </summary>
-        private float minManaPercent;
+        private float minManaPercent;      
         #endregion
 
         #region Constructors and Destructors
@@ -120,6 +120,15 @@ namespace LeagueSharp.SDK
         #endregion
 
         #region Public Properties
+        /// <summary>
+        ///     Cast Condition Delegate
+        /// </summary>
+        public delegate bool CastConditionDelegate();
+
+        /// <summary>
+        ///     Condition to Cast Spell
+        /// </summary>
+        public CastConditionDelegate CastCondition { get; set; }
 
         /// <summary>
         ///     Gets or sets the charged buff name.
@@ -194,7 +203,7 @@ namespace LeagueSharp.SDK
         {
             get
             {
-                if (!this.Slot.IsReady())
+                if (!this.IsReady())
                 {
                     return false;
                 }
@@ -329,7 +338,20 @@ namespace LeagueSharp.SDK
         /// </returns>
         public bool CanCast(Obj_AI_Base unit)
         {
-            return this.Slot.IsReady() && unit.IsValidTarget(this.Range);
+            return this.IsReady() && unit.IsValidTarget(this.Range);
+        }
+
+        /// <summary>
+        ///     Returns if a spell can kill a target.
+        /// </summary>
+        /// <param name="unit">The Target</param>
+        /// <param name="stage">
+        ///     The <see cref="Damage.DamageStage" /> of the spell.
+        /// </param>
+        /// <returns>Can spell kill target</returns>
+        public bool CanKill(Obj_AI_Base unit, Damage.DamageStage stage = Damage.DamageStage.Default)
+        {
+            return unit.IsValidTarget() && this.GetDamage(unit, stage) > unit.Health;
         }
 
         /// <summary>
@@ -363,7 +385,7 @@ namespace LeagueSharp.SDK
                 return CastStates.InvalidTarget;
             }
 
-            if (!this.Slot.IsReady())
+            if (!this.IsReady())
             {
                 return CastStates.NotReady;
             }
@@ -371,6 +393,11 @@ namespace LeagueSharp.SDK
             if (!this.minManaPercent.Equals(0) && ObjectManager.Player.ManaPercent < this.minManaPercent)
             {
                 return CastStates.LowMana;
+            }
+
+            if (this.CastCondition != null && !this.CastCondition())
+            {
+                return CastStates.FailedCondition;
             }
 
             if (!areaOfEffect && minTargets != -1)
@@ -482,7 +509,7 @@ namespace LeagueSharp.SDK
         /// </returns>
         public bool Cast(Vector3 fromPosition, Vector3 toPosition)
         {
-            return this.Slot.IsReady() && GameObjects.Player.Spellbook.CastSpell(this.Slot, fromPosition, toPosition);
+            return this.IsReady() && GameObjects.Player.Spellbook.CastSpell(this.Slot, fromPosition, toPosition);
         }
 
         /// <summary>
@@ -510,7 +537,7 @@ namespace LeagueSharp.SDK
         /// </returns>
         public bool Cast(Vector3 position)
         {
-            if (!this.Slot.IsReady())
+            if (!this.IsReady())
             {
                 return false;
             }
@@ -618,7 +645,7 @@ namespace LeagueSharp.SDK
         /// </returns>
         public bool CastOnUnit(Obj_AI_Base unit)
         {
-            if (!this.Slot.IsReady() || this.From.DistanceSquared(unit.ServerPosition) > this.RangeSqr)
+            if (!this.IsReady() || this.From.DistanceSquared(unit.ServerPosition) > this.RangeSqr)
             {
                 return false;
             }
@@ -848,6 +875,23 @@ namespace LeagueSharp.SDK
         }
 
         /// <summary>
+        ///     Returns the damage a spell will deal to target.
+        /// </summary>
+        /// <param name="target">
+        ///     The <see cref="Obj_AI_Hero" /> target.
+        /// </param>
+        /// <param name="stage">
+        ///     The <see cref="Damage.DamageStage" /> of the spell.
+        /// </param>
+        /// <returns>
+        ///     The damage value to target unit.
+        /// </returns>
+        public float GetDamage(Obj_AI_Base target, Damage.DamageStage stage = Damage.DamageStage.Default)
+        {
+            return (float) GameObjects.Player.GetSpellDamage(target, this.Slot, stage);
+        }
+
+        /// <summary>
         ///     Returns the best target found using the current TargetSelector Mode.
         ///     Please make sure to set the Spell.DamageType Property to the type of damage this spell does (if not done on
         ///     initialization).
@@ -945,6 +989,16 @@ namespace LeagueSharp.SDK
         {
             return this.RangeCheckFrom.DistanceSquared(point)
                    < (otherRange < 0 ? this.RangeSqr : otherRange * otherRange);
+        }
+
+        /// <summary>
+        ///     Returns if the Spell is ready to use.
+        /// </summary>
+        /// <param name="t">Time Left</param>
+        /// <returns>Is Spell Ready to use</returns>
+        public bool IsReady(int t = 0)
+        {
+            return this.Slot.IsReady(t);
         }
 
         /// <summary>

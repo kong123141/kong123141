@@ -20,6 +20,7 @@ namespace LeagueSharp.SDK
     using System;
     using System.Collections.Generic;
     using System.Linq;
+
     using LeagueSharp.SDK.Core.Utils;
 
     /// <summary>
@@ -158,6 +159,12 @@ namespace LeagueSharp.SDK
         ///     The nexus list.
         /// </summary>
         private static readonly List<Obj_HQ> NexusList = new List<Obj_HQ>();
+
+        /// <summary>
+        ///     The general particle emitters list.
+        /// </summary>
+        private static readonly List<Obj_GeneralParticleEmitter> ParticleEmittersList =
+            new List<Obj_GeneralParticleEmitter>();
 
         /// <summary>
         ///     The shops list.
@@ -341,6 +348,11 @@ namespace LeagueSharp.SDK
         public static IEnumerable<Obj_HQ> Nexuses => NexusList;
 
         /// <summary>
+        ///     Gets the general particle emitters.
+        /// </summary>
+        public static IEnumerable<Obj_GeneralParticleEmitter> ParticleEmitters => ParticleEmittersList;
+
+        /// <summary>
         ///     Gets or sets the player.
         /// </summary>
         public static Obj_AI_Hero Player { get; set; }
@@ -436,7 +448,9 @@ namespace LeagueSharp.SDK
                                 o => o.Team != GameObjectTeam.Neutral && !o.GetMinionType().HasFlag(MinionTypes.Ward)));
                     TurretsList.AddRange(ObjectManager.Get<Obj_AI_Turret>());
                     InhibitorsList.AddRange(ObjectManager.Get<Obj_BarracksDampener>());
-                    JungleList.AddRange(ObjectManager.Get<Obj_AI_Minion>().Where(o => o.Team == GameObjectTeam.Neutral));
+                    JungleList.AddRange(
+                        ObjectManager.Get<Obj_AI_Minion>()
+                            .Where(o => o.Team == GameObjectTeam.Neutral && o.Name != "WardCorpse"));
                     WardsList.AddRange(
                         ObjectManager.Get<Obj_AI_Minion>().Where(o => o.GetMinionType().HasFlag(MinionTypes.Ward)));
                     ShopsList.AddRange(ObjectManager.Get<Obj_Shop>());
@@ -444,6 +458,7 @@ namespace LeagueSharp.SDK
                     GameObjectsList.AddRange(ObjectManager.Get<GameObject>());
                     NexusList.AddRange(ObjectManager.Get<Obj_HQ>());
                     AttackableUnitsList.AddRange(ObjectManager.Get<AttackableUnit>());
+                    ParticleEmittersList.AddRange(ObjectManager.Get<Obj_GeneralParticleEmitter>());
 
                     EnemyHeroesList.AddRange(HeroesList.Where(o => o.IsEnemy));
                     EnemyMinionsList.AddRange(MinionsList.Where(o => o.IsEnemy));
@@ -548,7 +563,7 @@ namespace LeagueSharp.SDK
                         }
                     }
                 }
-                else
+                else if (minion.Name != "WardCorpse")
                 {
                     switch (minion.GetJungleType())
                     {
@@ -566,6 +581,13 @@ namespace LeagueSharp.SDK
                     JungleList.Add(minion);
                 }
 
+                return;
+            }
+
+            var particle = sender as Obj_GeneralParticleEmitter;
+            if (particle != null)
+            {
+                ParticleEmittersList.Add(particle);
                 return;
             }
 
@@ -747,6 +769,13 @@ namespace LeagueSharp.SDK
                     }
                 }
 
+                return;
+            }
+
+            var particle = sender as Obj_GeneralParticleEmitter;
+            if (particle != null)
+            {
+                ParticleEmittersList.Remove(particle);
                 return;
             }
 
