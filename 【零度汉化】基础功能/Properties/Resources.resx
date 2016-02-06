@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -13681,6 +13681,17 @@
 	"if health percent \u003c": "\u5982\u679c\u8840\u91cf\u0025\u0020\u003c",
 	"if health \u003c=": "\u5982\u679c\u8840\u91cf\u003c\u003d",
 	"auto buy blue trinket after lvl 9": "\u0039\u7ea7\u540e\u81ea\u52a8\u4e70\u84dd\u8272\u5fbd\u7ae0",
+	"low danger": "\u4F4E\u8840\u91CF\u8EB2\u907F\u8BBE\u7F6E",
+	"medium danger": "\u4E2D\u8840\u91CF\u8EB2\u907F\u8BBE\u7F6E",
+	"high danger": "\u9AD8\u8840\u91CF\u8EB2\u907F\u8BBE\u7F6E",
+	"activation above % hp": "\u4F4E\u8840\u91CF\u8BBE\u7F6E\u8303\u56F4",
+	"dodge circular spells": "\u8EB2\u907F\u5706\u5F62\u6280\u80FD",
+	"dodge fow spells": "\u6218\u4E89\u8FF7\u96FE\u4E0B\u8EB2\u907F\u6280\u80FD",
+	"activation between low and high": "\u8840\u91CF\u4F4E\u4E8E\u6B64\u767E\u5206\u6BD4\u81EA\u52A8\u6FC0\u6D3B\u795E\u8EB2\u907F\u72B6\u6001",
+	"activation under % hp": "\u542F\u52A8\u4E8E\u8BE5\u767E\u5206\u6BD4\u4E4B\u4E0B",
+	"aiezevade": "\u3010\u96f6\u5ea6\u6c49\u5316\u3011\u0045\u007A\u8EB2\u907F\u63D2\u4EF6\u0028\u004F\u004B\u0054\u0057\u0029",
+	"multilanguage settings": "\u8BED\u8A00\u5207\u6362",
+	"selecte language": "\u8BED\u8A00\u9009\u62E9",
 	"w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
