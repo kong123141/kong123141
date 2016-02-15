@@ -76,7 +76,7 @@ namespace LeagueSharp.Common
         public enum OrbwalkingMode
         {
             /// <summary>
-            ///     The orbalker will only last hit minions.
+            ///     The orbwalker will only last hit minions.
             /// </summary>
             LastHit,
 
@@ -95,6 +95,9 @@ namespace LeagueSharp.Common
             /// </summary>
             Combo,
 
+            /// <summary>
+            ///     The orbwalker will only last hit minions as late as possible.
+            /// </summary>
             Freeze,
 
             /// <summary>
@@ -119,7 +122,7 @@ namespace LeagueSharp.Common
             "gangplankqwrapper", "poppypassiveattack", "powerfist", "renektonpreexecute", "rengarq",
             "shyvanadoubleattack", "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble",
             "vie", "volibearq", "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "masochism",
-            "illaoiw", "elisespiderw", "fiorae", "meditate", "sejuaninorthernwinds"          
+            "illaoiw", "elisespiderw", "fiorae", "meditate", "sejuaninorthernwinds", "nautiluspiercinggaze"
         };
 
 
@@ -872,7 +875,7 @@ namespace LeagueSharp.Common
                 misc.AddItem(new MenuItem("AttackBarrel", "Auto attack gangplank barrel").SetShared().SetValue(true));
                 misc.AddItem(new MenuItem("Smallminionsprio", "Jungle clear small first").SetShared().SetValue(false));
                 misc.AddItem(
-                    new MenuItem("LimitAttackSpeed", "Don't kite if Attack Speed > 2.5").SetShared().SetValue(false));
+                    new MenuItem("LimitAttackSpeed", "Don't kite if Attack Speed > 2.5").SetShared().SetValue(true));
                 misc.AddItem(
                     new MenuItem("FocusMinionsOverTurrets", "Focus minions over objectives").SetShared()
                         .SetValue(new KeyBind('M', KeyBindType.Toggle)));
@@ -880,12 +883,12 @@ namespace LeagueSharp.Common
                 _config.AddSubMenu(misc);
 
                 /* Missile check */
-                _config.AddItem(new MenuItem("MissileCheck", "Use Missile Check").SetShared().SetValue(true));
+                _config.AddItem(new MenuItem("MissileCheck", "Use Missile Check").SetShared().SetValue(false));
 
                 /* Delay sliders */
                 _config.AddItem(
                     new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 0, 200)));
-                _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(30, 0, 200)));
+                _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(10, 0, 200)));
 
                 /*Load the menu*/
                 _config.AddItem(
