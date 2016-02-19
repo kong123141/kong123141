@@ -122,7 +122,7 @@ namespace LeagueSharp.Common
             "gangplankqwrapper", "poppypassiveattack", "powerfist", "renektonpreexecute", "rengarq",
             "shyvanadoubleattack", "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble",
             "vie", "volibearq", "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "masochism",
-            "illaoiw", "elisespiderw", "fiorae", "meditate", "sejuaninorthernwinds", "nautiluspiercinggaze"
+            "illaoiw", "elisespiderw", "fiorae", "meditate", "sejuaninorthernwinds"      
         };
 
 
@@ -875,7 +875,7 @@ namespace LeagueSharp.Common
                 misc.AddItem(new MenuItem("AttackBarrel", "Auto attack gangplank barrel").SetShared().SetValue(true));
                 misc.AddItem(new MenuItem("Smallminionsprio", "Jungle clear small first").SetShared().SetValue(false));
                 misc.AddItem(
-                    new MenuItem("LimitAttackSpeed", "Don't kite if Attack Speed > 2.5").SetShared().SetValue(true));
+                    new MenuItem("LimitAttackSpeed", "Don't kite if Attack Speed > 2.5").SetShared().SetValue(false));
                 misc.AddItem(
                     new MenuItem("FocusMinionsOverTurrets", "Focus minions over objectives").SetShared()
                         .SetValue(new KeyBind('M', KeyBindType.Toggle)));
@@ -888,7 +888,11 @@ namespace LeagueSharp.Common
                 /* Delay sliders */
                 _config.AddItem(
                     new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 0, 200)));
-                _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(10, 0, 200)));
+                _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(0, 0, 200)));
+
+                /*Set about attack limit*/
+                _config.AddItem(new MenuItem("EnableLimit", "\u542F\u52A8\u653B\u901F\u8D85\u8FC7\u0032\u002E\u0035\u7981\u6B62\u8D70\u780D").SetShared().SetValue(new KeyBind('O', KeyBindType.Toggle, true)));
+                _config.AddItem(new MenuItem("DrawEnables", "\u663E\u793A\u5728\u6C34\u5370\u4E0A\u9762").SetShared().SetValue(true));
 
                 /*Load the menu*/
                 _config.AddItem(
@@ -910,7 +914,10 @@ namespace LeagueSharp.Common
                         .SetValue(new KeyBind('N', KeyBindType.Press)));
                 _config.Item("StillCombo").ValueChanged +=
                     (sender, args) => { Move = !args.GetNewValue<KeyBind>().Active; };
-
+                _config.Item("EnableLimit").ValueChanged +=
+                    (sender, args) => { _config.Item("LimitAttackSpeed").SetValue(args.GetNewValue<KeyBind>().Active); };
+                _config.Item("DrawEnables").ValueChanged +=
+                    (sender, args) => { _config.Item("EnableLimit").Permashow(args.GetNewValue<bool>()); };
 
                 Player = ObjectManager.Player;
                 Game.OnUpdate += GameOnOnGameUpdate;
