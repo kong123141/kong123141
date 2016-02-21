@@ -13722,6 +13722,10 @@
 	"summoner ignite [dot]": "\u70B9\u71C3",
 	"summoner exhaust [danger]": "\u865A\u5F31\u0028\u5371\u9669\u65F6\u0029",
 	"suppresion [danger]": "\u538B\u5236\u0028\u5371\u9669\u65F6\u0029",
+	"anti-stealth": "\u53cd\u9690\u8eab",
+	"ultimate leveler": "\u5347\u7ea7\u5927\u62db",
+	"automaticly level up ultimate": "\u81ea\u52a8\u5347\u7ea7\u5927\u62db",
+	"heal on % incoming damage": "\u6cbb\u7597%\u7684\u4f24\u5bb3",
 	"w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
