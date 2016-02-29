@@ -641,6 +641,29 @@ namespace LeagueSharp.Common
                         return;
                     }
 
+                    if(Orbwalker.EnableDelay)
+                    {
+                        if ((Player.AttackDelay > 1 / 2.0f) && (Player.AttackDelay < 1 / 2.5f))
+                        {
+                            Utility.DelayAction.Add(Orbwalker.Speed20, () => { MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance); });
+                        }
+
+                        if ((Player.AttackDelay > 1 / 2.5f) && (Player.AttackDelay < 1 / 3.0f))
+                        {
+                            Utility.DelayAction.Add(Orbwalker.Speed25, () => { MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance); });
+                        }
+
+                        if ((Player.AttackDelay > 1 / 3.0f) && (Player.AttackDelay < 1 / 3.5f))
+                        {
+                            Utility.DelayAction.Add(Orbwalker.Speed30, () => { MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance); });
+                        }
+
+                        if ((Player.AttackDelay > 1 / 3.5f))
+                        {
+                            Utility.DelayAction.Add(Orbwalker.Speed35, () => { MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance); });
+                        }
+                    }
+
                     MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance);
                 }
             }
@@ -866,6 +889,14 @@ namespace LeagueSharp.Common
                 drawings.AddItem(new MenuItem("LastHitHelper", "Last Hit Helper").SetShared().SetValue(false));
                 _config.AddSubMenu(drawings);
 
+                var dealy = new Menu("Delay", "Delay");
+                dealy.AddItem(new MenuItem("EnableDelay", "EnableDelay").SetShared().SetValue(true));
+                dealy.AddItem(new MenuItem("2.0Speed", "2.0Speed").SetShared().SetValue(new Slider(0, 0, 1000)));
+                dealy.AddItem(new MenuItem("2.5Speed", "2.5Speed").SetShared().SetValue(new Slider(0, 0, 1000)));
+                dealy.AddItem(new MenuItem("3.0Speed", "3.0Speed").SetShared().SetValue(new Slider(0, 0, 1000)));
+                dealy.AddItem(new MenuItem("3.5Speed", "3.5Speed").SetShared().SetValue(new Slider(0, 0, 1000)));
+                _config.AddSubMenu(dealy);
+
                 /* Misc options */
                 var misc = new Menu("Misc", "Misc");
                 misc.AddItem(
@@ -928,6 +959,11 @@ namespace LeagueSharp.Common
                 get { return _config.Item("FarmDelay").GetValue<Slider>().Value; }
             }
 
+            public static bool EnableDelay
+            {
+                get { return _config.Item("EnableDelay").GetValue<bool>(); }
+            }
+
             /// <summary>
             ///     Gets a value indicating whether the orbwalker is orbwalking by checking the missiles.
             /// </summary>
@@ -940,6 +976,26 @@ namespace LeagueSharp.Common
             public static bool LimitAttackSpeed
             {
                 get { return _config.Item("LimitAttackSpeed").GetValue<bool>(); }
+            }
+
+            public static int Speed20
+            {
+                get { return _config.Item("2.0Speed").GetValue<Slider>().Value; }
+            }
+
+            public static int Speed25
+            {
+                get { return _config.Item("2.5Speed").GetValue<Slider>().Value; }
+            }
+
+            public static int Speed30
+            {
+                get { return _config.Item("3.0Speed").GetValue<Slider>().Value; }
+            }
+
+            public static int Speed35
+            {
+                get { return _config.Item("3.5Speed").GetValue<Slider>().Value; }
             }
 
             /// <summary>
