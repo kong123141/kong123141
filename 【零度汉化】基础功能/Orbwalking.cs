@@ -891,6 +891,10 @@ namespace LeagueSharp.Common
                     new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 0, 200)));
                 _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(0, 0, 200)));
 
+                /*Set about attack limit*/
+                _config.AddItem(new MenuItem("EnableLimit", "\u542F\u52A8\u653B\u901F\u8D85\u8FC7\u0032\u002E\u0035\u7981\u6B62\u8D70\u780D").SetShared().SetValue(new KeyBind('O', KeyBindType.Toggle, false)));
+                _config.AddItem(new MenuItem("DrawEnables", "\u663E\u793A\u5728\u6C34\u5370\u4E0A\u9762").SetShared().SetValue(true));
+
                 /*Load the menu*/
                 _config.AddItem(
                     new MenuItem("LastHit", "Last hit").SetShared().SetValue(new KeyBind('X', KeyBindType.Press)));
@@ -911,7 +915,8 @@ namespace LeagueSharp.Common
                         .SetValue(new KeyBind('N', KeyBindType.Press)));
                 _config.Item("StillCombo").ValueChanged +=
                     (sender, args) => { Move = !args.GetNewValue<KeyBind>().Active; };
-
+                _config.Item("EnableLimit").ValueChanged +=
+                    (sender, args) => { _config.Item("LimitAttackSpeed").SetValue(args.GetNewValue<KeyBind>().Active); };
 
                 Player = ObjectManager.Player;
                 Game.OnUpdate += GameOnOnGameUpdate;
@@ -1560,6 +1565,8 @@ namespace LeagueSharp.Common
                 }
                 _config.Item("FocusMinionsOverTurrets")
                     .Permashow(_config.Item("FocusMinionsOverTurrets").GetValue<KeyBind>().Active);
+
+                _config.Item("EnableLimit").Permashow(_config.Item("DrawEnables").GetValue<KeyBind>().Active);
 
                 if (_config.Item("LastHitHelper").GetValue<bool>())
                 {

@@ -643,6 +643,11 @@ namespace LeagueSharp.Common
 
                     if(Orbwalker.EnableDelay)
                     {
+                        if (Player.AttackDelay < 1 / 2.0f)
+                        {
+                            MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance);
+                        }
+
                         if ((Player.AttackDelay > 1 / 2.0f) && (Player.AttackDelay < 1 / 2.5f))
                         {
                             Utility.DelayAction.Add(Orbwalker.Speed20, () => { MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance); });
@@ -663,8 +668,10 @@ namespace LeagueSharp.Common
                             Utility.DelayAction.Add(Orbwalker.Speed35, () => { MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance); });
                         }
                     }
-
-                    MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance);
+                    else if(!Orbwalker.EnableDelay)
+                    {
+                        MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance);
+                    }
                 }
             }
             catch (Exception e)
