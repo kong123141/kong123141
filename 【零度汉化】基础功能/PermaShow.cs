@@ -579,7 +579,7 @@ namespace LeagueSharp.Common
 
             try
             {
-            Text = new Font(
+                Text = new Font(
                 Drawing.Direct3DDevice,
                 new FontDescription
                 {
@@ -589,9 +589,9 @@ namespace LeagueSharp.Common
                     Quality = Quality,
                 });
 
-            sprite = new Sprite(Drawing.Direct3DDevice);
-            BoxLine = new Line(Drawing.Direct3DDevice) { Width = 1 };
-        }
+                sprite = new Sprite(Drawing.Direct3DDevice);
+                BoxLine = new Line(Drawing.Direct3DDevice) { Width = 1 };
+            }
             catch (System.DllNotFoundException ex)
             {
                 if(ex.Message.Contains("d3dx9_43"))
