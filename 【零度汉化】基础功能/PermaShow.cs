@@ -577,7 +577,8 @@ namespace LeagueSharp.Common
                 Quality = FontQuality.Default;
             }
 
-
+            try
+            {
             Text = new Font(
                 Drawing.Direct3DDevice,
                 new FontDescription
@@ -590,6 +591,16 @@ namespace LeagueSharp.Common
 
             sprite = new Sprite(Drawing.Direct3DDevice);
             BoxLine = new Line(Drawing.Direct3DDevice) { Width = 1 };
+        }
+            catch (System.DllNotFoundException ex)
+            {
+                if(ex.Message.Contains("d3dx9_43"))
+                {
+                    var msg = "Drawings won't work because DirectX (June 2010) is not installed, install https://www.microsoft.com/en-us/download/details.aspx?id=8109 to fix this problem.";
+                    Console.WriteLine(msg);
+                    Game.PrintChat(msg);
+                }
+            }
         }
     }
 }
