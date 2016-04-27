@@ -122,7 +122,7 @@ namespace LeagueSharp.Common
             "gangplankqwrapper", "powerfist", "renektonpreexecute", "rengarq",
             "shyvanadoubleattack", "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble",
             "vie", "volibearq", "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "masochism",
-            "illaoiw", "elisespiderw", "fiorae", "meditate", "sejuaninorthernwinds"      
+            "illaoiw", "elisespiderw", "fiorae", "meditate", "sejuaninorthernwinds", "asheq"
         };
 
 
@@ -457,7 +457,9 @@ namespace LeagueSharp.Common
             }
 
             if (Player.IsCastingInterruptableSpell())
+            {
                 return false;
+            }
 
             return Utils.GameTimeTickCount + Game.Ping / 2 + 25 >= LastAATick + Player.AttackDelay * 1000;
         }
