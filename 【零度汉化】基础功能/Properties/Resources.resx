@@ -13778,7 +13778,8 @@
    "max damage": "\u6700\u5927\u4F24\u5BB3",
    "first cast": "\u6700\u5148\u91CA\u653E",
    "qa setting": "\u0051\u0041\u8BBE\u7F6E",
-	"w obj. pos.": "W\u7269\u4f53"
+   "don't kite if attack speed > 2.5": "\u5f53\u653b\u901f\u8d85\u8fc72.5\u7684\u65f6\u5019\u4e0d\u8d70\u780d",
+   "w obj. pos.": "W\u7269\u4f53"
 }</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
