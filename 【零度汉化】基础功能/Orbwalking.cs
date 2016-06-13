@@ -802,7 +802,7 @@ namespace LeagueSharp.Common
         ///     This class allows you to add an instance of "Orbwalker" to your assembly in order to control the orbwalking in an
         ///     easy way.
         /// </summary>
-        public class Orbwalker
+        public class Orbwalker : IDisposable
         {
             /// <summary>
             ///     The lane clear wait time modifier.
@@ -874,7 +874,7 @@ namespace LeagueSharp.Common
                 /* Misc options */
                 var misc = new Menu("Misc", "Misc");
                 misc.AddItem(
-                    new MenuItem("HoldPosRadius", "Hold Position Radius").SetShared().SetValue(new Slider(0, 0, 250)));
+                    new MenuItem("HoldPosRadius", "Hold Position Radius").SetShared().SetValue(new Slider(50, 50, 250)));
                 misc.AddItem(new MenuItem("PriorizeFarm", "Priorize farm over harass").SetShared().SetValue(true));
                 misc.AddItem(new MenuItem("AttackWards", "Auto attack wards").SetShared().SetValue(false));
                 misc.AddItem(new MenuItem("AttackPetsnTraps", "Auto attack pets & traps").SetShared().SetValue(true));
@@ -918,10 +918,21 @@ namespace LeagueSharp.Common
                     (sender, args) => { Move = !args.GetNewValue<KeyBind>().Active; };
 
 
-                Player = ObjectManager.Player;
-                Game.OnUpdate += GameOnOnGameUpdate;
-                Drawing.OnDraw += DrawingOnOnDraw;
+                this.Player = ObjectManager.Player;
+                Game.OnUpdate += this.GameOnOnGameUpdate;
+                Drawing.OnDraw += this.DrawingOnOnDraw;
                 Instances.Add(this);
+            }
+
+            /// <summary>
+            /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            /// </summary>
+            public void Dispose()
+            {
+                Menu.Remove(_config);
+                Game.OnUpdate -= this.GameOnOnGameUpdate;
+                Drawing.OnDraw -= this.DrawingOnOnDraw;
+                Instances.Remove(this);
             }
 
             /// <summary>

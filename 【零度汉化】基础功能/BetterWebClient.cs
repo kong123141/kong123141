@@ -59,6 +59,11 @@ namespace LeagueSharp.Common
         {
             get { return GetHeaderValue("Location"); }
         }
+        
+        public string Kappa
+        {
+            get { return "version5"; }
+        }
 
         //Get last status code
         public HttpStatusCode StatusCode
