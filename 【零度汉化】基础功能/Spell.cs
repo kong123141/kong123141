@@ -25,6 +25,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LeagueSharp.Common.Data;
+using LeagueSharp.Data.Enumerations;
 using SharpDX;
 
 #endregion
@@ -107,6 +109,8 @@ namespace LeagueSharp.Common
         /// </summary>
         private float _width;
 
+        public Spell() { }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Spell"/> class.
         /// </summary>
@@ -123,6 +127,61 @@ namespace LeagueSharp.Common
 
             // Default values
             MinHitChance = HitChance.VeryHigh;
+        }
+
+        /// <summary>
+        ///     Initializes a spell using SpellDb defined values
+        /// </summary>
+        /// <param name="slot">The SpellSlot</param>
+        /// <param name="useSpellDbValues">Doesn't matter if it's true or false, using this override will automatically use SpellDb Values.</param>
+        public Spell(SpellSlot slot, bool useSpellDbValues)
+        {
+            Slot = slot;
+            var spellData = SpellDatabase.GetBySpellSlot(slot, ObjectManager.Player.CharData.BaseSkinName);
+            // Charged Spell:
+            if (spellData.ChargedSpellName != "")
+            {
+                ChargedBuffName = spellData.ChargedBuffName;
+                ChargedMaxRange = spellData.ChargedMaxRange;
+                ChargedMinRange = spellData.ChargedMinRange;
+                ChargedSpellName = spellData.ChargedSpellName;
+                ChargeDuration = spellData.ChargeDuration;
+                Delay = spellData.Delay;
+                Range = spellData.Range;
+                Width = spellData.Radius > 0 && spellData.Radius < 30000
+                    ? spellData.Radius
+                    : ((spellData.Width > 0 && spellData.Width < 30000) ? spellData.Width : 30000);
+                Collision = (spellData.CollisionObjects != null
+                             &&
+                             spellData.CollisionObjects.Any(
+                                 obj => obj == LeagueSharp.Data.Enumerations.CollisionableObjects.Minions));
+                Speed = spellData.MissileSpeed;
+                IsChargedSpell = true;
+                Type = SpellDatabase.GetSkillshotTypeFromSpellType(spellData.SpellType);
+                return;
+            }
+            // Skillshot:
+            if (spellData.CastType.Any(type => type == CastType.Position || type == CastType.Direction))
+            {
+                Delay = spellData.Delay;
+                Range = spellData.Range;
+                Width = spellData.Radius > 0 && spellData.Radius < 30000
+                    ? spellData.Radius
+                    : ((spellData.Width > 0 && spellData.Width < 30000) ? spellData.Width : 30000);
+                Collision = (spellData.CollisionObjects != null
+                             &&
+                             spellData.CollisionObjects.Any(
+                                 obj => obj == LeagueSharp.Data.Enumerations.CollisionableObjects.Minions));
+                Speed = spellData.MissileSpeed;
+                IsSkillshot = true;
+                Type = SpellDatabase.GetSkillshotTypeFromSpellType(spellData.SpellType);
+                return;
+            }
+            // Targeted:
+            Range = spellData.Range;
+            Delay = spellData.Delay;
+            Speed = spellData.MissileSpeed;
+            IsSkillshot = false;
         }
 
         /// <summary>
@@ -245,6 +304,16 @@ namespace LeagueSharp.Common
         }
 
         /// <summary>
+        /// Adds the Players hitbox to the range value
+        /// </summary>
+        public bool AddSelfHitboxToRange { get; set; }
+
+        /// <summary>
+        /// Adds the Enemies hitbox to the range value
+        /// </summary>
+        public bool AddEnemyHitboxToRange { get; set; }
+
+        /// <summary>
         /// Gets or sets the range.
         /// </summary>
         /// <value>The range.</value>
@@ -252,9 +321,16 @@ namespace LeagueSharp.Common
         {
             get
             {
+                var baseRange = _range;
+
+                if (AddSelfHitboxToRange)
+                {
+                    baseRange += ObjectManager.Player.BoundingRadius;
+                }
+
                 if (!IsChargedSpell)
                 {
-                    return _range;
+                    return baseRange;
                 }
 
                 if (IsCharging)
@@ -268,7 +344,36 @@ namespace LeagueSharp.Common
 
                 return ChargedMaxRange;
             }
+
             set { _range = value; }
+        }
+
+        /// <summary>
+        /// Gets the range the spell has when casted to target
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public float GetRange(Obj_AI_Base target)
+        {
+            var result = Range;
+
+            if (AddEnemyHitboxToRange && target != null)
+            {
+                result += target.BoundingRadius;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the range sqared the spell has when casted to target
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public float GetRangeSqr(Obj_AI_Base target)
+        {
+            var result = GetRange(target);
+            return result * result;
         }
 
         /// <summary>
@@ -575,7 +680,7 @@ namespace LeagueSharp.Common
             if (!IsSkillshot)
             {
                 //Target out of range
-                if (RangeCheckFrom.Distance(unit.ServerPosition, true) > RangeSqr)
+                if (RangeCheckFrom.Distance(unit.ServerPosition, true) > GetRangeSqr(unit))
                 {
                     return CastStates.OutOfRange;
                 }
@@ -665,7 +770,7 @@ namespace LeagueSharp.Common
         /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
         public bool CastOnUnit(Obj_AI_Base unit, bool packetCast = false)
         {
-            if (!Slot.IsReady() || From.Distance(unit.ServerPosition, true) > RangeSqr)
+            if (!Slot.IsReady() || From.Distance(unit.ServerPosition, true) > GetRangeSqr(unit))
             {
                 return false;
             }
