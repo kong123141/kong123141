@@ -1,6 +1,7 @@
-﻿# 零度汉化
+﻿# 零度Team
 
-基础功能
-基础功能-SDK
+L# Data库
+L# Common库
+L# SDKEx库
 
 

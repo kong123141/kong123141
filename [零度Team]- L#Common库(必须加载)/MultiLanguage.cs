@@ -70,7 +70,7 @@ namespace LeagueSharp.Common
         {
             try
             {
-                var languageStrings = new ResourceManager("LeagueSharp.Common.Properties.Resources", typeof(Resources).Assembly).GetString("ChaosVIP");
+                var languageStrings = new ResourceManager("LeagueSharp.Common.Properties.Resources", typeof(Resources).Assembly).GetString("NightMoon");
 
                 if (String.IsNullOrEmpty(languageStrings))
                 {

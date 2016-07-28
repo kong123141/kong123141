@@ -1392,7 +1392,7 @@ namespace LeagueSharp.Common
                         result = (from minion in MinionListAA.Where(minion => ShouldAttackMinion(minion, false))
                                   let predHealth = HealthPrediction.LaneClearHealthPrediction( minion, (int)(Player.AttackDelay * 1000 * LaneClearWaitTimeMod), FarmDelay)
                                   where predHealth >= 2 * Player.GetAutoAttackDamage(minion) || Math.Abs(predHealth - minion.Health) < float.Epsilon
-                                  select minion).MaxOrDefault(m => m.Health);
+                                  select minion).MaxOrDefault(m => MinionManager.IsMinion(m, true) ? m.Health : float.MaxValue);
 
                         if (result != null)
                         {
@@ -1484,8 +1484,6 @@ namespace LeagueSharp.Common
                 {
                     Render.Circle.DrawCircle(Player.Position, _config.Item("HoldPosRadius").GetValue<Slider>().Value, _config.Item("HoldZone").GetValue<Circle>().Color, _config.Item("AALineWidth").GetValue<Slider>().Value, true);
                 }
-
-                _config.Item("FocusMinionsOverTurrets").Permashow(_config.Item("FocusMinionsOverTurrets").GetValue<KeyBind>().Active);
 
                 if (_config.Item("LastHitHelper").GetValue<bool>())
                 {

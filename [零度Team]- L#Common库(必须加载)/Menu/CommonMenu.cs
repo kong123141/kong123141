@@ -10,7 +10,7 @@
         /// <summary>
         ///     The menu instance.
         /// </summary>
-        internal static Menu Instance = new Menu("LeagueSharp.Common", "LeagueSharp.Common", true);
+        internal static Menu Instance = new Menu("[零度Team]- L# Common库", "LeagueSharp.Common", true);
 
         #endregion
 
