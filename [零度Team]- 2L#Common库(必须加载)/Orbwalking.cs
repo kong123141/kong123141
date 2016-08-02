@@ -1136,6 +1136,7 @@ namespace LeagueSharp.Common
 
                 if (mode == OrbwalkingMode.LaneClear || mode == OrbwalkingMode.Mixed || mode == OrbwalkingMode.LastHit || mode == OrbwalkingMode.Freeze)
                 {
+
                     foreach (var minion in MinionManager.GetMinion(Player.Position, 0, MinionTeam.NotAlly).OrderBy(minion => HealthPrediction.GetHealthPrediction(minion, 1200)))
                     {
                         if (minion.Team != GameObjectTeam.Neutral)
@@ -1143,7 +1144,7 @@ namespace LeagueSharp.Common
                             if (!ShouldAttackMinion(minion))
                                 continue;
 
-                            var t = (int)(Player.AttackCastDelay * 1000) + BrainFarmInt + Game.Ping / 2 + 1000 * (int)Math.Max(0, Player.ServerPosition.Distance(minion.ServerPosition) - Player.BoundingRadius) / (int)GetMyProjectileSpeed();
+                            var t = (int)(Player.AttackCastDelay * 1000) + BrainFarmInt + Game.Ping / 2 + 1000 * (int)Math.Max(0, Player.Distance(minion) - Player.BoundingRadius) / (int)GetMyProjectileSpeed();
 
                             if (mode == OrbwalkingMode.Freeze)
                             {
@@ -1445,10 +1446,10 @@ namespace LeagueSharp.Common
                         return;
                     }
 
-                    if (Player.IsCastingInterruptableSpell(true))
-                    {
-                        return;
-                    }
+                    //if (Player.IsCastingInterruptableSpell(true))
+                    //{
+                    //    return;
+                    //}
 
                     MinionListAA = MinionManager.GetMinion(Player.Position, 0);
 
